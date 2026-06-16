@@ -1,0 +1,73 @@
+
+<view class="fr-page compare-page">
+  <view class="compare-head">
+    <text class="fr-page-title">食品对比</text>
+    <text class="fr-page-subtitle">选择两款食品，比较评分、风险和适用人群</text>
+  </view>
+
+  <view class="select-grid">
+    <view class="fr-card select-card" data-side="A" bindtap="selectFood">
+      <text class="select-label">食品 A</text>
+      <image class="select-img" wx:if="{{foodA && foodA.imagePath}}" src="{{foodA.imagePath}}" mode="aspectFill"></image>
+      <view class="select-placeholder" wx:else><text class="iconfont icon-list"></text><text>选择图片</text></view>
+      <text class="select-name" wx:if="{{foodA && foodA.food_category}}">{{foodA.food_category}}</text>
+      <text class="select-score fr-score-{{foodA.health_score >= 80 ? 'good' : foodA.health_score >= 60 ? 'mid' : 'bad'}}" wx:if="{{foodA && foodA.health_score}}">{{foodA.health_score}}分</text>
+    </view>
+    <view class="fr-card select-card" data-side="B" bindtap="selectFood">
+      <text class="select-label">食品 B</text>
+      <image class="select-img" wx:if="{{foodB && foodB.imagePath}}" src="{{foodB.imagePath}}" mode="aspectFill"></image>
+      <view class="select-placeholder" wx:else><text class="iconfont icon-list"></text><text>选择图片</text></view>
+      <text class="select-name" wx:if="{{foodB && foodB.food_category}}">{{foodB.food_category}}</text>
+      <text class="select-score fr-score-{{foodB.health_score >= 80 ? 'good' : foodB.health_score >= 60 ? 'mid' : 'bad'}}" wx:if="{{foodB && foodB.health_score}}">{{foodB.health_score}}分</text>
+    </view>
+  </view>
+
+  <view class="fr-btn-primary start-btn" wx:if="{{foodA && foodB && !ready && !analyzing}}" bindtap="startCompare">开始对比</view>
+  <view class="fr-btn-primary start-btn disabled" wx:if="{{analyzing}}">分析中</view>
+
+  <block wx:if="{{ready}}">
+    <view class="fr-section">
+      <view class="fr-hero-card fr-card-soft-green recommend-card">
+        <text class="card-eyebrow">推荐选择</text>
+        <text class="winner-name">{{winnerName}}</text>
+        <text class="winner-score">{{winner === 'A' ? foodA.health_score : foodB.health_score}} 分</text>
+        <text class="winner-desc">综合评分更高，风险成分更少。</text>
+      </view>
+    </view>
+
+    <view class="fr-section">
+      <view class="fr-card">
+        <text class="fr-section-title">对比详情</text>
+        <view class="compare-row" wx:for="{{cmpRows}}" wx:key="label">
+          <text class="compare-label">{{item.label}}</text>
+          <view class="compare-values">
+            <text class="{{item.aWins ? 'win' : ''}}">A {{item.valA}}</text>
+            <text class="{{item.bWins ? 'win' : ''}}">B {{item.valB}}</text>
+          </view>
+          <text class="compare-note">{{item.aWins ? 'A 更优' : item.bWins ? 'B 更优' : '差异不大'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="fr-section">
+      <view class="fr-card">
+        <text class="fr-section-title">风险差异</text>
+        <view class="risk-cols">
+          <view><text class="risk-col-title">食品 A</text><view class="tag-row"><text class="fr-tag fr-tag-warn" wx:for="{{riskListA}}" wx:key="name">{{item.name}}</text><text class="fr-tag" wx:if="{{riskListA.length === 0}}">暂无明显风险</text></view></view>
+          <view><text class="risk-col-title">食品 B</text><view class="tag-row"><text class="fr-tag fr-tag-warn" wx:for="{{riskListB}}" wx:key="name">{{item.name}}</text><text class="fr-tag" wx:if="{{riskListB.length === 0}}">暂无明显风险</text></view></view>
+        </view>
+        <text class="risk-summary">{{winner === 'A' ? '食品 A 风险更少，建议优先选择。' : '食品 B 风险更少，建议优先选择。'}}</text>
+      </view>
+    </view>
+
+    <view class="fr-section">
+      <view class="fr-card ai-card">
+        <text class="fr-section-title ai-title">AI 对比建议</text>
+        <view class="insight-part"><text class="fr-tag fr-tag-ai">发现</text><text>{{winner === 'A' ? '食品 A 综合评分更高，风险成分更少。' : '食品 B 综合评分更高，风险成分更少。'}}</text></view>
+        <view class="insight-part"><text class="fr-tag fr-tag-green">建议</text><text>{{aiAdvice || '结合个人忌口和食用频率选择更适合的一款。'}}</text></view>
+      </view>
+    </view>
+
+    <text class="reset-link" bindtap="resetAll">重新选择食品</text>
+  </block>
+</view>

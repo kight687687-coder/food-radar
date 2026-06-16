@@ -1,0 +1,27 @@
+
+.history-head { padding-top: 12rpx; }
+.loading { display: flex; flex-direction: column; align-items: center; gap: 18rpx; padding: 160rpx 0; color: #4E5969; font-size: 26rpx; }
+.empty-card { margin-top: 40rpx; text-align: center; }
+.empty-title { display: block; color: #1D2129; font-size: 32rpx; font-weight: 900; }
+.empty-desc { display: block; margin-top: 14rpx; color: #4E5969; font-size: 26rpx; line-height: 1.55; }
+.empty-btn { margin-top: 30rpx; }
+.stats-card { margin-top: 28rpx; }
+.stats-title { display: block; color: #4E5969; font-size: 24rpx; font-weight: 800; }
+.stats-grid { margin-top: 22rpx; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16rpx; }
+.stats-grid view { padding: 20rpx; border-radius: 24rpx; background: #F2F3F5; }
+.stats-grid text:first-child { display: block; color: #1D2129; font-size: 40rpx; font-weight: 900; }
+.stats-grid text:last-child { display: block; margin-top: 8rpx; color: #4E5969; font-size: 21rpx; }
+.group { margin-top: 30rpx; }
+.group-date { display: block; color: #4E5969; font-size: 26rpx; font-weight: 900; margin-bottom: 14rpx; }
+.record-card { display: flex; align-items: center; gap: 18rpx; margin-bottom: 14rpx; }
+.record-thumb { width: 90rpx; height: 90rpx; border-radius: 24rpx; background: #E5E7EB; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #4E5969; font-size: 26rpx; font-weight: 900; }
+.pk-thumb { background: #F2EFFF; color: #7B61FF; }
+.record-main { flex: 1; min-width: 0; }
+.record-name { display: block; color: #1D2129; font-size: 28rpx; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.record-meta { display: block; margin-top: 8rpx; color: #4E5969; font-size: 22rpx; }
+.record-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8rpx; }
+.record-score { font-size: 30rpx; font-weight: 900; }
+.level-good { color: #049A4F; background: #E8F8EE; }
+.level-mid { color: #C45A00; background: #FFF3E6; }
+.level-bad { color: #C92A2A; background: #FFECEC; }
+.rename-input { height: 56rpx; border-radius: 16rpx; background: #F2F3F5; border: 1rpx solid #E5E7EB; padding: 0 18rpx; font-size: 26rpx; }

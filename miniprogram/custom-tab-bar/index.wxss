@@ -1,0 +1,172 @@
+.tab-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(247, 248, 250, 0) 0%, rgba(247, 248, 250, 0.96) 34%, rgba(247, 248, 250, 0.98) 100%);
+  backdrop-filter: blur(14px);
+}
+
+.tab-bar {
+  height: 118rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1rpx solid rgba(29, 33, 41, 0.06);
+  box-shadow: 0 10rpx 32rpx rgba(29, 33, 41, 0.08);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  padding: 0 12rpx;
+  overflow: visible;
+}
+
+.tab-item {
+  min-width: 0;
+  height: 108rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-pill {
+  height: 96rpx;
+  min-width: 84rpx;
+  padding: 0 8rpx;
+  border-radius: 999rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.icon-wrap {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tab-icon {
+  width: 56rpx;
+  height: 56rpx;
+  display: block;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.tab-font-icon {
+  font-family: 'FoodRadarIconfont' !important;
+  width: 56rpx;
+  height: 56rpx;
+  color: #86909C;
+  font-size: 46rpx;
+  line-height: 56rpx;
+  text-align: center;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.tab-text {
+  margin-top: 4rpx;
+  font-size: 21rpx;
+  line-height: 1;
+  color: #86909C;
+  font-weight: 700;
+}
+
+.tab-item.active .icon-wrap {
+  background: #E8F8EE;
+  box-shadow: none;
+  transform: translateY(-1rpx);
+}
+
+.tab-item.active .tab-icon {
+  transform: scale(1.05);
+}
+
+.tab-item.active .tab-font-icon {
+  color: #07C160;
+  transform: scale(1.05);
+}
+
+.tab-item.active .tab-text {
+  color: #07C160;
+  font-weight: 900;
+}
+
+.tab-item.featured {
+  align-items: center;
+}
+
+.tab-item.featured .tab-pill {
+  width: 136rpx;
+  height: 116rpx;
+  min-width: 136rpx;
+  padding: 0;
+  border-radius: 50%;
+  transform: translateY(-12rpx);
+}
+
+.scan-action {
+  width: 136rpx;
+  height: 116rpx;
+  border-radius: 50%;
+  position: relative;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-action-gloss {
+  display: none;
+}
+
+.scan-action-icon {
+  position: relative;
+  z-index: 1;
+  width: 104rpx;
+  height: 104rpx;
+  display: block;
+  margin-top: 0;
+}
+
+.scan-action-text {
+  position: relative;
+  z-index: 1;
+  margin-top: -10rpx;
+  color: #07C160;
+  font-size: 20rpx;
+  line-height: 1;
+  font-weight: 950;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.tab-item.featured.active .scan-action {
+  transform: scale(1.02);
+  box-shadow: none;
+  animation: scanTabPop 0.26s ease-out;
+}
+
+.tab-item:active .tab-pill {
+  transform: scale(0.94);
+}
+
+.tab-item.featured:active .tab-pill {
+  transform: translateY(-12rpx) scale(0.96);
+}
+
+@keyframes scanTabPop {
+  0% { transform: scale(0.9); opacity: 0.76; }
+  70% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1.02); opacity: 1; }
+}

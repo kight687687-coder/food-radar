@@ -1,0 +1,48 @@
+<view class="fr-page ai-chat-page">
+  <view class="chat-head">
+    <text class="fr-page-title">AI 营养师</text>
+    <text class="fr-page-subtitle">围绕配料表、添加剂和饮食风险提问，获得更具体的解释和建议</text>
+  </view>
+
+  <view class="scope-card">
+    <view class="scope-mark">AI</view>
+    <view>
+      <text class="scope-title">食品安全问答</text>
+      <text class="scope-desc">适合咨询添加剂安全性、特殊人群注意事项、配料表风险和饮食选择。</text>
+    </view>
+  </view>
+
+  <view class="example-row">
+    <text class="fr-tag fr-tag-ai" wx:for="{{examples}}" wx:key="*this" data-text="{{item}}" bindtap="useExample">{{item}}</text>
+  </view>
+
+  <view class="message-list">
+    <view class="message-row {{item.role}}" wx:for="{{messages}}" wx:key="index">
+      <view class="chat-avatar assistant-avatar" wx:if="{{item.role === 'assistant'}}">
+        <image src="{{item.avatar || botAvatar}}" mode="aspectFill"></image>
+      </view>
+      <view class="message {{item.role}}">
+        <text>{{item.text}}</text>
+      </view>
+      <view class="chat-avatar user-avatar" wx:if="{{item.role === 'user'}}">
+        <image wx:if="{{item.avatar || userAvatar}}" src="{{item.avatar || userAvatar}}" mode="aspectFill"></image>
+        <text wx:else>{{item.avatarText || userAvatarText}}</text>
+      </view>
+    </view>
+    <view class="message-row assistant" wx:if="{{loading}}">
+      <view class="chat-avatar assistant-avatar">
+        <image src="{{botAvatar}}" mode="aspectFill"></image>
+      </view>
+      <view class="message assistant loading">
+        <view class="dot"></view>
+        <view class="dot"></view>
+        <view class="dot"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="chat-input-bar">
+    <input class="chat-input" value="{{question}}" bindinput="onInput" placeholder="输入食品安全问题" confirm-type="send" bindconfirm="sendQuestion" />
+    <view class="send-btn {{loading ? 'disabled' : ''}}" bindtap="sendQuestion">发送</view>
+  </view>
+</view>

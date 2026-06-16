@@ -1,0 +1,75 @@
+.avoid-page {
+  padding-bottom: 60rpx;
+}
+
+.avoid-head {
+  padding-top: 8rpx;
+}
+
+.group-card {
+  margin-top: 24rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+}
+
+.group-head {
+  margin-bottom: 18rpx;
+}
+
+.group-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.group-desc {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #4E5969;
+}
+
+.opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.opt {
+  min-height: 54rpx;
+  padding: 0 20rpx;
+  border-radius: 999rpx;
+  background: #F3F4F6;
+  border: 1rpx solid #E5E7EB;
+  color: #4E5969;
+  font-size: 24rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opt.danger.selected {
+  background: #FFECEC;
+  border-color: #FFECEC;
+  color: #C92A2A;
+}
+
+.opt.warn.selected {
+  background: #FFF3E6;
+  border-color: #FFF3E6;
+  color: #C45A00;
+}
+
+.opt.green.selected {
+  background: #E8F8EE;
+  border-color: #E8F8EE;
+  color: #049A4F;
+}
+
+.save-btn {
+  margin-top: 34rpx;
+}

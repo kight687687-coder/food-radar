@@ -1,0 +1,80 @@
+
+<view class="fr-page mine-page">
+  <view class="mine-head">
+    <text class="fr-page-title">我的</text>
+    <text class="fr-page-subtitle">个人与家庭设置中心</text>
+  </view>
+
+  <view class="fr-hero-card guardian-card">
+    <view class="guardian-left">
+      <text class="card-eyebrow">当前守护对象</text>
+      <view class="avatar-row">
+        <view class="avatar-wrap" bindtap="chooseAvatar">
+          <image wx:if="{{avatar}}" src="{{avatar}}" class="avatar-img" mode="aspectFill"></image>
+          <text wx:else>{{avatarText}}</text>
+        </view>
+        <view>
+          <text class="guardian-name">{{nickname}}</text>
+          <text class="guardian-type">{{userType}}</text>
+        </view>
+      </view>
+      <view class="avoid-tags" wx:if="{{selectedAvoidNames.length > 0}}">
+        <text class="fr-tag fr-tag-warn" wx:for="{{selectedAvoidNames}}" wx:key="*this">{{item}}</text>
+      </view>
+    </view>
+    <view class="health-index">
+      <text>{{healthScore === null ? '--' : healthScore}}</text>
+      <text>健康指数</text>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head"><text class="fr-section-title">家庭成员</text><text class="fr-section-action" bindtap="goFamilyManage">管理</text></view>
+    <view class="fr-card member-card">
+      <view class="member-list">
+        <view class="member-item {{item.active ? 'active' : ''}}" wx:for="{{members}}" wx:key="memberId" data-id="{{item.memberId}}" bindtap="switchMember">
+          <view class="member-avatar"><image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"></image><text wx:else>{{item.avatarText}}</text></view>
+          <text>{{item.nickname}}</text>
+        </view>
+        <view class="member-item add" bindtap="addMember"><view class="member-avatar"><text class="iconfont icon-user-group"></text></view><text>添加</text></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card body-card">
+      <view class="fr-section-head"><text class="fr-section-title">身体指标</text><text class="fr-section-action" bindtap="editProfile">编辑</text></view>
+      <view class="body-group">
+        <text class="body-label">基础信息</text>
+        <text class="body-value">{{age}}岁 · {{gender}}</text>
+      </view>
+      <view class="body-group">
+        <text class="body-label">体型指标</text>
+        <text class="body-value">{{height}}cm · {{weight}}kg</text>
+        <text class="fr-tag {{bmiLevel === '正常' ? 'fr-tag-green' : 'fr-tag-warn'}}" wx:if="{{bmi !== null}}">BMI {{bmi}} {{bmiLevel}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card ai-profile-card">
+      <text class="fr-section-title ai-title">AI 健康画像</text>
+      <view class="profile-tags">
+        <text class="fr-tag fr-tag-ai" wx:for="{{aiTags}}" wx:key="*this">{{item}}</text>
+      </view>
+      <text class="profile-note">根据当前人群类型、忌口与扫描记录生成</text>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head"><text class="fr-section-title">设置</text></view>
+    <view class="fr-card settings-card">
+      <view class="setting-row" bindtap="editProfile"><text>编辑个人信息</text><text class="iconfont setting-arrow icon-arrow-right"></text></view>
+      <view class="setting-row" bindtap="editUserType"><text>人群类型</text><view class="setting-value"><text>{{userType}}</text><text class="iconfont setting-arrow icon-arrow-right"></text></view></view>
+      <view class="setting-row" bindtap="editAvoid"><text>忌口设置</text><view class="setting-value"><text>{{selectedAvoidNames.length}} 项</text><text class="iconfont setting-arrow icon-arrow-right"></text></view></view>
+      <view class="setting-row" bindtap="goFamilyManage"><text>家庭管理</text><text class="iconfont setting-arrow icon-arrow-right"></text></view>
+      <view class="setting-row" bindtap="clearCache"><text>清除缓存</text><text class="iconfont setting-arrow icon-arrow-right"></text></view>
+      <view class="setting-row"><text>关于食安雷达</text><text>2.0</text></view>
+    </view>
+  </view>
+</view>

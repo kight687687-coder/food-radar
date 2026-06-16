@@ -1,0 +1,96 @@
+
+<view class="fr-page fr-density-relaxed scan-page">
+  <view class="scan-head">
+    <text class="fr-page-title">AI 食品识别中心</text>
+    <text class="fr-page-subtitle">上传配料表图片，识别风险与建议</text>
+  </view>
+
+  <view class="scan-hero">
+    <view class="scan-illustration">
+      <view class="label-card">
+        <view class="label-head"></view>
+        <view class="label-line long"></view>
+        <view class="label-line"></view>
+        <view class="label-line short"></view>
+        <view class="scan-frame">
+          <view class="scan-line"></view>
+          <view class="corner lt"></view>
+          <view class="corner rt"></view>
+          <view class="corner lb"></view>
+          <view class="corner rb"></view>
+        </view>
+      </view>
+      <view class="ai-chip">AI</view>
+      <view class="safe-chip">配料表</view>
+    </view>
+    <text class="scan-title">上传配料表图片</text>
+    <text class="scan-subtitle">从相册选择包装背面或配料表截图</text>
+    <view class="fr-btn-primary scan-main-btn fr-press-strong" bindtap="chooseImage">
+      <text>{{analyzing ? '分析中' : '选择图片'}}</text>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card">
+      <text class="fr-section-title">上传建议</text>
+      <view class="tip-list">
+        <text class="tip-item">配料表文字尽量清晰</text>
+        <text class="tip-item">避免反光和大角度倾斜</text>
+        <text class="tip-item">上传包装背面的完整配料区域</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section support-row">
+    <view class="fr-card support-card">
+      <text class="fr-section-title">支持识别</text>
+      <view class="support-tags">
+        <text class="fr-tag-md fr-tag-success-weak">配料表</text>
+        <text class="fr-tag-md fr-tag-success-weak">食品标签</text>
+        <text class="fr-tag-md fr-tag-success-weak">添加剂名称</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">AI 分析能力</text>
+    </view>
+    <view class="ability-grid">
+      <view class="fr-mini-card ability-item fr-press-strong"><view class="fr-entry-surface fr-entry-surface-info"><text class="iconfont fr-entry-icon fr-color-info icon-chart-pie"></text></view><text>健康评分</text></view>
+      <view class="fr-mini-card ability-item fr-press-strong"><view class="fr-entry-surface fr-entry-surface-warning"><text class="iconfont fr-entry-icon fr-color-warning icon-shield-warning"></text></view><text>风险识别</text></view>
+      <view class="fr-mini-card ability-item fr-press-strong"><view class="fr-entry-surface fr-entry-surface-ai"><text class="iconfont fr-entry-icon fr-color-ai icon-user-group"></text></view><text>人群预警</text></view>
+      <view class="fr-mini-card ability-item fr-press-strong"><view class="fr-entry-surface fr-entry-surface-warning"><text class="iconfont fr-entry-icon fr-color-warning icon-shield-warning"></text></view><text>忌口命中</text></view>
+      <view class="fr-mini-card ability-item fr-press-strong"><view class="fr-entry-surface fr-entry-surface-success"><text class="iconfont fr-entry-icon fr-color-success icon-shield-check"></text></view><text>有益成分</text></view>
+      <view class="fr-mini-card ability-item fr-press-strong"><view class="fr-entry-surface fr-entry-surface-info"><text class="iconfont fr-entry-icon fr-color-info icon-ai"></text></view><text>AI 建议</text></view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card pk-card fr-press-light" bindtap="goCompare">
+      <view>
+        <text class="card-kicker">配料表 PK</text>
+        <text class="card-title">对比两款食品</text>
+        <text class="card-desc">比较评分与风险成分，帮你选更适合的一款。</text>
+      </view>
+      <text class="card-action">开始 PK</text>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">最近识别</text>
+      <text class="fr-section-action" bindtap="goHistory">查看全部</text>
+    </view>
+    <view class="fr-card recent-card fr-list-row fr-press-light" wx:if="{{recentRecord}}" bindtap="goRecentDetail">
+      <image class="recent-thumb" wx:if="{{recentRecord.imagePath}}" src="{{recentRecord.imagePath}}" mode="aspectFill"></image>
+      <view class="recent-thumb placeholder" wx:else></view>
+      <view class="recent-main fr-list-main">
+        <text class="recent-name fr-list-title">{{recentRecord.foodName}}</text>
+        <text class="recent-meta fr-list-desc">{{recentRecord.category}} · {{recentRecord.time}}</text>
+      </view>
+      <text class="recent-score fr-list-meta {{recentRecord.score >= 80 ? 'fr-score-good' : recentRecord.score >= 60 ? 'fr-score-mid' : 'fr-score-bad'}}">{{recentRecord.score}}分</text>
+    </view>
+    <view class="fr-card fr-empty" wx:else>上传配料表图片后，会在这里显示最近一次结果。</view>
+  </view>
+</view>

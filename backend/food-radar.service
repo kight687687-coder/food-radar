@@ -1,0 +1,30 @@
+[Unit]
+Description=Food Radar Backend API
+Documentation=https://github.com/food-radar
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/food-radar/backend
+
+# gunicorn 路径（pip 用户安装）
+Environment="PATH=/home/ubuntu/.local/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/ubuntu/.local/bin/gunicorn \
+  -w 2 \
+  -b 0.0.0.0:5000 \
+  --access-logfile /var/log/food-radar/access.log \
+  --error-logfile /var/log/food-radar/error.log \
+  --timeout 120 \
+  app:app
+
+Restart=always
+RestartSec=5
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

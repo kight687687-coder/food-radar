@@ -1,0 +1,127 @@
+<view class="fr-page archive-page">
+  <view class="member-header">
+    <view class="member-avatar">
+      <image wx:if="{{avatar}}" src="{{avatar}}" mode="aspectFill"></image>
+      <text wx:else>{{avatarText}}</text>
+    </view>
+    <view class="member-copy">
+      <view class="member-name-row">
+        <text class="member-name">{{nickname}}</text>
+        <text class="active-badge">当前成员</text>
+      </view>
+      <text class="member-subtitle">{{memberLine}} · 家庭健康档案</text>
+    </view>
+  </view>
+
+  <view class="insight-card tone-{{statusTone}}">
+    <text class="card-kicker">近7天安全指数</text>
+    <view class="score-row">
+      <text class="score-number">{{archiveScore}}</text>
+      <text class="status-pill status-{{statusTone}}">{{statusText}}</text>
+    </view>
+    <text class="trend-line trend-{{trendTone}}">{{trendText}}</text>
+
+    <view class="insight-block">
+      <text>主要原因</text>
+      <text>{{mainReason}}</text>
+    </view>
+    <view class="insight-block">
+      <text>建议</text>
+      <text>{{suggestion}}</text>
+    </view>
+  </view>
+
+  <view class="section-card next-card">
+    <view class="section-head">
+      <text class="section-title">接下来可以做</text>
+      <text class="section-subtitle">未来 7 天</text>
+    </view>
+    <view
+      class="next-item fr-list-row with-arrow fr-press-light"
+      wx:for="{{nextActions}}"
+      wx:key="title"
+      data-type="{{item.type}}"
+      bindtap="goNextAction"
+    >
+      <text class="iconfont next-icon fr-icon-{{item.tone}} {{item.iconClass}}"></text>
+      <view class="fr-list-main">
+        <text class="fr-list-title">{{item.title}}</text>
+        <text class="fr-list-desc">{{item.desc}}</text>
+      </view>
+      <text class="iconfont next-arrow fr-list-arrow icon-arrow-right"></text>
+    </view>
+  </view>
+
+  <view class="section-card concern-card">
+    <view class="section-head">
+      <text class="section-title">重点关注</text>
+      <text class="section-subtitle">支撑当前判断</text>
+    </view>
+    <view class="concern-row fr-list-row" wx:for="{{concernRows}}" wx:key="title">
+      <text class="iconfont concern-icon fr-icon-{{item.iconTone}} {{item.iconClass}}"></text>
+      <view class="concern-copy fr-list-main">
+        <text class="fr-list-title">{{item.title}}</text>
+        <text class="fr-list-desc">{{item.desc}}</text>
+      </view>
+      <text class="metric-tag fr-list-meta tag-{{item.tone}}">{{item.meta}}</text>
+    </view>
+  </view>
+
+  <view class="section-card recent-card">
+    <view class="section-head">
+      <text class="section-title">最近记录</text>
+      <text class="section-action" bindtap="goManage" data-type="history">查看全部</text>
+    </view>
+    <block wx:if="{{recentRecords.length}}">
+      <view
+        class="record-row fr-list-row fr-press-light"
+        wx:for="{{recentRecords}}"
+        wx:key="createTime"
+        data-time="{{item.createTime}}"
+        bindtap="goRecordDetail"
+      >
+        <view class="record-main fr-list-main">
+          <text class="fr-list-title">{{item.foodName}}</text>
+          <text class="fr-list-desc">{{item.category}} · {{item.dateLabel}} {{item.time}}</text>
+        </view>
+        <view class="record-score fr-list-meta score-{{item.cls}}">
+          <text>{{item.score}}</text>
+          <text>{{item.levelText}}</text>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="empty-record" bindtap="goScan">
+      <text>还没有食品记录</text>
+      <text>识别几次常吃食品后，这里会成为健康判断的证据。</text>
+    </view>
+  </view>
+
+  <view class="section-card profile-card" wx:if="{{showRiskProfiles}}">
+    <view class="section-head">
+      <text class="section-title">长期画像</text>
+      <text class="section-subtitle">{{profileBasis}}</text>
+    </view>
+    <view class="profile-row">
+      <view class="profile-pill" wx:for="{{riskProfiles}}" wx:key="name">
+        <text>{{item.name}}</text>
+        <text>{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-card manage-card">
+    <view class="section-head">
+      <text class="section-title">档案管理</text>
+    </view>
+    <view class="manage-row">
+      <view class="manage-item fr-press-light" wx:for="{{manageActions}}" wx:key="type" data-type="{{item.type}}" bindtap="goManage">
+        <text class="iconfont manage-icon fr-icon-{{item.tone}} {{item.iconClass}}"></text>
+        <view class="manage-copy">
+          <text>{{item.title}}</text>
+          <text>{{item.desc}}</text>
+        </view>
+        <text class="iconfont manage-arrow icon-arrow-right"></text>
+      </view>
+    </view>
+  </view>
+</view>

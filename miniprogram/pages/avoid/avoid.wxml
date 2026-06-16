@@ -1,0 +1,55 @@
+<view class="fr-page avoid-page">
+  <view class="avoid-head">
+    <text class="fr-page-title">忌口设置</text>
+    <text class="fr-page-subtitle">选择需要避免的成分，扫描配料表时会自动突出提示</text>
+  </view>
+
+  <view class="group-card">
+    <view class="group-head">
+      <text class="group-title">过敏类</text>
+      <text class="group-desc">明确过敏源建议优先选择</text>
+    </view>
+    <view class="opts">
+      <view class="opt danger {{sel_peanut ? 'selected' : ''}}" data-id="peanut" bindtap="toggleItem">花生过敏</view>
+      <view class="opt danger {{sel_nuts ? 'selected' : ''}}" data-id="nuts" bindtap="toggleItem">坚果过敏</view>
+      <view class="opt danger {{sel_milk_allergy ? 'selected' : ''}}" data-id="milk_allergy" bindtap="toggleItem">牛奶过敏</view>
+      <view class="opt danger {{sel_egg ? 'selected' : ''}}" data-id="egg" bindtap="toggleItem">鸡蛋过敏</view>
+      <view class="opt danger {{sel_wheat ? 'selected' : ''}}" data-id="wheat" bindtap="toggleItem">小麦/麸质过敏</view>
+      <view class="opt danger {{sel_soy ? 'selected' : ''}}" data-id="soy" bindtap="toggleItem">大豆过敏</view>
+      <view class="opt danger {{sel_seafood ? 'selected' : ''}}" data-id="seafood" bindtap="toggleItem">海鲜过敏</view>
+      <view class="opt danger {{sel_sesame ? 'selected' : ''}}" data-id="sesame" bindtap="toggleItem">芝麻过敏</view>
+    </view>
+  </view>
+
+  <view class="group-card">
+    <view class="group-head">
+      <text class="group-title">不耐受类</text>
+      <text class="group-desc">适合乳糖、咖啡因等敏感体质</text>
+    </view>
+    <view class="opts">
+      <view class="opt warn {{sel_lactose ? 'selected' : ''}}" data-id="lactose" bindtap="toggleItem">乳糖不耐受</view>
+      <view class="opt warn {{sel_fructose ? 'selected' : ''}}" data-id="fructose" bindtap="toggleItem">果糖不耐受</view>
+      <view class="opt warn {{sel_caffeine ? 'selected' : ''}}" data-id="caffeine" bindtap="toggleItem">咖啡因敏感</view>
+      <view class="opt warn {{sel_alcohol ? 'selected' : ''}}" data-id="alcohol" bindtap="toggleItem">酒精不耐受</view>
+      <view class="opt warn {{sel_msg ? 'selected' : ''}}" data-id="msg" bindtap="toggleItem">味精敏感</view>
+    </view>
+  </view>
+
+  <view class="group-card">
+    <view class="group-head">
+      <text class="group-title">主动回避类</text>
+      <text class="group-desc">用于控制摄入或保持更清淡的配料选择</text>
+    </view>
+    <view class="opts">
+      <view class="opt green {{sel_trans_fat ? 'selected' : ''}}" data-id="trans_fat" bindtap="toggleItem">反式脂肪</view>
+      <view class="opt green {{sel_artificial_color ? 'selected' : ''}}" data-id="artificial_color" bindtap="toggleItem">人工色素</view>
+      <view class="opt green {{sel_artificial_sweet ? 'selected' : ''}}" data-id="artificial_sweet" bindtap="toggleItem">人工甜味剂</view>
+      <view class="opt green {{sel_preservative ? 'selected' : ''}}" data-id="preservative" bindtap="toggleItem">防腐剂</view>
+      <view class="opt green {{sel_hfcs ? 'selected' : ''}}" data-id="hfcs" bindtap="toggleItem">高果糖浆</view>
+      <view class="opt green {{sel_nitrite ? 'selected' : ''}}" data-id="nitrite" bindtap="toggleItem">亚硝酸盐</view>
+      <view class="opt green {{sel_flavor ? 'selected' : ''}}" data-id="flavor" bindtap="toggleItem">香精香料</view>
+    </view>
+  </view>
+
+  <view class="fr-btn-primary save-btn" bindtap="saveAndBack">保存设置</view>
+</view>

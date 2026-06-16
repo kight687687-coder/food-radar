@@ -1,0 +1,66 @@
+.ingredient-page {
+  padding-bottom: 60rpx;
+}
+
+.ingredient-head {
+  padding-top: 8rpx;
+}
+
+.search-card {
+  margin-top: 28rpx;
+  padding: 26rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+  box-shadow: 0 16rpx 42rpx rgba(15, 23, 42, 0.05);
+}
+
+.search-input {
+  height: 82rpx;
+  border-radius: 24rpx;
+  background: #F3F4F6;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #1D2129;
+}
+
+.search-btn {
+  margin-top: 20rpx;
+}
+
+.example-wrap {
+  margin-top: 28rpx;
+}
+
+.example-title {
+  display: block;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.example-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tip-card {
+  margin-top: 28rpx;
+}
+
+.tip-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.tip-desc {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: #4E5969;
+  line-height: 1.55;
+}

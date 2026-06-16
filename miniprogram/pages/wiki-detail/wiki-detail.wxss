@@ -1,0 +1,276 @@
+.detail-page {
+  padding-bottom: 56rpx;
+}
+
+.loading-panel {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16rpx;
+}
+
+.loading-title {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.loading-desc {
+  width: 520rpx;
+  font-size: 26rpx;
+  color: #4E5969;
+  line-height: 1.5;
+}
+
+.hero-card {
+  padding: 28rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+  box-shadow: 0 18rpx 46rpx rgba(15, 23, 42, 0.06);
+}
+
+.hero-card.risk-low {
+  background: linear-gradient(135deg, #FFFFFF 0%, #E8F8EE 100%);
+}
+
+.hero-card.risk-mid {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF3E6 100%);
+}
+
+.hero-card.risk-high {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFECEC 100%);
+}
+
+.hero-top,
+.hero-foot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.hero-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.hero-name {
+  font-size: 44rpx;
+  line-height: 1.15;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.hero-id,
+.hero-alias {
+  font-size: 24rpx;
+  color: #4E5969;
+  line-height: 1.45;
+}
+
+.risk-badge,
+.category-pill,
+.source-pill {
+  height: 44rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.risk-badge.risk-low {
+  color: #049A4F;
+  background: #E8F8EE;
+}
+
+.risk-badge.risk-mid {
+  color: #C45A00;
+  background: #FFF3E6;
+}
+
+.risk-badge.risk-high {
+  color: #C92A2A;
+  background: #FFECEC;
+}
+
+.risk-badge.risk-unknown {
+  color: #4E5969;
+  background: #F3F4F6;
+}
+
+.hero-foot {
+  align-items: center;
+  margin-top: 28rpx;
+  justify-content: flex-start;
+}
+
+.category-pill {
+  color: #4E5969;
+  background: #F3F4F6;
+}
+
+.source-pill {
+  color: #7B61FF;
+  background: #F2EFFF;
+}
+
+.notice-card {
+  margin-top: 20rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 20rpx;
+  color: #C45A00;
+  background: #FFF3E6;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.story-card,
+.info-card,
+.risk-card,
+.group-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.story-item {
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.story-item:first-child {
+  padding-top: 0;
+}
+
+.story-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.story-label {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #1D2129;
+}
+
+.story-text {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  line-height: 1.65;
+  color: #4E5969;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 26rpx;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.info-row:first-child {
+  padding-top: 0;
+}
+
+.info-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.info-label {
+  width: 150rpx;
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #4E5969;
+}
+
+.info-value {
+  flex: 1;
+  text-align: right;
+  font-size: 26rpx;
+  line-height: 1.5;
+  color: #1D2129;
+  font-weight: 650;
+}
+
+.risk-track {
+  height: 18rpx;
+  border-radius: 999rpx;
+  background: #E5E7EB;
+  overflow: hidden;
+}
+
+.risk-fill {
+  height: 18rpx;
+  border-radius: 999rpx;
+}
+
+.risk-fill.risk-low {
+  background: #07C160;
+}
+
+.risk-fill.risk-mid {
+  background: #FF7D00;
+}
+
+.risk-fill.risk-high {
+  background: #F53F3F;
+}
+
+.risk-fill.risk-unknown {
+  background: #C9CDD4;
+}
+
+.risk-labels {
+  margin-top: 12rpx;
+  display: flex;
+  justify-content: space-between;
+  color: #C9CDD4;
+  font-size: 22rpx;
+}
+
+.risk-desc {
+  margin-top: 24rpx;
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #1D2129;
+}
+
+.warning-box {
+  margin-top: 16rpx;
+  padding: 22rpx;
+  border-radius: 16rpx;
+  background: #F7F8FA;
+  color: #4E5969;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.group-card {
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #4E5969;
+}
+
+.source-note {
+  margin-top: 28rpx;
+  color: #C9CDD4;
+  font-size: 22rpx;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.back-btn {
+  margin-top: 26rpx;
+}

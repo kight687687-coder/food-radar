@@ -1,0 +1,44 @@
+
+.result-top { padding-top: 12rpx; display: flex; align-items: center; gap: 20rpx; }
+.back-text { color: #07C160; font-size: 26rpx; font-weight: 800; }
+.result-hero { margin-top: 28rpx; text-align: center; }
+.hero-label { display: block; text-align: left; color: #4E5969; font-size: 26rpx; font-weight: 800; }
+.hero-score { display: block; margin-top: 18rpx; font-size: 104rpx; font-weight: 900; line-height: 1; }
+.score-level { display: block; margin-top: 16rpx; color: #1D2129; font-size: 30rpx; font-weight: 900; }
+.score-sub { display: block; margin-top: 10rpx; color: #4E5969; font-size: 24rpx; }
+.food-strip { display: flex; align-items: center; gap: 18rpx; }
+.food-thumb { width: 94rpx; height: 94rpx; border-radius: 24rpx; background: #E5E7EB; }
+.food-name { display: block; color: #1D2129; font-size: 30rpx; font-weight: 900; }
+.food-desc { display: block; margin-top: 8rpx; color: #4E5969; font-size: 22rpx; }
+.ai-card { border-left: 6rpx solid #7B61FF; }
+.ai-title { color: #7B61FF; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 18rpx; }
+.ai-text { display: block; margin-top: 18rpx; color: #4E5969; font-size: 26rpx; line-height: 1.65; }
+.ai-text.sub { color: #4E5969; }
+.avoid-card { border-left: 6rpx solid #F53F3F; background: #FFECEC; }
+.avoid-desc { display: block; margin-top: 14rpx; color: #C92A2A; font-size: 26rpx; line-height: 1.55; }
+.warn-card { border-left: 6rpx solid #FF7D00; }
+.warn-row { margin-top: 16rpx; color: #4E5969; font-size: 26rpx; line-height: 1.55; }
+.risk-item { display: flex; gap: 18rpx; padding: 22rpx 0; border-bottom: 1rpx solid #F3F4F6; }
+.risk-item:last-child { border-bottom: 0; }
+.risk-line { width: 6rpx; border-radius: 999rpx; }
+.risk-bad { background: #F53F3F; }
+.risk-mid { background: #FF7D00; }
+.risk-low { background: #07C160; }
+.risk-name { display: block; color: #1D2129; font-size: 28rpx; font-weight: 900; }
+.risk-desc { display: block; margin-top: 8rpx; color: #4E5969; font-size: 22rpx; font-weight: 700; }
+.risk-note { display: block; margin-top: 8rpx; color: #4E5969; font-size: 22rpx; line-height: 1.5; }
+.benefit-summary, .benefit-empty { display: block; margin-top: 16rpx; color: #4E5969; font-size: 26rpx; line-height: 1.55; }
+.suggestion-text { display: block; margin-top: 18rpx; color: #4E5969; font-size: 26rpx; line-height: 1.65; }
+.long-term { margin-top: 24rpx; padding-top: 22rpx; border-top: 1rpx solid #F3F4F6; }
+.long-term text:first-child { display: block; color: #1D2129; font-size: 26rpx; font-weight: 900; }
+.long-term text:last-child { display: block; margin-top: 10rpx; color: #4E5969; font-size: 26rpx; line-height: 1.55; }
+.actions { margin-top: 34rpx; padding-bottom: 24rpx; }
+.action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; margin-top: 16rpx; }
+.avoid-overlay { position: fixed; inset: 0; z-index: 30; background: rgba(15,23,42,.36); display: flex; align-items: center; justify-content: center; padding: 48rpx; }
+.avoid-modal { width: 100%; border-radius: 24rpx; background: #FFFFFF; padding: 28rpx; }
+.modal-title { display: block; color: #1D2129; font-size: 34rpx; font-weight: 900; }
+.modal-desc { display: block; margin-top: 16rpx; color: #4E5969; font-size: 26rpx; line-height: 1.55; }
+.modal-btn { margin-top: 28rpx; }
+
+.engine-credit { display: block; margin-top: 12rpx; color: #C9CDD4; font-size: 20rpx; line-height: 1.4; }

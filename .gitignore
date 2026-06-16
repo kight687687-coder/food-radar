@@ -1,0 +1,16 @@
+*.bak-codex
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
+
+# Local runtime logs
+*.log
+*.err
+*.out
+backend/logs/
+
+# Local secrets
+backend/.env
+miniprogram/project.private.config.json

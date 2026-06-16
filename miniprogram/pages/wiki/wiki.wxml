@@ -1,0 +1,59 @@
+<view class="fr-page wiki-page">
+  <view class="wiki-head">
+    <view>
+      <text class="fr-page-title">添加剂百科</text>
+      <text class="fr-page-subtitle">查名称、E 编号和常见别名，快速判断使用场景与风险等级</text>
+    </view>
+  </view>
+
+  <view class="search-card">
+    <view class="search-box">
+      <text class="iconfont search-symbol icon-search"></text>
+      <input class="search-input" placeholder="搜索添加剂名称、E 编号或别名" value="{{searchWord}}" bindinput="onSearch" confirm-type="search" />
+      <view class="clear-btn" wx:if="{{searchWord}}" bindtap="clearSearch"><text class="iconfont icon-shield-warning"></text></view>
+    </view>
+    <view class="quick-stats">
+      <view class="stat-item">
+        <text class="stat-number">{{totalCount}}</text>
+        <text class="stat-label">已收录</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-number warn">{{highRiskCount}}</text>
+        <text class="stat-label">高风险</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view class="category-bar" scroll-x enable-flex>
+    <view class="category-track">
+      <view class="category-tab {{currentCat === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" data-cat="{{item}}" bindtap="switchCategory">{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="result-line">
+    <text>{{currentCat}}</text>
+    <text class="result-count">{{filteredAdditives.length}} 条结果</text>
+  </view>
+
+  <scroll-view class="list-scroll" scroll-y bindscrolltolower="loadMore">
+    <view class="additive-card" wx:for="{{displayList}}" wx:key="id" data-name="{{item.name}}" bindtap="goDetail">
+      <view class="card-main">
+        <view class="title-row">
+          <text class="item-name">{{item.name}}</text>
+          <text class="risk-pill risk-{{item.riskTone}}">{{item.riskText}}</text>
+        </view>
+        <text class="item-id">{{item.id}} · {{item.category}}</text>
+        <text class="item-usage" wx:if="{{item.usage}}">{{item.usage}}</text>
+        <text class="item-alias" wx:if="{{item.aliasText}}">别名：{{item.aliasText}}</text>
+      </view>
+      <text class="iconfont card-arrow icon-arrow-right"></text>
+    </view>
+
+    <view class="empty-state" wx:if="{{filteredAdditives.length === 0}}">
+      <view class="empty-mark"><text class="iconfont icon-search"></text></view>
+      <text class="empty-title">没有找到匹配条目</text>
+      <text class="empty-desc">换一个名称、E 编号或食品配料里的常见叫法再试试</text>
+    </view>
+  </scroll-view>
+</view>

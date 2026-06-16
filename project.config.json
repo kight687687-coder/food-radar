@@ -1,0 +1,14 @@
+{
+  "miniprogramRoot": "miniprogram/",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "appid": "wx65d7d0711785aaba",
+  "projectname": "food-radar",
+  "libVersion": "3.0.0",
+  "compileType": "miniprogram"
+}

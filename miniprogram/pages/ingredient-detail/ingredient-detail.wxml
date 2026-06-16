@@ -1,0 +1,23 @@
+<view class="fr-page ingredient-page">
+  <view class="ingredient-head">
+    <text class="fr-page-title">成分解读</text>
+    <text class="fr-page-subtitle">输入配料表里的添加剂名称，跳转到百科库查看用途、常见食品和风险说明</text>
+  </view>
+
+  <view class="search-card">
+    <input class="search-input" value="{{keyword}}" bindinput="onInput" placeholder="例如：山梨酸钾、阿斯巴甜" confirm-type="search" bindconfirm="search" />
+    <view class="fr-btn-primary search-btn" bindtap="search">查询成分</view>
+  </view>
+
+  <view class="example-wrap">
+    <text class="example-title">常查成分</text>
+    <view class="example-list">
+      <view class="fr-tag" wx:for="{{examples}}" wx:key="*this" data-text="{{item}}" bindtap="useExample">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="fr-card tip-card" bindtap="goWiki">
+    <text class="tip-title">进入完整添加剂百科</text>
+    <text class="tip-desc">按分类浏览防腐剂、甜味剂、色素、乳化剂等常见条目</text>
+  </view>
+</view>

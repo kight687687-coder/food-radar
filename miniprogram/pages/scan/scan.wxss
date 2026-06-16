@@ -1,0 +1,72 @@
+
+.scan-page { padding-bottom: 220rpx; }
+.scan-head { padding-top: 12rpx; }
+.scan-hero {
+  margin-top: 28rpx;
+  min-height: 520rpx;
+  padding: 32rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(145deg, #FFFFFF 0%, #EAF3FF 58%, #EAF3FF 100%);
+  border: 1rpx solid rgba(22,119,255,.14);
+  box-shadow: 0 18rpx 42rpx rgba(15,23,42,.055);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  animation: scanHeroIn 0.34s ease-out both;
+}
+.scan-illustration { position: relative; width: 330rpx; height: 230rpx; margin-bottom: 26rpx; }
+.label-card { position: absolute; left: 38rpx; top: 10rpx; width: 250rpx; height: 190rpx; border-radius: 20rpx; background: #FFFFFF; border: 1rpx solid #EAF3FF; box-shadow: 0 18rpx 36rpx rgba(22,119,255,.12); transform: rotate(-3deg); padding: 28rpx; }
+.label-head { width: 72rpx; height: 18rpx; border-radius: 999rpx; background: #07C160; opacity: .9; }
+.label-line { margin-top: 20rpx; width: 142rpx; height: 12rpx; border-radius: 999rpx; background: #EAF3FF; }
+.label-line.long { width: 178rpx; }
+.label-line.short { width: 110rpx; }
+.scan-frame { position: absolute; left: 34rpx; top: 54rpx; right: 34rpx; bottom: 34rpx; border-radius: 16rpx; border: 2rpx solid rgba(7,193,96,.18); }
+.scan-line { position: absolute; left: 14rpx; right: 14rpx; top: 18rpx; height: 5rpx; border-radius: 999rpx; background: linear-gradient(90deg, rgba(7,193,96,0) 0%, rgba(7,193,96,.75) 50%, rgba(7,193,96,0) 100%); box-shadow: 0 0 18rpx rgba(7,193,96,.22); animation: scanSweep 2.2s ease-in-out infinite; }
+.corner { position: absolute; width: 28rpx; height: 28rpx; border-color: #07C160; border-style: solid; }
+.corner.lt { left: -2rpx; top: -2rpx; border-width: 6rpx 0 0 6rpx; border-radius: 12rpx 0 0 0; }
+.corner.rt { right: -2rpx; top: -2rpx; border-width: 6rpx 6rpx 0 0; border-radius: 0 12rpx 0 0; }
+.corner.lb { left: -2rpx; bottom: -2rpx; border-width: 0 0 6rpx 6rpx; border-radius: 0 0 0 12rpx; }
+.corner.rb { right: -2rpx; bottom: -2rpx; border-width: 0 6rpx 6rpx 0; border-radius: 0 0 12rpx 0; }
+.ai-chip { position: absolute; right: 10rpx; top: 28rpx; width: 70rpx; height: 58rpx; border-radius: 20rpx; background: #F2EFFF; color: #7B61FF; font-size: 24rpx; font-weight: 950; display: flex; align-items: center; justify-content: center; box-shadow: none; }
+.safe-chip { position: absolute; left: 10rpx; bottom: 8rpx; height: 46rpx; padding: 0 18rpx; border-radius: 999rpx; background: #E8F8EE; color: #049A4F; font-size: 22rpx; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.scan-title { font-size: 38rpx; font-weight: 950; color: #1D2129; }
+.scan-subtitle { margin-top: 12rpx; font-size: 26rpx; color: #86909C; }
+.scan-main-btn { width: 300rpx; margin-top: 34rpx; }
+.tip-list { margin-top: 22rpx; display: flex; flex-direction: column; gap: 18rpx; }
+.tip-item { position: relative; min-height: auto; display: block; padding-left: 24rpx; color: #4E5969; font-size: 26rpx; line-height: 1.5; }
+.tip-item::before { content: ''; position: absolute; left: 0; top: 16rpx; width: 8rpx; height: 8rpx; border-radius: 50%; background: #07C160; }
+.support-tags { margin-top: 22rpx; display: flex; gap: 14rpx; flex-wrap: wrap; }
+.ability-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16rpx; }
+.ability-item { min-height: 166rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10rpx; color: #4E5969; font-size: 24rpx; font-weight: 800; box-shadow: none; }
+.pk-card { display: flex; align-items: center; justify-content: space-between; gap: 28rpx; }
+.pk-card,
+.recent-card,
+.ability-item {
+  transition: transform 0.14s ease, opacity 0.14s ease;
+}
+
+.card-kicker { display: block; color: #1677FF; font-size: 22rpx; font-weight: 800; margin-bottom: 10rpx; }
+.card-title { display: block; color: #1D2129; font-size: 30rpx; font-weight: 900; }
+.card-desc { display: block; margin-top: 10rpx; color: #4E5969; font-size: 24rpx; line-height: 1.5; }
+.card-action { flex-shrink: 0; color: #07C160; font-size: 26rpx; font-weight: 800; }
+.recent-card { gap: 18rpx; }
+.recent-thumb { width: 88rpx; height: 88rpx; border-radius: 16rpx; background: #E5E7EB; }
+.recent-main { flex: 1; min-width: 0; }
+.recent-name { display: block; color: #1D2129; font-size: 28rpx; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recent-meta { display: block; margin-top: 8rpx; color: #4E5969; font-size: 22rpx; }
+.recent-score { font-size: 30rpx; font-weight: 900; }
+
+@keyframes scanHeroIn {
+  0% { opacity: 0; transform: translateY(18rpx); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scanSweep {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 1; }
+  50% { transform: translateY(86rpx); opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(0); opacity: 0; }
+}

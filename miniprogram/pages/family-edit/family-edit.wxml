@@ -1,0 +1,116 @@
+<view class="fr-page member-edit-page">
+  <view class="member-head">
+    <text class="fr-page-title">{{isEdit ? '编辑成员' : '添加成员'}}</text>
+    <text class="fr-page-subtitle">为不同家人保存人群类型和忌口信息，识别食品时自动给出更贴近个人的提醒</text>
+  </view>
+
+  <view class="profile-card">
+    <view class="avatar-button" bindtap="chooseAvatar">
+      <image class="avatar-img" src="{{avatar}}" mode="aspectFill" wx:if="{{avatar}}"></image>
+      <view class="avatar-placeholder" wx:else>
+        <text>{{avatarLetter}}</text>
+      </view>
+    </view>
+    <view class="profile-copy">
+      <text class="profile-title">{{nickname || '未命名成员'}}</text>
+      <text class="profile-desc">从相册选择头像，可留空</text>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">基本信息</text>
+    </view>
+    <view class="form-card">
+      <view class="form-item">
+        <text class="form-label">昵称</text>
+        <input class="form-input" placeholder="输入昵称" value="{{nickname}}" bindinput="onNicknameInput" maxlength="10" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">性别</text>
+        <picker mode="selector" range="{{genders}}" bindchange="confirmGender">
+          <view class="form-picker">
+            <text class="{{gender ? '' : 'form-placeholder'}}">{{gender || '请选择'}}</text>
+            <text class="iconfont form-arrow icon-arrow-right"></text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">关系</text>
+        <picker mode="selector" range="{{relations}}" bindchange="confirmRelation">
+          <view class="form-picker">
+            <text class="{{relationship ? '' : 'form-placeholder'}}">{{relationship || '请选择'}}</text>
+            <text class="iconfont form-arrow icon-arrow-right"></text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="metric-row">
+        <view class="metric-item">
+          <text class="metric-label">年龄</text>
+          <input class="metric-input" type="number" placeholder="岁" value="{{age}}" bindinput="onAgeInput" />
+        </view>
+        <view class="metric-item">
+          <text class="metric-label">身高</text>
+          <input class="metric-input" type="number" placeholder="cm" value="{{height}}" bindinput="onHeightInput" />
+        </view>
+        <view class="metric-item">
+          <text class="metric-label">体重</text>
+          <input class="metric-input" type="number" placeholder="kg" value="{{weight}}" bindinput="onWeightInput" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">健康偏好</text>
+    </view>
+    <view class="form-card">
+      <view class="form-item">
+        <text class="form-label">人群类型</text>
+        <picker mode="selector" range="{{['普通人群','减肥','健身','儿童','老人','孕妇','糖尿病','心血管']}}" bindchange="confirmType">
+          <view class="form-picker">
+            <text>{{userType}}</text>
+            <text class="iconfont form-arrow icon-arrow-right"></text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item avoid-trigger" bindtap="toggleAvoidSection">
+        <view>
+          <text class="form-label block">忌口设置</text>
+          <text class="field-help">过敏、不耐受和主动回避项</text>
+        </view>
+        <view class="form-picker compact">
+          <text class="avoid-summary">{{avoidSummary}}</text>
+          <text class="iconfont form-arrow {{avoidExpanded ? 'open' : ''}} icon-arrow-right"></text>
+        </view>
+      </view>
+
+      <view wx:if="{{avoidExpanded}}" class="avoid-section">
+        <view class="avoid-group" wx:for="{{avoidGroups}}" wx:for-item="g" wx:key="key">
+          <view class="avoid-group-header" bindtap="toggleGroup" data-key="{{g.key}}">
+            <text class="avoid-group-title">{{g.name}}</text>
+            <text class="iconfont form-arrow {{g.expanded ? 'open' : ''}} icon-arrow-right"></text>
+          </view>
+          <view wx:if="{{g.expanded}}" class="avoid-items">
+            <view
+              class="avoid-opt {{item.checked ? 'checked' : ''}}"
+              wx:for="{{g.items}}"
+              wx:for-item="item"
+              wx:key="id"
+              data-id="{{item.id}}"
+              bindtap="toggleAvoidItem"
+            >{{item.name}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-btn-primary save-btn" bindtap="saveMember">{{isEdit ? '保存修改' : '添加成员'}}</view>
+  <view class="delete-btn" bindtap="deleteMember" wx:if="{{isEdit}}">删除成员</view>
+</view>

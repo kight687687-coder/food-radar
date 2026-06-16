@@ -1,0 +1,61 @@
+
+<view class="fr-page explore-page">
+  <view class="explore-head">
+    <text class="fr-page-title">探索</text>
+    <text class="fr-page-subtitle">搜索食品知识、添加剂、标准</text>
+  </view>
+
+  <view class="search-box">搜索添加剂、风险成分、食品标准</view>
+
+  <view class="fr-section">
+    <view class="fr-hero-card recommend-card" data-path="/pages/wiki/wiki" bindtap="goPage">
+      <view>
+        <text class="card-eyebrow">今日推荐</text>
+        <text class="recommend-title">添加剂百科</text>
+        <text class="recommend-desc">看懂配料表里的陌生成分，查风险等级、人群提醒与食用建议。</text>
+        <text class="recommend-action">立即查询</text>
+      </view>
+      <view class="fr-entry-surface fr-entry-surface-success">
+        <text class="iconfont recommend-icon fr-entry-icon fr-color-success icon-book"></text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head"><text class="fr-section-title">常用服务</text></view>
+    <view class="service-grid">
+      <view class="service-item" data-path="/pages/wiki/wiki" bindtap="goPage"><view class="fr-entry-surface fr-entry-surface-success"><text class="iconfont fr-entry-icon fr-color-success icon-book"></text></view><text>添加剂百科</text></view>
+      <view class="service-item" data-path="/pages/compare/compare" bindtap="goPage"><view class="fr-entry-surface fr-entry-surface-info"><text class="iconfont fr-entry-icon fr-color-info icon-chart-pie"></text></view><text>配料表 PK</text></view>
+      <view class="service-item" bindtap="goAiChat"><view class="fr-entry-surface fr-entry-surface-ai"><text class="iconfont fr-entry-icon fr-color-ai icon-ai"></text></view><text>AI 营养师</text></view>
+      <view class="service-item" data-path="/pages/report/report" bindtap="goTab"><view class="fr-entry-surface fr-entry-surface-success"><text class="iconfont fr-entry-icon fr-color-success icon-folder"></text></view><text>健康档案</text></view>
+      <view class="service-item" data-path="/pages/ingredient-detail/ingredient-detail" bindtap="goPage"><view class="fr-entry-surface fr-entry-surface-warning"><text class="iconfont fr-entry-icon fr-color-warning icon-list"></text></view><text>成分解读</text></view>
+      <view class="service-item" data-path="/pages/avoid/avoid" bindtap="goPage"><view class="fr-entry-surface fr-entry-surface-warning"><text class="iconfont fr-entry-icon fr-color-warning icon-shield-warning"></text></view><text>忌口设置</text></view>
+      <view class="service-item" data-path="/pages/card-report/card-report" bindtap="goPage"><view class="fr-entry-surface fr-entry-surface-info"><text class="iconfont fr-entry-icon fr-color-info icon-file-text"></text></view><text>报告卡</text></view>
+      <view class="service-item" data-path="/pages/history/history" bindtap="goPage"><view class="fr-entry-surface fr-entry-surface-success"><text class="iconfont fr-entry-icon fr-color-success icon-file-text"></text></view><text>历史记录</text></view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head"><text class="fr-section-title">AI 智能服务</text></view>
+    <view class="fr-card ai-main-card" bindtap="goAiChat">
+      <view class="fr-entry-surface fr-entry-surface-ai">
+        <text class="iconfont ai-card-icon fr-entry-icon fr-color-ai icon-ai"></text>
+      </view>
+      <view>
+        <text class="card-eyebrow ai">新功能</text>
+        <text class="tool-title">AI 营养师</text>
+        <text class="tool-desc">咨询添加剂、配料表与食品风险问题。</text>
+      </view>
+      <text class="ai-action">提问</text>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head"><text class="fr-section-title">即将上线</text></view>
+    <view class="fr-card roadmap-card">
+      <view class="roadmap-item" bindtap="showComing"><view><text>食品标准查询</text><text>对照国家标准理解食品标签</text></view><text>规划中</text></view>
+      <view class="roadmap-item" bindtap="showComing"><view><text>儿童饮食分析</text><text>识别儿童慎食成分</text></view><text>规划中</text></view>
+      <view class="roadmap-item" bindtap="showComing"><view><text>孕妇饮食助手</text><text>关注咖啡因、防腐剂等风险</text></view><text>规划中</text></view>
+    </view>
+  </view>
+</view>

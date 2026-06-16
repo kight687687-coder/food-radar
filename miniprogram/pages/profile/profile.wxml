@@ -1,0 +1,88 @@
+<view class="fr-page profile-page">
+  <view class="profile-head">
+    <text class="fr-page-title">健康档案</text>
+    <text class="fr-page-subtitle">填写基础信息后，识别结果会按你的身体状态、饮食目标和忌口偏好给出提醒</text>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">基础信息</text>
+    </view>
+    <view class="form-card">
+      <view class="form-item">
+        <text class="form-label">昵称</text>
+        <input class="form-input" placeholder="输入昵称" value="{{nickname}}" bindinput="onNicknameInput" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">性别</text>
+        <picker mode="multiSelector" range="{{[genderList]}}" bindchange="confirmGender" bindcancel="cancelGender">
+          <view class="form-picker">
+            <text class="{{gender ? '' : 'placeholder'}}">{{gender || '请选择'}}</text>
+            <text class="iconfont arrow icon-arrow-right"></text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="metric-row">
+        <view class="metric-item">
+          <text class="metric-label">年龄</text>
+          <input class="metric-input" type="number" placeholder="岁" value="{{age}}" bindinput="onAgeInput" />
+        </view>
+        <view class="metric-item">
+          <text class="metric-label">身高</text>
+          <input class="metric-input" type="number" placeholder="cm" value="{{height}}" bindinput="onHeightInput" />
+        </view>
+        <view class="metric-item">
+          <text class="metric-label">体重</text>
+          <input class="metric-input" type="number" placeholder="kg" value="{{weight}}" bindinput="onWeightInput" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">分析偏好</text>
+    </view>
+    <view class="form-card">
+      <view class="form-item">
+        <text class="form-label">人群类型</text>
+        <picker mode="selector" range="{{typeList}}" bindchange="confirmType" bindcancel="cancelType">
+          <view class="form-picker">
+            <text>{{userType}}</text>
+            <text class="iconfont arrow icon-arrow-right"></text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item avoid-trigger" bindtap="toggleAvoidSection">
+        <view>
+          <text class="form-label block">忌口设置</text>
+          <text class="field-help">扫描结果中会优先提示这些风险</text>
+        </view>
+        <view class="form-picker compact">
+          <text class="avoid-summary">{{avoidSummary}}</text>
+          <text class="iconfont arrow {{avoidExpanded ? 'open' : ''}} icon-arrow-right"></text>
+        </view>
+      </view>
+
+      <view class="avoid-panel" wx:if="{{avoidExpanded}}">
+        <view class="sub-group" wx:for="{{avoidGroups}}" wx:for-item="g" wx:key="key">
+          <view class="sub-group-header" bindtap="toggleGroup" data-key="{{g.key}}">
+            <text class="sub-group-title">{{g.name}}</text>
+            <text class="iconfont arrow {{g.expanded ? 'open' : ''}} icon-arrow-right"></text>
+          </view>
+          <view wx:if="{{g.expanded}}" class="sub-group-items">
+            <view class="avoid-opt {{item.checked ? 'checked' : ''}}" wx:for="{{g.items}}" wx:for-item="item" wx:key="id" data-id="{{item.id}}" bindtap="toggleAvoidItem">{{item.name}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="actions">
+    <view class="fr-btn-primary" bindtap="saveProfile">{{mode ? '保存修改' : '完成档案'}}</view>
+    <view class="skip-btn" bindtap="skipProfile" wx:if="{{!mode}}">暂时跳过</view>
+  </view>
+</view>

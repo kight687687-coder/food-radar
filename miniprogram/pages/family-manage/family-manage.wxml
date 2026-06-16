@@ -1,0 +1,45 @@
+<view class="fr-page family-page">
+  <view class="family-head">
+    <text class="fr-page-title">家庭成员</text>
+    <text class="fr-page-subtitle">切换当前成员后，识别、历史和健康报告会按该成员展示</text>
+  </view>
+
+  <view class="summary-card">
+    <view>
+      <text class="summary-number">{{members.length}}</text>
+      <text class="summary-label">已添加成员</text>
+    </view>
+    <view class="summary-tag">最多 6 位</view>
+  </view>
+
+  <view class="member-list">
+    <view class="member-card {{activeMemberId === item.memberId ? 'active' : ''}}" wx:for="{{members}}" wx:key="memberId" bindtap="switchMember" data-id="{{item.memberId}}">
+      <view class="member-avatar">
+        <image class="member-avatar-img" src="{{item.avatar}}" mode="aspectFill" wx:if="{{item.avatar}}"></image>
+        <text wx:else>{{item.avatarLetter}}</text>
+      </view>
+      <view class="member-info">
+        <view class="member-title-row">
+          <text class="member-name">{{item.nickname}}</text>
+          <text class="active-badge" wx:if="{{activeMemberId === item.memberId}}">当前</text>
+        </view>
+        <text class="member-type">{{item.relationText}}</text>
+        <text class="member-extra">{{item.avoidText}}</text>
+      </view>
+      <view class="member-actions">
+        <view class="icon-btn edit" bindtap="editMember" data-id="{{item.memberId}}" catchtap="editMember"><text class="iconfont icon-arrow-right"></text></view>
+        <view class="icon-btn delete" wx:if="{{members.length > 1}}" bindtap="deleteMember" data-id="{{item.memberId}}" catchtap="deleteMember"><text class="iconfont icon-shield-warning"></text></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="add-card" wx:if="{{members.length < 6}}" bindtap="addMember">
+    <view class="add-symbol"><text class="iconfont icon-user-group"></text></view>
+    <view>
+      <text class="add-title">添加家庭成员</text>
+      <text class="add-desc">为孩子、老人或控糖人群建立独立档案</text>
+    </view>
+  </view>
+
+  <view class="limit-tip" wx:if="{{members.length >= 6}}">成员数量已达上限</view>
+</view>

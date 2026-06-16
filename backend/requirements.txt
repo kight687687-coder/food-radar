@@ -1,0 +1,12 @@
+flask
+flask-cors
+pymysql
+sqlalchemy
+requests
+scikit-learn
+pillow
+python-dotenv
+openai
+joblib
+pandas
+gunicorn

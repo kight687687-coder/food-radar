@@ -1,0 +1,63 @@
+
+<view class="fr-page history-page">
+  <view class="history-head">
+    <text class="fr-page-title">扫描历史</text>
+    <text class="fr-page-subtitle">完整记录与回看</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <view class="spinner"></view>
+    <text>加载中</text>
+  </view>
+
+  <view class="fr-card empty-card" wx:if="{{loaded && records.length === 0}}">
+    <text class="empty-title">还没有扫描记录</text>
+    <text class="empty-desc">选择配料表图片，生成第一份食品安全分析。</text>
+    <view class="fr-btn-primary empty-btn" bindtap="goScan">去识别</view>
+  </view>
+
+  <block wx:if="{{records.length > 0}}">
+    <view class="fr-hero-card stats-card">
+      <text class="stats-title">累计记录</text>
+      <view class="stats-grid">
+        <view><text>{{totalCount}}</text><text>累计分析</text></view>
+        <view><text>{{highRiskCount}}</text><text>高风险</text></view>
+        <view><text>{{avgScore}}</text><text>平均分</text></view>
+      </view>
+    </view>
+
+    <view class="group" wx:for="{{groupedRecords}}" wx:for-index="gIndex" wx:key="dateLabel">
+      <text class="group-date">{{item.dateLabel}}</text>
+      <view class="fr-card record-card" wx:for="{{item.records}}" wx:for-item="rec" wx:key="id" bindtap="goDetail" data-g="{{gIndex}}" data-index="{{index}}">
+        <block wx:if="{{rec.type === 'pk'}}">
+          <view class="record-thumb pk-thumb"><text>PK</text></view>
+          <view class="record-main">
+            <text class="record-name">{{rec.winner === 'A' ? rec.categoryA : rec.categoryB}}</text>
+            <text class="record-meta">食品对比 · {{rec.time}}</text>
+          </view>
+          <view class="record-side">
+            <text class="record-score fr-score-good">{{rec.winnerScore}}分</text>
+            <text class="fr-tag fr-tag-green">推荐</text>
+          </view>
+        </block>
+        <block wx:else>
+          <image class="record-thumb" wx:if="{{rec.imagePath}}" src="{{rec.imagePath}}" mode="aspectFill"></image>
+          <view class="record-thumb placeholder" wx:else><text>{{rec.score}}</text></view>
+          <view class="record-main">
+            <view wx:if="{{renameInfo.g === gIndex && renameInfo.index === index}}" class="rename-wrap">
+              <input class="rename-input" value="{{renameInfo.value}}" focus="{{true}}" bindconfirm="confirmRename" bindblur="confirmRename" data-g="{{gIndex}}" data-index="{{index}}" placeholder="输入名称" />
+            </view>
+            <view wx:else catchtap="startRename" data-g="{{gIndex}}" data-index="{{index}}">
+              <text class="record-name">{{rec.foodName}}</text>
+            </view>
+            <text class="record-meta">{{rec.category}} · {{rec.time}}</text>
+          </view>
+          <view class="record-side">
+            <text class="record-score fr-score-{{rec.score >= 80 ? 'good' : rec.score >= 60 ? 'mid' : 'bad'}}">{{rec.score}}分</text>
+            <text class="fr-tag level-{{rec.score >= 80 ? 'good' : rec.score >= 60 ? 'mid' : 'bad'}}">{{rec.score >= 80 ? '安全' : rec.score >= 60 ? '注意' : '高风险'}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </block>
+</view>

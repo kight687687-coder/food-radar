@@ -1,0 +1,262 @@
+.wiki-page {
+  padding-bottom: 0;
+}
+
+.wiki-head {
+  padding-top: 8rpx;
+}
+
+.search-card {
+  margin-top: 28rpx;
+  padding: 22rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+  box-shadow: 0 16rpx 42rpx rgba(15, 23, 42, 0.05);
+}
+
+.search-box {
+  height: 82rpx;
+  border-radius: 24rpx;
+  background: #F3F4F6;
+  display: flex;
+  align-items: center;
+  padding: 0 22rpx;
+  gap: 14rpx;
+}
+
+.search-symbol {
+  font-size: 34rpx;
+  color: #4E5969;
+  line-height: 1;
+}
+
+.search-input {
+  flex: 1;
+  height: 82rpx;
+  font-size: 28rpx;
+  color: #1D2129;
+}
+
+.clear-btn {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #E5E7EB;
+  color: #4E5969;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  line-height: 1;
+}
+
+.quick-stats {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.stat-number {
+  font-size: 34rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.stat-number.warn {
+  color: #F53F3F;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #4E5969;
+}
+
+.stat-divider {
+  width: 1rpx;
+  height: 46rpx;
+  background: #E5E7EB;
+  margin: 0 24rpx;
+}
+
+.category-bar {
+  margin: 24rpx -28rpx 0;
+  white-space: nowrap;
+}
+
+.category-track {
+  display: flex;
+  gap: 14rpx;
+  padding: 0 28rpx;
+}
+
+.category-tab {
+  flex-shrink: 0;
+  height: 58rpx;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+  color: #4E5969;
+  font-size: 24rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-tab.active {
+  background: #1D2129;
+  border-color: #1D2129;
+  color: #FFFFFF;
+}
+
+.result-line {
+  margin-top: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #1D2129;
+}
+
+.result-count {
+  color: #4E5969;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.list-scroll {
+  height: calc(100vh - 430rpx);
+  margin-top: 14rpx;
+}
+
+.additive-card {
+  min-height: 168rpx;
+  margin-bottom: 18rpx;
+  padding: 26rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.item-name {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.item-id,
+.item-alias {
+  font-size: 22rpx;
+  color: #4E5969;
+}
+
+.item-usage {
+  font-size: 26rpx;
+  line-height: 1.45;
+  color: #4E5969;
+}
+
+.risk-pill {
+  flex-shrink: 0;
+  height: 42rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21rpx;
+  font-weight: 800;
+}
+
+.risk-low {
+  color: #049A4F;
+  background: #E8F8EE;
+}
+
+.risk-mid {
+  color: #C45A00;
+  background: #FFF3E6;
+}
+
+.risk-high {
+  color: #C92A2A;
+  background: #FFECEC;
+}
+
+.risk-unknown {
+  color: #4E5969;
+  background: #F3F4F6;
+}
+
+.card-arrow {
+  color: #C9CDD4;
+  font-size: 44rpx;
+  line-height: 1;
+}
+
+.empty-state {
+  margin-top: 80rpx;
+  padding: 48rpx 32rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.empty-mark {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #F3F4F6;
+  color: #4E5969;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  font-weight: 900;
+}
+
+.empty-title {
+  margin-top: 18rpx;
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.empty-desc {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #4E5969;
+  line-height: 1.55;
+}

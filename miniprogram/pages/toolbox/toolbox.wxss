@@ -1,0 +1,22 @@
+
+.explore-head { padding-top: 12rpx; }
+.search-box { margin-top: 28rpx; height: 82rpx; border-radius: 999rpx; background: #FFFFFF; border: 1rpx solid #E5E7EB; color: #4E5969; font-size: 26rpx; display: flex; align-items: center; padding: 0 30rpx; box-shadow: 0 12rpx 26rpx rgba(15,23,42,.04); }
+.recommend-card { display: flex; justify-content: space-between; align-items: center; gap: 28rpx; overflow: hidden; }
+.card-eyebrow { display: block; color: #07C160; font-size: 22rpx; line-height: 1.3; font-weight: 900; margin-bottom: 12rpx; }
+.card-eyebrow.ai { color: #1677FF; }
+.recommend-title, .tool-title { display: block; color: #1D2129; font-size: 30rpx; font-weight: 900; line-height: 1.3; }
+.recommend-desc, .tool-desc { display: block; margin-top: 12rpx; color: #4E5969; font-size: 26rpx; line-height: 1.55; }
+.recommend-action, .ai-action { display: block; margin-top: 22rpx; color: #07C160; font-size: 26rpx; line-height: 1.3; font-weight: 900; }
+.service-grid { display: grid; grid-template-columns: repeat(4, 1fr); row-gap: 12rpx; column-gap: 12rpx; padding: 16rpx; border-radius: 20rpx; background: #FFFFFF; border: 1rpx solid #E5E7EB; box-shadow: 0 14rpx 40rpx rgba(15,23,42,.045); }
+.service-item { min-height: 144rpx; padding: 16rpx 6rpx 14rpx; border-radius: 16rpx; background: #F7F8FA; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; transition: transform .14s ease, opacity .14s ease; }
+.service-item:active { transform: scale(.95); opacity: .86; }
+.service-item .fr-entry-surface { margin-bottom: 12rpx; }
+.service-item > text:last-child { color: #1D2129; font-size: 22rpx; font-weight: 800; line-height: 1.3; }
+.ai-main-card { display: grid; grid-template-columns: 82rpx 1fr auto; align-items: center; gap: 18rpx; border-left: 4rpx solid #1677FF; background: #FFFFFF; }
+.ai-action { margin-top: 0; color: #1677FF; flex-shrink: 0; }
+.roadmap-card { padding-top: 12rpx; padding-bottom: 12rpx; }
+.roadmap-item { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; padding: 22rpx 0; border-bottom: 1rpx solid #F3F4F6; }
+.roadmap-item:last-child { border-bottom: 0; }
+.roadmap-item view text:first-child { display: block; color: #1D2129; font-size: 28rpx; font-weight: 900; }
+.roadmap-item view text:last-child { display: block; margin-top: 8rpx; color: #4E5969; font-size: 22rpx; }
+.roadmap-item > text { flex-shrink: 0; min-height: 38rpx; padding: 0 14rpx; border-radius: 999rpx; background: #F3F4F6; color: #86909C; font-size: 22rpx; line-height: 38rpx; font-weight: 800; }

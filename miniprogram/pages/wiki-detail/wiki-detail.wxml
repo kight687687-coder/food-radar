@@ -1,0 +1,100 @@
+<view class="fr-page detail-page">
+  <block wx:if="{{loading}}">
+    <view class="loading-panel">
+      <view class="spinner"></view>
+      <text class="loading-title">正在查询添加剂资料</text>
+      <text class="loading-desc">如果本地百科没有命中，会尝试用 AI 补全基础信息</text>
+    </view>
+  </block>
+
+  <block wx:if="{{!loading && additive}}">
+    <view class="hero-card risk-{{additive.riskTone}}">
+      <view class="hero-top">
+        <view class="hero-main">
+          <text class="hero-name">{{additive.name}}</text>
+          <text class="hero-id" wx:if="{{additive.id}}">{{additive.id}}</text>
+          <text class="hero-alias" wx:if="{{additive.aliasText}}">{{additive.aliasText}}</text>
+        </view>
+        <view class="risk-badge risk-{{additive.riskTone}}">{{additive.riskText}}</view>
+      </view>
+      <view class="hero-foot">
+        <text class="category-pill">{{additive.category}}</text>
+        <text class="source-pill" wx:if="{{additive.fromApi}}">AI 补全</text>
+      </view>
+    </view>
+
+    <view class="notice-card" wx:if="{{errorText}}">
+      <text>{{errorText}}</text>
+    </view>
+
+    <view class="fr-section" wx:if="{{additive.origin || additive.mechanism || additive.controversy || additive.intake_status}}">
+      <view class="fr-section-head">
+        <text class="fr-section-title">安全概览</text>
+      </view>
+      <view class="fr-card story-card">
+        <view class="story-item" wx:if="{{additive.origin}}">
+          <text class="story-label">来源与合成</text>
+          <text class="story-text">{{additive.origin}}</text>
+        </view>
+        <view class="story-item" wx:if="{{additive.mechanism}}">
+          <text class="story-label">作用机制</text>
+          <text class="story-text">{{additive.mechanism}}</text>
+        </view>
+        <view class="story-item" wx:if="{{additive.controversy}}">
+          <text class="story-label">安全争议</text>
+          <text class="story-text">{{additive.controversy}}</text>
+        </view>
+        <view class="story-item" wx:if="{{additive.intake_status}}">
+          <text class="story-label">摄入参考</text>
+          <text class="story-text">{{additive.intake_status}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="fr-section">
+      <view class="fr-section-head">
+        <text class="fr-section-title">基础信息</text>
+      </view>
+      <view class="fr-card info-card">
+        <view class="info-row" wx:for="{{additive.infoRows}}" wx:key="label">
+          <text class="info-label">{{item.label}}</text>
+          <text class="info-value">{{item.value}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="fr-section">
+      <view class="fr-section-head">
+        <text class="fr-section-title">风险判断</text>
+      </view>
+      <view class="fr-card risk-card">
+        <view class="risk-scale">
+          <view class="risk-track">
+            <view class="risk-fill risk-{{additive.riskTone}}" style="width: {{additive.riskWidth}};"></view>
+          </view>
+          <view class="risk-labels">
+            <text>低</text>
+            <text>中</text>
+            <text>高</text>
+          </view>
+        </view>
+        <text class="risk-desc">{{additive.risk_desc || additive.warning}}</text>
+        <view class="warning-box" wx:if="{{additive.warning}}">
+          <text>{{additive.warning}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="fr-section" wx:if="{{additive.specialGroupsText}}">
+      <view class="fr-section-head">
+        <text class="fr-section-title">重点人群</text>
+      </view>
+      <view class="fr-card group-card">
+        <text>{{additive.specialGroupsText}}</text>
+      </view>
+    </view>
+
+    <view class="source-note" wx:if="{{additive.fromApi}}">AI 生成内容仅供参考，重要健康决策请结合权威资料。</view>
+    <view class="fr-btn-secondary back-btn" bindtap="goBack">返回列表</view>
+  </block>
+</view>

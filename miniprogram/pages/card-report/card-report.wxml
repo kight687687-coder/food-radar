@@ -1,0 +1,54 @@
+<view class="fr-page card-report-page">
+  <view class="report-head">
+    <text class="fr-page-title">饮食报告卡</text>
+    <text class="fr-page-subtitle">把一段时间内的识别记录生成可保存、可分享的健康报告</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{historyList.length === 0}}">
+    <view class="empty-mark">0</view>
+    <text class="empty-title">还没有识别记录</text>
+    <text class="empty-desc">先从相册选择配料表完成一次识别，再回来生成报告卡</text>
+  </view>
+
+  <view wx:if="{{historyList.length > 0}}">
+    <view class="time-selectors">
+      <view class="t-btn {{period === 'day' ? 'active' : ''}}" data-period="day" bindtap="selectPeriod">今日</view>
+      <view class="t-btn {{period === 'week' ? 'active' : ''}}" data-period="week" bindtap="selectPeriod">本周</view>
+      <view class="t-btn {{period === 'year' ? 'active' : ''}}" data-period="year" bindtap="selectPeriod">本年</view>
+    </view>
+
+    <view class="stats-card" wx:if="{{periodStats}}">
+      <text class="stats-label">{{periodStats.label}}</text>
+      <view class="stats-row">
+        <view class="stat-item">
+          <text class="stat-val">{{periodStats.count}}</text>
+          <text class="stat-unit">次识别</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-val">{{periodStats.avgScore}}</text>
+          <text class="stat-unit">平均分</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-val">{{periodStats.bestScore}}</text>
+          <text class="stat-unit">最高分</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="no-data-card" wx:if="{{!periodStats}}">
+      <text>当前时间范围内没有记录</text>
+    </view>
+
+    <view class="canvas-section" wx:if="{{periodStats}}">
+      <view class="canvas-wrap">
+        <canvas type="2d" id="reportCanvas" style="width:{{canvasW}}px;height:{{canvasH}}px;"></canvas>
+      </view>
+      <view class="action-row">
+        <view class="fr-btn-primary action-btn" bindtap="saveToAlbum">保存到相册</view>
+        <button class="share-btn" open-type="share">分享</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,28 @@
+<view class="tab-shell">
+  <view class="tab-bar">
+    <view
+      class="tab-item {{selected === index ? 'active' : ''}} {{item.featured ? 'featured' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="pagePath"
+      data-index="{{index}}"
+      bindtap="switchTab"
+    >
+      <view class="tab-pill">
+        <block wx:if="{{item.featured}}">
+          <view class="scan-action">
+            <view class="scan-action-gloss"></view>
+            <image class="scan-action-icon" src="{{item.actionIconPath}}" mode="aspectFit"></image>
+            <text class="scan-action-text">{{item.text}}</text>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="icon-wrap">
+            <text wx:if="{{item.iconText}}" class="tab-font-icon">{{item.iconText}}</text>
+            <image wx:else class="tab-icon" src="{{selected === index ? item.selectedIconPath : item.iconPath}}" mode="aspectFit"></image>
+          </view>
+          <text class="tab-text">{{item.text}}</text>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>

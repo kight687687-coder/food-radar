@@ -1,0 +1,104 @@
+
+<view class="fr-page result-page">
+  <view class="result-top">
+    <text class="back-text" bindtap="goBack">返回</text>
+    <text class="fr-page-title">食品分析结果</text>
+  </view>
+
+  <view class="fr-hero-card fr-card-soft-green result-hero" wx:if="{{result}}">
+    <text class="hero-label">健康评分</text>
+    <text class="hero-score {{result.health_score >= 80 ? 'fr-score-good' : result.health_score >= 60 ? 'fr-score-mid' : 'fr-score-bad'}}">{{animatedScore}}</text>
+    <text class="score-level">{{scoreLevel}}</text>
+   <text class="score-sub">{{riskItems.length}} 项风险 · {{benefitItems.length}} 项有益成分</text>
+    <text class="engine-credit">参照 GB 2760 等国家食品安全标准</text>
+  </view>
+
+  <view class="fr-section" wx:if="{{result && result.imagePath}}">
+    <view class="fr-card food-strip">
+      <image class="food-thumb" src="{{result.imagePath}}" mode="aspectFill"></image>
+      <view>
+        <text class="food-name">{{result.food_category || '识别食品'}}</text>
+        <text class="food-desc">配料表分析结果</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card ai-card">
+      <text class="fr-section-title ai-title">AI 综合结论</text>
+      <view class="tag-row" wx:if="{{aiTags.length > 0}}"><text class="fr-tag fr-tag-ai" wx:for="{{aiTags}}" wx:key="*this">{{item}}</text></view>
+      <text class="ai-text" wx:if="{{aiSummary}}">{{aiSummary}}</text>
+      <text class="ai-text sub" wx:if="{{aiDetail}}">{{aiDetail}}</text>
+      <text class="ai-text" wx:if="{{!aiSummary && !aiDetail}}">已完成食品风险分析，请结合风险成分和个人设置查看结果。</text>
+    </view>
+  </view>
+
+  <view class="fr-section" wx:if="{{hitAvoids.length > 0}}">
+    <view class="fr-card avoid-card">
+      <text class="fr-section-title">忌口提醒</text>
+      <text class="avoid-desc">检测到你设置的忌口成分，建议谨慎食用或避免。</text>
+      <view class="tag-row"><text class="fr-tag fr-tag-danger" wx:for="{{hitAvoids}}" wx:key="*this">{{item}}</text></view>
+    </view>
+  </view>
+
+  <view class="fr-section" wx:if="{{myWarnings.length > 0}}">
+    <view class="fr-card warn-card">
+      <text class="fr-section-title">人群提醒</text>
+      <view class="warn-row" wx:for="{{myWarnings}}" wx:key="msg"><text>{{item.msg || item}}</text></view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card">
+      <view class="fr-section-head"><text class="fr-section-title">风险成分</text></view>
+      <block wx:if="{{riskItems.length > 0}}">
+        <view class="risk-item" wx:for="{{riskItems}}" wx:key="name" data-name="{{item.name}}" bindtap="goWiki">
+          <view class="risk-line risk-{{item.cls}}"></view>
+          <view class="risk-main">
+            <text class="risk-name">{{item.name}}</text>
+            <text class="risk-desc">{{item.level}} · -{{item.deduct}} 分</text>
+            <text class="risk-note">{{item.desc}}</text>
+          </view>
+        </view>
+      </block>
+      <view class="fr-empty" wx:else>未发现明显风险成分，配料表整体风险较低。</view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card benefit-card">
+      <text class="fr-section-title">有益成分</text>
+      <text class="benefit-summary">检测到 {{benefitItems.length}} 项有益成分，本次加分 +{{result.beneficial_bonus || 0}}</text>
+      <view class="tag-row" wx:if="{{benefitItems.length > 0}}"><text class="fr-tag fr-tag-green" wx:for="{{benefitItems}}" wx:key="name">{{item.name}}</text></view>
+      <text class="benefit-empty" wx:else>暂未识别到明显有益成分。</text>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-card suggestion-card">
+      <text class="fr-section-title">建议</text>
+      <text class="suggestion-text">{{aiSuggestion || '偶尔食用问题不大，建议结合个人情况控制频率。'}}</text>
+      <view class="long-term" wx:if="{{longTermRisk}}">
+        <text>长期关注</text>
+        <text>{{longTermRisk}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="actions">
+    <view class="fr-btn-primary" bindtap="goScan">再选一张</view>
+    <view class="action-row">
+      <view class="fr-btn-secondary" bindtap="goCompare">PK 对比</view>
+      <view class="fr-btn-secondary" bindtap="goCardReport">生成卡片</view>
+    </view>
+  </view>
+
+  <view class="avoid-overlay" wx:if="{{showAvoidAlert && hitAvoids.length > 0}}">
+    <view class="avoid-modal">
+      <text class="modal-title">忌口提醒</text>
+      <text class="modal-desc">检测到你设置的忌口成分，请谨慎食用。</text>
+      <view class="tag-row"><text class="fr-tag fr-tag-danger" wx:for="{{hitAvoids}}" wx:key="*this">{{item}}</text></view>
+      <view class="fr-btn-primary modal-btn" bindtap="closeAvoidAlert">我知道了</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,67 @@
+{
+  "pages": [
+    "pages/profile/profile",
+    "pages/index/index",
+    "pages/scan/scan",
+    "pages/result/result",
+    "pages/compare/compare",
+    "pages/history/history",
+    "pages/report/report",
+    "pages/mine/mine",
+    "pages/avoid/avoid",
+    "pages/toolbox/toolbox",
+    "pages/card-report/card-report",
+    "pages/ingredient-detail/ingredient-detail",
+    "pages/family-manage/family-manage",
+    "pages/family-edit/family-edit",
+    "pages/wiki/wiki",
+    "pages/wiki-detail/wiki-detail",
+    "pages/ai-chat/ai-chat"
+  ],
+  "tabBar": {
+    "custom": true,
+    "color": "#86909C",
+    "selectedColor": "#07C160",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "images/tabbar/home.png",
+        "selectedIconPath": "images/tabbar/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/report/report",
+        "iconPath": "images/tabbar/report.png",
+        "selectedIconPath": "images/tabbar/report-active.png",
+        "text": "档案"
+      },
+      {
+        "pagePath": "pages/scan/scan",
+        "iconPath": "images/tabbar/scan.png",
+        "selectedIconPath": "images/tabbar/scan-active.png",
+        "text": "识别"
+      },
+      {
+        "pagePath": "pages/toolbox/toolbox",
+        "iconPath": "images/tabbar/explore.png",
+        "selectedIconPath": "images/tabbar/explore-active.png",
+        "text": "探索"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "iconPath": "images/tabbar/mine.png",
+        "selectedIconPath": "images/tabbar/mine-active.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#F7F8FA",
+    "navigationBarTitleText": "食安雷达",
+    "navigationBarTextStyle": "black"
+  },
+  "sitemapLocation": "sitemap.json"
+}

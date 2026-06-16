@@ -1,0 +1,31 @@
+
+.compare-head { padding-top: 12rpx; }
+.select-grid { margin-top: 28rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; }
+.select-card { min-height: 292rpx; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.select-label { align-self: flex-start; color: #4E5969; font-size: 22rpx; font-weight: 800; }
+.select-img, .select-placeholder { margin-top: 18rpx; width: 132rpx; height: 132rpx; border-radius: 24rpx; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #C9CDD4; font-size: 24rpx; font-weight: 800; }
+.select-placeholder { flex-direction: column; gap: 8rpx; }
+.select-placeholder .iconfont { color: #1677FF; font-size: 44rpx; }
+.select-name { margin-top: 16rpx; color: #1D2129; font-size: 26rpx; font-weight: 900; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.select-score { margin-top: 8rpx; font-size: 26rpx; font-weight: 900; }
+.start-btn { margin-top: 24rpx; }
+.start-btn.disabled { opacity: .72; }
+.card-eyebrow { display: block; color: #07C160; font-size: 22rpx; font-weight: 900; margin-bottom: 14rpx; }
+.winner-name { display: block; color: #1D2129; font-size: 38rpx; font-weight: 900; }
+.winner-score { display: block; margin-top: 12rpx; color: #07C160; font-size: 58rpx; font-weight: 900; line-height: 1; }
+.winner-desc { display: block; margin-top: 16rpx; color: #4E5969; font-size: 26rpx; }
+.compare-row { padding: 24rpx 0; border-bottom: 1rpx solid #F3F4F6; }
+.compare-row:last-child { border-bottom: 0; }
+.compare-label { color: #1D2129; font-size: 28rpx; font-weight: 900; }
+.compare-values { margin-top: 16rpx; display: flex; gap: 18rpx; color: #4E5969; font-size: 26rpx; font-weight: 800; }
+.compare-values .win { color: #07C160; }
+.compare-note { display: block; margin-top: 10rpx; color: #C9CDD4; font-size: 22rpx; }
+.risk-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; margin-top: 20rpx; }
+.risk-col-title { display: block; color: #1D2129; font-size: 26rpx; font-weight: 900; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 10rpx; margin-top: 14rpx; }
+.risk-summary { display: block; margin-top: 24rpx; padding: 20rpx; border-radius: 16rpx; background: #F2F3F5; color: #4E5969; font-size: 24rpx; line-height: 1.5; }
+.ai-card { border-left: 6rpx solid #7B61FF; }
+.ai-title { color: #7B61FF; }
+.insight-part { display: flex; align-items: flex-start; gap: 16rpx; margin-top: 18rpx; color: #4E5969; font-size: 26rpx; line-height: 1.55; }
+.insight-part .fr-tag { flex-shrink: 0; }
+.reset-link { display: block; text-align: center; color: #4E5969; font-size: 26rpx; font-weight: 700; padding: 34rpx 0; }

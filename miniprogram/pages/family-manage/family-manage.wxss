@@ -1,0 +1,213 @@
+.family-page {
+  padding-bottom: 56rpx;
+}
+
+.family-head {
+  padding-top: 8rpx;
+}
+
+.summary-card {
+  margin-top: 28rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #FFFFFF 0%, #E8F8EE 100%);
+  border: 1rpx solid rgba(34, 197, 94, 0.16);
+  box-shadow: 0 16rpx 42rpx rgba(15, 23, 42, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summary-number {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.summary-label {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  color: #4E5969;
+}
+
+.summary-tag {
+  height: 48rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #E8F8EE;
+  color: #049A4F;
+  font-size: 22rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-list {
+  margin-top: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.member-card {
+  padding: 26rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.member-card.active {
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 0 16rpx 36rpx rgba(34, 197, 94, 0.1);
+}
+
+.member-avatar {
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 50%;
+  background: #F2EFFF;
+  color: #7B61FF;
+  font-size: 34rpx;
+  font-weight: 900;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-avatar-img {
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 50%;
+}
+
+.member-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.member-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.member-name {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1D2129;
+}
+
+.active-badge {
+  height: 36rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  background: #E8F8EE;
+  color: #049A4F;
+  font-size: 21rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+}
+
+.member-type {
+  font-size: 24rpx;
+  color: #4E5969;
+}
+
+.member-extra {
+  font-size: 22rpx;
+  color: #C9CDD4;
+}
+
+.member-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.icon-btn {
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.icon-btn .iconfont {
+  font-size: 28rpx;
+}
+
+.icon-btn.edit {
+  background: #F3F4F6;
+  color: #4E5969;
+}
+
+.icon-btn.delete {
+  background: #FFECEC;
+  color: #F53F3F;
+}
+
+.add-card {
+  margin-top: 24rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 2rpx dashed #C9CDD4;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.add-symbol {
+  width: 58rpx;
+  height: 58rpx;
+  border-radius: 50%;
+  background: #E8F8EE;
+  color: #07C160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.add-symbol .iconfont {
+  font-size: 32rpx;
+}
+
+.add-title {
+  display: block;
+  font-size: 28rpx;
+  color: #1D2129;
+  font-weight: 900;
+}
+
+.add-desc {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #4E5969;
+}
+
+.limit-tip {
+  margin-top: 28rpx;
+  text-align: center;
+  color: #C9CDD4;
+  font-size: 24rpx;
+}

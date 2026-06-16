@@ -1,0 +1,166 @@
+<view class="fr-page fr-density-relaxed home-page">
+  <view class="home-top">
+    <view>
+      <text class="fr-page-title">食安雷达</text>
+      <text class="fr-page-subtitle">家庭食品安全管家</text>
+    </view>
+    <view class="engine-bar" bindtap="showEnginePanel" hover-class="engine-bar-hover">
+      <text class="iconfont engine-icon icon-shield-check"></text>
+      <text class="engine-label">参考国家标准</text>
+    </view>
+  </view>
+
+  <view class="safety-card level-{{safetyLevelClass}} {{animateIn ? 'animate-in' : ''}}">
+    <view class="safety-main">
+      <view class="safety-copy">
+        <view class="safety-head">
+          <view>
+            <text class="hero-label">家庭安全指数</text>
+            <text class="hero-sub">根据最近识别记录更新</text>
+          </view>
+          <text class="status-pill fr-tag-md level-{{safetyLevelClass}} {{animateIn ? 'animate-in' : ''}}">{{safetyStatusText}}</text>
+        </view>
+
+        <view class="score-line">
+          <text class="hero-score level-{{safetyLevelClass}} {{animateIn ? 'animate-in' : ''}}">{{safetyScore || '--'}}</text>
+          <text class="score-unit">分</text>
+        </view>
+        <text class="score-note">今日已分析 {{todayScanCount}} 次 · 已守护 {{guardDays}} 天</text>
+      </view>
+
+      <view class="score-ring" style="background: conic-gradient({{scoreRingColor}} {{scoreRingDeg}}deg, #F2F3F5 0deg);">
+        <view class="score-ring-inner">
+          <text>{{safetyScore || '--'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="home-copy {{animateIn ? 'animate-in' : ''}}">
+      <text class="home-summary">{{homeSummary}}</text>
+      <text class="home-suggestion">{{homeSuggestion}}</text>
+    </view>
+
+    <view class="home-primary-action fr-press-strong {{animateIn ? 'animate-in' : ''}}" bindtap="goScan">
+      <view class="primary-icon-wrap">
+        <image class="primary-camera-icon" src="/images/action-icons/camera-action-3d.png" mode="aspectFit"></image>
+      </view>
+      <view class="primary-action-text">
+        <text>拍照识别配料表</text>
+        <text>上传配料表，立即生成食品安全分析</text>
+      </view>
+      <view class="primary-action-cta">
+        <text class="iconfont icon-arrow-right"></text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">常用功能</text>
+    </view>
+    <view class="quick-grid">
+      <view class="quick-item fr-press-strong" bindtap="goWiki">
+        <image class="quick-3d-icon" src="/images/entry-icons/additive-3d.png" mode="aspectFit"></image>
+        <text class="quick-title">添加剂百科</text>
+        <text class="quick-sub">查成分</text>
+      </view>
+      <view class="quick-item fr-press-strong" bindtap="goCompare">
+        <image class="quick-3d-icon" src="/images/entry-icons/compare-3d.png" mode="aspectFit"></image>
+        <text class="quick-title">配料表 PK</text>
+        <text class="quick-sub">比一比</text>
+      </view>
+      <view class="quick-item fr-press-strong" bindtap="goAiChat">
+        <image class="quick-3d-icon" src="/images/entry-icons/qa-3d.png" mode="aspectFit"></image>
+        <text class="quick-title">营养师问答</text>
+        <text class="quick-sub">问问题</text>
+      </view>
+      <view class="quick-item fr-press-strong" bindtap="goReport">
+        <image class="quick-3d-icon" src="/images/entry-icons/profile-3d.png" mode="aspectFit"></image>
+        <text class="quick-title">健康档案</text>
+        <text class="quick-sub">看趋势</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fr-section">
+    <view class="fr-section-head">
+      <text class="fr-section-title">最近识别</text>
+      <text wx:if="{{recentRecords.length > 0}}" class="fr-section-action" bindtap="goHistory">查看全部</text>
+    </view>
+    <view wx:if="{{recentRecords.length > 0}}" class="recent-simple-card fr-list-row fr-press-light" data-index="0" bindtap="goDetailFromIndex">
+      <image class="recent-thumb" wx:if="{{recentRecords[0].imagePath}}" src="{{recentRecords[0].imagePath}}" mode="aspectFill"></image>
+      <view class="recent-thumb placeholder" wx:else>
+        <text class="iconfont recent-placeholder-icon icon-list"></text>
+      </view>
+      <view class="recent-info fr-list-main">
+        <text class="recent-name fr-list-title">{{recentRecords[0].foodName}}</text>
+        <text class="recent-meta fr-list-desc">{{recentRecords[0].category}} · {{recentRecords[0].time}}</text>
+      </view>
+      <view class="recent-score-wrap fr-list-meta">
+        <text class="recent-score fr-score-{{recentRecords[0].levelCls}}">{{recentRecords[0].score}}分</text>
+        <text class="recent-level fr-tag-sm level-{{recentRecords[0].levelCls}}">{{recentRecords[0].levelText}}</text>
+      </view>
+    </view>
+    <view class="recent-empty-card fr-press-light" wx:else bindtap="goScan">
+      <text class="iconfont fr-icon-box-md fr-icon-success icon-list"></text>
+      <view>
+        <text>还没有识别记录</text>
+        <text>选一张配料表图片，生成第一份分析</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评分引擎面板 -->
+  <view class="engine-overlay {{enginePanelShow ? 'show' : ''}}" bindtap="closeEnginePanel" catchtouchmove="noop">
+    <view class="engine-panel {{enginePanelShow ? 'show' : ''}}" catchtap="noop">
+      <view class="engine-panel-head">
+        <text class="engine-panel-title">食品安全评估依据</text>
+        <view class="engine-panel-close" bindtap="closeEnginePanel">
+          <text class="iconfont icon-close"></text>
+        </view>
+      </view>
+      <view class="engine-layer {{enginePanelShow ? 'layer-in' : ''}}" style="animation-delay: 0s">
+        <view class="layer-icon-wrap input">
+          <text class="layer-icon">🧩</text>
+        </view>
+        <view class="layer-body">
+          <view class="layer-head">
+            <text class="layer-verb">输入层</text>
+            <text class="layer-action">识别</text>
+          </view>
+          <text class="layer-title">食品信息识别</text>
+          <text class="layer-desc">成分 / 品类 / 加工方式</text>
+        </view>
+      </view>
+      <view class="engine-layer {{enginePanelShow ? 'layer-in' : ''}}" style="animation-delay: 0.12s">
+        <view class="layer-icon-wrap evaluate">
+          <text class="layer-icon">⚙️</text>
+        </view>
+        <view class="layer-body">
+          <view class="layer-head">
+            <text class="layer-verb">评估层</text>
+            <text class="layer-action">匹配</text>
+          </view>
+          <text class="layer-title">风险规则映射</text>
+          <text class="layer-desc">参考食品安全国家标准与添加剂使用规则</text>
+        </view>
+      </view>
+      <view class="engine-layer {{enginePanelShow ? 'layer-in' : ''}}" style="animation-delay: 0.24s">
+        <view class="layer-icon-wrap output">
+          <text class="layer-icon">📊</text>
+        </view>
+        <view class="layer-body">
+          <view class="layer-head">
+            <text class="layer-verb">输出层</text>
+            <text class="layer-action">生成</text>
+          </view>
+          <text class="layer-title">风险信号生成</text>
+          <text class="layer-desc">轻度关注 / 中风险 / 高风险</text>
+        </view>
+      </view>
+      <view class="engine-panel-foot">
+        <text>参考国家食品安全标准及公开规则，仅作日常风险提示</text>
+      </view>
+    </view>
+  </view>
+</view>
