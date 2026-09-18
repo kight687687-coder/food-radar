@@ -1,0 +1,3217 @@
+const { BENEFICIAL_KEYWORDS, BENEFICIAL_ADDITIVE_NAMES } = require('../../utils/constants')
+const family = require('../../utils/family')
+const app = getApp()
+function formatDateKey(d) {
+return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+function formatTime(value) {
+if (!value) return ''
+const d = new Date(value)
+return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+function scoreLevel(score) {
+if (score >= 80) return { text: '安全', cls: 'good' }
+if (score >= 60) return { text: '注意', cls: 'mid' }
+return { text: '高风险', cls: 'bad' }
+}
+Page({
+data: {
+safetyScore: 0,
+safetyLevelClass: 'empty',
+safetyStatusText: '等待记录',
+scoreRingDeg: 0,
+scoreRingColor: '#C9CDD4',
+scoreDeltaText: '暂无对比',
+guardDays: 0,
+todayScanCount: 0,
+homeSummary: '选择一张配料表图片，先看看这个食品适不适合你。',
+homeSuggestion: '从常吃的零食、饮料、儿童食品开始记录，会更快形成家庭档案。',
+riskEvent: null,
+recentRecords: [],
+trendBars: [],
+trendSummary: '扫描 3 次以上后生成趋势',
+nickname: '',
+userType: '',
+animateIn: false,
+enginePanelShow: false,
+},
+onShow() {
+if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+this.getTabBar().setData({ selected: 0 })
+}
+this.replayEntryAnimation()
+const saved = wx.getStorageSync('userProfile')
+if (saved && saved.userId) {
+app.globalData.userId = saved.userId
+app.globalData.userType = saved.userType || ''
+app.globalData.hasProfile = true
+this.loadDashboard()
+} else {
+wx.reLaunch({ url: '/pages/profile/profile' })
+}
+},
+replayEntryAnimation() {
+this.setData({ animateIn: false })
+wx.nextTick(() => {
+this.setData({ animateIn: true })
+})
+},
+loadDashboard() {
+const activeMember = family.getActiveMember()
+const history = family.getFilteredHistory().filter(r => r.type !== 'pk')
+const safetyScore = this.computeSafetyScore(history)
+const safetyView = this.getSafetyView(safetyScore)
+const scoreDeltaText = this.computeDelta(history)
+const guardDays = this.computeGuardDays(history)
+const todayScanCount = this.computeTodayScanCount(history)
+const recentRecords = this.buildRecent(history.slice(0, 2))
+const trendBars = this.buildTrend(history)
+const trendSummary = this.buildTrendSummary(trendBars)
+const riskEvent = this.buildRiskEvent(history)
+const homeCopy = this.buildHomeCopy(history, safetyScore, riskEvent)
+this.setData({
+safetyScore,
+safetyLevelClass: safetyView.cls,
+safetyStatusText: safetyView.text,
+scoreRingDeg: Math.round(Math.max(0, Math.min(safetyScore, 100)) * 3.6),
+scoreRingColor: this.getScoreRingColor(safetyView.cls),
+scoreDeltaText,
+guardDays,
+todayScanCount,
+recentRecords,
+trendBars,
+trendSummary,
+riskEvent,
+homeSummary: homeCopy.summary,
+homeSuggestion: homeCopy.suggestion,
+nickname: activeMember ? (activeMember.nickname || activeMember.relationship || '当前成员') : '当前成员',
+userType: activeMember ? activeMember.userType || '' : '',
+})
+},
+computeSafetyScore(history) {
+const scores = history.map(r => r.score ?? r.fullResult?.health_score ?? 0).filter(Boolean)
+if (!scores.length) return 0
+return Math.round(scores.slice(0, 10).reduce((s, v) => s + v, 0) / Math.min(scores.length, 10))
+},
+getSafetyView(score) {
+if (score >= 80) return { text: '状态良好', cls: 'good' }
+if (score >= 60) return { text: '需要关注', cls: 'mid' }
+if (score > 0) return { text: '风险偏高', cls: 'bad' }
+return { text: '等待记录', cls: 'empty' }
+},
+computeDelta(history) {
+const now = new Date()
+const weekStart = new Date(now)
+weekStart.setDate(now.getDate() - 6)
+const prevStart = new Date(now)
+prevStart.setDate(now.getDate() - 13)
+const current = []
+const prev = []
+history.forEach(r => {
+if (!r.createTime) return
+const d = new Date(r.createTime)
+const score = r.score ?? r.fullResult?.health_score ?? 0
+if (!score) return
+if (d >= weekStart && d <= now) current.push(score)
+else if (d >= prevStart && d < weekStart) prev.push(score)
+})
+if (!current.length || !prev.length) return '继续积累记录'
+const avg = arr => Math.round(arr.reduce((s, v) => s + v, 0) / arr.length)
+const diff = avg(current) - avg(prev)
+if (diff === 0) return '与上周持平'
+return diff > 0 ? `较上周提升 ${diff} 分` : `较上周下降 ${Math.abs(diff)} 分`
+},
+computeGuardDays(history) {
+const days = new Set()
+history.forEach(r => {
+if (r.createTime) days.add(formatDateKey(new Date(r.createTime)))
+})
+return days.size
+},
+computeTodayScanCount(history) {
+const todayKey = formatDateKey(new Date())
+return history.filter(r => r.createTime && formatDateKey(new Date(r.createTime)) === todayKey).length
+},
+getScoreRingColor(level) {
+if (level === 'good') return '#07C160'
+if (level === 'mid') return '#FF7D00'
+if (level === 'bad') return '#F53F3F'
+return '#C9CDD4'
+},
+buildRecent(records) {
+return records.map(r => {
+const score = r.score ?? r.fullResult?.health_score ?? 0
+const level = scoreLevel(score)
+return {
+foodName: r.foodName || r.food_category || r.fullResult?.food_category || '未命名食品',
+category: r.food_category || r.fullResult?.food_category || '食品',
+score,
+levelText: level.text,
+levelCls: level.cls,
+imagePath: r.imagePath || r.fullResult?.imagePath || '',
+time: formatTime(r.createTime),
+createTime: r.createTime,
+}
+})
+},
+buildTrend(history) {
+const result = []
+const today = new Date()
+const labels = ['一', '二', '三', '四', '五', '六', '日']
+for (let i = 6; i >= 0; i--) {
+const d = new Date(today)
+d.setDate(today.getDate() - i)
+const key = formatDateKey(d)
+const scores = history.filter(r => r.createTime && formatDateKey(new Date(r.createTime)) === key)
+.map(r => r.score ?? r.fullResult?.health_score ?? 0).filter(Boolean)
+// 同一天有多次扫描时取平均分，避免单次记录过度影响趋势
+const score = scores.length ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : 0
+const day = d.getDay()
+const label = labels[day === 0 ? 6 : day - 1]
+result.push({
+label,
+score,
+height: score ? Math.max(28, Math.round(score * 1.15)) : 22,
+cls: score >= 80 ? 'good' : score >= 60 ? 'mid' : score > 0 ? 'bad' : 'empty',
+})
+}
+return result
+},
+buildTrendSummary(bars) {
+const scores = bars.map(b => b.score).filter(Boolean)
+if (scores.length < 3) return '扫描 3 次以上后生成趋势'
+const avg = Math.round(scores.reduce((s, v) => s + v, 0) / scores.length)
+return `本周平均 ${avg} 分，持续记录更容易发现变化`
+},
+buildRiskEvent(history) {
+const riskMap = {}
+history.forEach(r => {
+const risks = r.fullResult?.risk_additives || []
+// 已知有益添加剂不计入风险事件，避免首页误报
+risks.filter(a => !BENEFICIAL_ADDITIVE_NAMES.includes(a.name)).forEach(a => {
+const key = a.name || '风险成分'
+if (!riskMap[key]) riskMap[key] = { name: key, count: 0, sources: [] }
+riskMap[key].count++
+const source = r.foodName || r.food_category || r.fullResult?.food_category
+if (source && riskMap[key].sources.indexOf(source) === -1) riskMap[key].sources.push(source)
+})
+})
+const top = Object.values(riskMap).sort((a, b) => b.count - a.count)[0]
+if (!top) return null
+return {
+title: `${top.name} 出现 ${top.count} 次`,
+source: top.sources.slice(0, 3).join('、') || '近期扫描食品',
+}
+},
+buildHomeCopy(history, score, riskEvent) {
+if (!history.length) {
+return {
+summary: '还没有识别记录，先选一张配料表图片看看。',
+suggestion: '从家里常吃的食品开始，几次之后就能看出更清楚的饮食变化。',
+}
+}
+if (riskEvent) {
+return {
+summary: `近期 ${riskEvent.title}，主要来自 ${riskEvent.source}。`,
+suggestion: '同类食品可以先少买几次，换一款配料更短的会更稳妥。',
+}
+}
+if (score >= 80) {
+return {
+summary: '最近识别的食品整体比较安心。',
+suggestion: '继续保持看配料表的习惯，给家里常吃食品留个底。',
+}
+}
+if (score >= 60) {
+return {
+summary: '最近有一些成分需要留意，但整体还算可控。',
+suggestion: '买之前多比较一下配料表，优先选成分更简单的。',
+}
+}
+return {
+summary: '最近食品风险偏高，需要更谨慎一点。',
+suggestion: '先减少同类食品频率，再用配料表 PK 找更合适的替代品。',
+}
+},
+goScan() { wx.switchTab({ url: '/pages/scan/scan' }) },
+showEnginePanel() { this.setData({ enginePanelShow: true }) },
+closeEnginePanel() { this.setData({ enginePanelShow: false }) },
+noop() {},
+goWiki() { wx.navigateTo({ url: '/pages/wiki/wiki' }) },
+goCompare() { wx.navigateTo({ url: '/pages/compare/compare' }) },
+goAiChat() { wx.navigateTo({ url: '/pages/ai-chat/ai-chat' }) },
+goReport() { wx.switchTab({ url: '/pages/report/report' }) },
+goHistory() { wx.navigateTo({ url: '/pages/history/history' }) },
+goDetailFromIndex(e) {
+const record = this.data.recentRecords[e.currentTarget.dataset.index]
+if (!record) return
+const scanHistory = wx.getStorageSync('scanHistory') || []
+const fullRecord = scanHistory.find(r => r.createTime === record.createTime)
+if (fullRecord && fullRecord.fullResult) {
+const fullResult = fullRecord.fullResult
+fullResult.imagePath = fullRecord.imagePath || fullResult.imagePath || ''
+wx.setStorageSync('lastResult', fullResult)
+wx.navigateTo({ url: '/pages/result/result' })
+}
+},
+})
+const api = require('../../utils/request')
+const family = require('../../utils/family')
+Page({
+data: {
+analyzing: false,
+recentRecord: null,
+},
+onShow() {
+if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+this.getTabBar().setData({ selected: 2 })
+}
+this.loadRecent()
+},
+loadRecent() {
+const history = family.getFilteredHistory().filter(r => r.type !== 'pk')
+const latest = history[0]
+if (!latest) {
+// 没有历史记录时清空最近记录展示
+this.setData({ recentRecord: null })
+return
+}
+const d = new Date(latest.createTime)
+const time = latest.createTime ? `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : ''
+this.setData({
+recentRecord: {
+foodName: latest.foodName || latest.food_category || '未命名食品',
+category: latest.food_category || latest.fullResult?.food_category || '食品',
+score: latest.score || latest.fullResult?.health_score || 0,
+imagePath: latest.imagePath || latest.fullResult?.imagePath || '',
+time,
+createTime: latest.createTime,
+}
+})
+},
+chooseImage() {
+if (this.data.analyzing) return
+wx.chooseMedia({
+count: 1,
+mediaType: ['image'],
+sourceType: ['album'],
+success: (res) => this.uploadImage(res.tempFiles[0].tempFilePath),
+})
+},
+uploadImage(filePath) {
+this.setData({ analyzing: true })
+wx.showLoading({ title: '分析中', mask: true })
+wx.getFileSystemManager().readFile({
+filePath,
+encoding: 'base64',
+success: (fileRes) => {
+// 将图片base64提交给后端，后端完成OCR、分类、评分和AI分析
+api.analyze(fileRes.data).then((data) => {
+wx.hideLoading()
+data.imagePath = filePath
+wx.setStorageSync('lastResult', data)
+// 提取前三个风险添加剂作为历史列表标签
+const tags = (data.risk_additives || []).slice(0, 3).map(a => a.name)
+const record = family.addScanRecord({
+foodName: data.food_category || '未命名食品',
+food_category: data.food_category || '',
+score: data.health_score,
+tags,
+createTime: new Date().toISOString(),
+imagePath: '',
+fullResult: data,
+})
+// 保存图片到本地持久路径，避免临时文件失效后历史图片无法展示
+wx.saveFile({
+tempFilePath: filePath,
+success: (saveRes) => {
+const history = wx.getStorageSync('scanHistory') || []
+const idx = history.findIndex(r => r.createTime === record.createTime)
+if (idx !== -1) {
+// 回写历史记录中的图片路径，并同步完整结果中的图片路径
+history[idx].imagePath = saveRes.savedFilePath
+if (history[idx].fullResult) history[idx].fullResult.imagePath = saveRes.savedFilePath
+wx.setStorageSync('scanHistory', history)
+}
+const lastResult = wx.getStorageSync('lastResult') || {}
+lastResult.imagePath = saveRes.savedFilePath
+wx.setStorageSync('lastResult', lastResult)
+},
+})
+this.setData({ analyzing: false })
+wx.navigateTo({ url: '/pages/result/result' })
+}).catch((err) => {
+// 后端识别失败或网络失败时，恢复按钮状态并提示用户重新选择清晰图片
+wx.hideLoading()
+wx.showToast({ title: err.msg || '分析失败，请重新选择清晰图片', icon: 'none', duration: 3000 })
+this.setData({ analyzing: false })
+})
+},
+fail: () => {
+wx.hideLoading()
+wx.showToast({ title: '读取图片失败', icon: 'none' })
+this.setData({ analyzing: false })
+},
+})
+},
+goCompare() {
+wx.navigateTo({ url: '/pages/compare/compare' })
+},
+goRecentDetail() {
+const record = this.data.recentRecord
+if (!record) return
+const scanHistory = wx.getStorageSync('scanHistory') || []
+const fullRecord = scanHistory.find(r => r.createTime === record.createTime)
+if (fullRecord && fullRecord.fullResult) {
+// 结果页统一读取lastResult，因此进入前同步缓存中的完整记录
+const fullResult = fullRecord.fullResult
+fullResult.imagePath = fullRecord.imagePath || fullResult.imagePath || ''
+wx.setStorageSync('lastResult', fullResult)
+wx.navigateTo({ url: '/pages/result/result' })
+}
+},
+goHistory() {
+wx.navigateTo({ url: '/pages/history/history' })
+},
+})
+const { BENEFICIAL_MAP } = require('../../utils/constants')
+const { animateScore } = require('../../utils/helpers')
+Page({
+data: {
+result: null,
+scoreLevel: '',
+animatedScore: 0,
+myWarnings: [],
+userType: '',
+riskItems: [],
+benefitItems: [],
+hitAvoids: [],
+showAvoidAlert: false,
+aiTags: [],
+},
+onLoad() { this.loadData() },
+onShow() { this.loadData() },
+animate(target) { animateScore(this.setData.bind(this), 'animatedScore', target || 0) },
+loadData() {
+const result = wx.getStorageSync('lastResult')
+if (!result) {
+wx.showToast({ title: '暂无分析数据', icon: 'none' })
+wx.switchTab({ url: '/pages/scan/scan' })
+return
+}
+const score = result.health_score || 0
+const scoreLevel = score >= 80 ? '可以放心食用' : score >= 60 ? '建议适量食用' : '需要谨慎选择'
+const rawRisks = result.risk_additives || []
+const riskItems = rawRisks.slice(0, 6).map(a => {
+const deduct = Number(a.deduct_score) || Number(a.deduct) || 0
+const cls = deduct >= 20 ? 'bad' : deduct >= 10 ? 'mid' : 'low'
+return {
+name: a.name || '风险成分',
+level: a.risk_level || (cls === 'bad' ? '高风险' : cls === 'mid' ? '中风险' : '低风险'),
+deduct,
+cls,
+desc: a.reason || a.description || '建议关注摄入频率。'
+}
+})
+if (result.ingredients_count_penalty > 0) {
+riskItems.push({ name: '配料较多', level: '中风险', deduct: result.ingredients_count_penalty, cls: 'mid', desc: '配料项目较多，建议优先选择配料更短的同类食品。' })
+}
+let rawBenefits = result.beneficial_ingredients || []
+if (rawBenefits.length === 0 && result.ingredients && BENEFICIAL_MAP) {
+const ingCombined = '' + result.ingredients
+const seen = new Set()
+Object.keys(BENEFICIAL_MAP).forEach(keyword => {
+if (ingCombined.indexOf(keyword) !== -1 && !seen.has(keyword)) {
+seen.add(keyword)
+rawBenefits.push({ nutrient: keyword, benefit_category: BENEFICIAL_MAP[keyword].cat })
+}
+})
+}
+const benefitItems = rawBenefits.slice(0, 6).map(b => ({ name: b.nutrient || b.name, cat: b.benefit_category || '' }))
+const profile = wx.getStorageSync('userProfile') || {}
+const hitAvoids = (result.avoid_warnings || []).map(a => a.name || a.avoid_name || a).filter(Boolean)
+const myWarnings = result.group_warnings || []
+const aiReport = result.ai_report || {}
+const aiTags = []
+if (score >= 80) aiTags.push('整体风险较低')
+if (riskItems.length) aiTags.push('存在风险成分')
+if (myWarnings.length) aiTags.push('人群需注意')
+this.setData({
+result,
+scoreLevel,
+myWarnings,
+userType: profile.userType || '',
+riskItems,
+benefitItems,
+hitAvoids,
+showAvoidAlert: hitAvoids.length > 0,
+aiTags,
+aiSummary: aiReport.summary || '',
+aiDetail: aiReport.detail || '',
+aiSuggestion: aiReport.suggestion || '',
+longTermRisk: aiReport.long_term_risk || '',
+})
+this.animate(score)
+},
+closeAvoidAlert() { this.setData({ showAvoidAlert: false }) },
+goBack() { wx.switchTab({ url: '/pages/index/index' }) },
+goScan() { wx.switchTab({ url: '/pages/scan/scan' }) },
+goCompare() { wx.setStorageSync('resultForCompare', this.data.result); wx.navigateTo({ url: '/pages/compare/compare' }) },
+goCardReport() { wx.navigateTo({ url: '/pages/card-report/card-report' }) },
+goWiki(e) {
+const name = e.currentTarget.dataset.name
+if (!name) return
+wx.navigateTo({ url: `/pages/wiki-detail/wiki-detail?name=${encodeURIComponent(name)}` })
+},
+})
+import json
+import re
+import sys
+import io
+from datetime import datetime, date
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session
+from config import SQLALCHEMY_DATABASE_URI, DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_BASE_URL
+from models import Base, ScanHistory
+app = Flask(__name__)
+app.json.ensure_ascii = False
+CORS(app)
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
+def _resp(code=200, msg="success", data=None):
+return jsonify({"code": code, "msg": msg, "data": data or {}})
+def _parse_ingredients(text):
+# 配料表标记列表（按优先级）
+MARKERS = ["配料表", "配料", "成分表", "成分", "原料表", "原料"]
+# 截断标记——遇到这些就停止（配料表之后的内容）
+STOP_KW = ["生产日期", "保质期", "储存条件", "贮藏", "贮存", "食用方法",
+"产品标准", "生产许可证", "产地", "委托方", "受委托方",
+"制造商", "厂家", "服务热线", "客服", "二维码", "扫码",
+"微信公众号", "微博", "网址", "www.", "http"]
+start = 0
+for marker in MARKERS:
+idx = text.find(marker)
+if idx != -1:
+start = idx + len(marker)
+break
+text = text[start:]
+for stop in STOP_KW:
+idx = text.find(stop)
+if idx != -1:
+text = text[:idx]
+break
+text = re.sub(r"^[：:\s、，,；;\n\r]*", "", text)
+parts = re.split(r"[、，,；;。\n\r]+", text)
+parts = [p.strip() for p in parts if p.strip()]
+FILTER_KW = ['生产', '厂家', '地址', '保质期', '净含量', '营养', '每100',
+'执行', '标准', '温度', '储存', '食用方法', '产地',
+'服务热线', '热线', '商标', '公司', '有限', '科技',
+'生物', '授权', '使用', '许可', '证', '号', 'QS', 'SC',
+'℃', '焦', '瓦', '毫克', '克/', 'g/', 'mg/', '%', '日期',
+'年', '月', '提示', '请', '避免', '直射', '干燥', '阴凉',
+'食用前', '建议', '警告', '注意', '联系', '客服',
+'省', '市', '县', '区', '路', '街', '号楼', '传真', '邮编',
+'网址', 'www', 'http', '扫码', '红包', '抽奖', '赢', '活动',
+'兑换', '积分', '会员', '关注', '分享', '点赞', '投票',
+'生产日期', '储存条件', '联系电话', '电话号码', '邮政编码',
+'执行标准', '生产许可证', '备案号', '注册号', 'GB', 'SC', 'QS',
+'电话', '邮编']
+result = []
+for p in parts:
+# 过长文本通常是地址、说明或宣传语，不作为单个配料处理
+if len(p) > 15:
+continue
+# 命中生产、标准、联系方式等关键词时，判定为非配料字段
+if any(kw in p for kw in FILTER_KW):
+continue
+# 纯数字或纯英文一般不是中文配料名称
+if re.match(r'^\d+$', p) or re.match(r'^[a-zA-Z]+$', p):
+continue
+if re.match(r'^[\d.]+%?$', p) or re.match(r'^[\d.]+(g|mg|ml|kcal|kJ|%)$', p):
+continue
+if re.search(r'[a-zA-Z]', p) and re.search(r'\d', p) and len(p) > 8:
+continue
+if re.search(r'\d{3,}', p):
+continue
+result.append(p)
+if len(result) < 2 and parts:
+# 至少去掉明显非配料的条目
+loose = [p for p in parts if len(p) <= 15
+and not re.match(r'^\d+$', p)
+and not any(kw in p for kw in FILTER_KW)]
+return loose[:20] if loose else parts[:20]
+return result
+def _get_subcategory(main_category, ingredients_list):
+ing_text = ",".join(ingredients_list)
+# 饮料类根据碳酸、咖啡因、茶多酚、果汁等关键词细分
+if main_category == "饮料类":
+if "碳酸" in ing_text or "二氧化碳" in ing_text:
+return "碳酸饮料"
+if "咖啡因" in ing_text or "牛磺酸" in ing_text:
+return "能量饮料"
+if "茶" in ing_text or "茶多酚" in ing_text:
+return "茶饮料"
+if "果汁" in ing_text or "浓缩汁" in ing_text:
+return "果汁饮料"
+return "饮料"
+# 乳制品类根据菌种、乳粉、奶酪等关键词细分
+if main_category == "乳制品类":
+if "嗜热链球菌" in ing_text or "乳酸菌" in ing_text or "保加利亚" in ing_text:
+return "酸奶"
+if "乳粉" in ing_text or "奶粉" in ing_text:
+return "奶粉"
+if "奶酪" in ing_text or "干酪" in ing_text:
+return "奶酪"
+return "纯牛奶"
+if main_category == "零食类":
+if "马铃薯" in ing_text or "薯片" in ing_text:
+return "薯片"
+if "膨化" in ing_text or "玉米粉" in ing_text:
+return "膨化食品"
+if "坚果" in ing_text or "花生" in ing_text or "核桃" in ing_text or "杏仁" in ing_text:
+return "坚果"
+if "海苔" in ing_text or "紫菜" in ing_text:
+return "海苔零食"
+return "零食"
+# 正餐类根据速冻、方便面、罐头等关键词细分
+if main_category == "正餐类":
+if "速冻" in ing_text or "糯米" in ing_text:
+return "速冻食品"
+if "方便面" in ing_text or "油炸面" in ing_text:
+return "方便面"
+if "罐头" in ing_text or "午餐肉" in ing_text:
+return "罐头食品"
+return "正餐"
+if main_category == "肉制品类":
+if "牛肉" in ing_text:
+return "牛肉制品"
+if "猪肉" in ing_text and "亚硝酸" in ing_text:
+return "腌制肉品"
+if "鸡肉" in ing_text:
+return "鸡肉制品"
+return "肉制品"
+return main_category
+def _validate_ingredients(ingredients_list, ocr_text):
+if len(ingredients_list) > 80:
+return False, "配料表异常（条目过多），请重新拍摄配料表区域"
+# 有效配料必须包含食品相关字符
+if ingredients_list:
+_FOOD_CHARS = ["糖", "粉", "油", "酸", "钠", "胶", "脂", "水", "盐",
+"肉", "奶", "乳", "蛋", "豆", "米", "麦",
+"淀", "素", "色", "香", "精", "料", "醋", "酱", "芡"]
+# 统计食品相关字出现比例，用于判断识别结果是否像真实配料
+food_count = sum(1 for ing in ingredients_list if any(c in ing for c in _FOOD_CHARS))
+food_ratio = food_count / len(ingredients_list)
+if food_ratio < 0.3:
+return False, "未找到有效配料表，请对准配料表拍摄"
+# 至少1条有效配料即通过
+if len(ingredients_list) >= 1:
+return True, ""
+# 没有识别到任何配料
+return False, "无法识别有效配料表，请重新拍摄"
+def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
+from ocr import ocr_image
+from classifier import classify
+from score import score_ingredients
+from ai_analyze import generate_report
+# 1. OCR
+ocr_text = ocr_image(image_base64=image_base64)
+if not ocr_text.strip():
+raise ValueError("OCR未能识别到文字")
+# 1.5 强制检查原文是否有配料表标识（在解析之前）
+_INGREDIENT_PATTERNS = [
+r'配\s*料',                          # 配料：/配料表（标点可选）
+r'成\s*分[：:;.]',                   # 成分：/成分:（排除"营养成分表"）
+r'原\s*料[：:;.]',                   # 原料：/原料:（排除营销用语）
+r'配\s*方[：:;.]',                   # 配方：/配方:
+r'[Ii]ngredients?',                  # Ingredients/ingredient
+]
+# 排除——OCR 识别到"营养成分表"但没识别到"配料/原料/配方"
+if re.search(r'营\s*养\s*成\s*分', ocr_text) and not re.search(r'配\s*料|原\s*料|配\s*方', ocr_text):
+raise ValueError("识别到营养成分表，请翻转包装找到配料表重新拍摄")
+# 未命中配料相关标识时，直接中断分析，避免后续评分建立在错误文本上
+if not any(re.search(p, ocr_text) for p in _INGREDIENT_PATTERNS):
+raise ValueError("未找到配料表，请翻转包装找到以'配料：'开头的文字重新拍摄")
+# 2. 解析配料
+ingredients_list = _parse_ingredients(ocr_text)
+# 2.5 配料可信度验证
+valid, reason = _validate_ingredients(ingredients_list, ocr_text)
+if not valid:
+raise ValueError(reason)
+# 3. 分类
+print(f"[Classify] 输入配料: {','.join(ingredients_list[:10])}... 共{len(ingredients_list)}条")
+food_category_main, confidence = classify(",".join(ingredients_list))
+# 分类置信度过低且配料数量不足时，认为图片质量或识别区域不可靠
+if confidence < 0.3 and len(ingredients_list) < 2:
+raise ValueError("未能识别到有效配料表，请对准配料表重新拍摄")
+food_category = _get_subcategory(food_category_main, ingredients_list)
+# 4. 评分
+score_result = score_ingredients(
+ingredients_list,
+group_type=user_type,
+avoid_ids=avoid_ids,
+)
+# 5. AI分析
+ai_report = generate_report(
+food_category=food_category,
+health_score=score_result["health_score"],
+risk_additives=score_result["risk_additives"],
+user_type=user_type,
+warnings=score_result["group_warnings"],
+)
+return {
+"ingredients": ",".join(ingredients_list),
+"food_category": food_category,
+"food_category_main": food_category_main,
+"health_score": score_result["health_score"],
+"risk_count": len(score_result["risk_additives"]),
+"risk_additives": score_result["risk_additives"],
+"group_warnings": score_result["group_warnings"],
+"beneficial_ingredients": score_result["beneficial_ingredients"],
+"beneficial_bonus": score_result.get("beneficial_bonus", 0),
+"avoid_warnings": score_result["avoid_warnings"],
+"stacking_penalty": score_result.get("stacking_penalty", 0),
+"ingredients_count_penalty": score_result.get("ingredients_count_penalty", 0),
+"ai_report": ai_report,
+}
+@app.route("/health", methods=["GET"])
+def health():
+return _resp(data={"status": "ok", "time": datetime.now().isoformat()})
+@app.route("/analyze", methods=["POST"])
+def analyze():
+try:
+body = request.get_json(force=True)
+image = body.get("image")
+user_type = body.get("user_type")
+avoid_ids = body.get("avoid_ids")
+if image:
+print("[Analyze] 收到图片 base64 长度:", len(image))
+else:
+return _resp(code=400, msg="缺少 image 参数")
+# 将前端传入的逗号分隔编号转换为整数列表，供评分模块匹配避开项
+if avoid_ids:
+avoid_ids = [int(i) for i in avoid_ids.split(",") if i.strip()]
+else:
+avoid_ids = None
+# 调用统一分析管线，得到识别、分类、评分和AI分析结果
+result = _run_analysis_pipeline(image, user_type, avoid_ids)
+with Session(engine) as session:
+record = ScanHistory(
+user_id=body.get("user_id"),
+product_name=result["food_category"],
+ingredients=result["ingredients"],
+food_category=result["food_category"],
+health_score=result["health_score"],
+risk_count=result["risk_count"],
+result_json=json.dumps(result, ensure_ascii=False),
+)
+session.add(record)
+print("准备插入记录:", record.user_id, record.product_name, record.health_score)
+session.commit()
+result["scan_id"] = record.id
+return _resp(data=result)
+except ValueError as e:
+return _resp(code=400, msg=str(e))
+except Exception as e:
+import traceback
+print(traceback.format_exc())
+return _resp(code=500, msg=f"分析失败: {str(e)}")
+@app.route("/compare", methods=["POST"])
+def compare():
+try:
+body = request.get_json(force=True)
+img1 = body.get("image1")
+img2 = body.get("image2")
+user_type = body.get("user_type")
+if not img1 or not img2:
+return _resp(code=400, msg="缺少 image1 或 image2 参数")
+r1 = _run_analysis_pipeline(img1, user_type)
+r2 = _run_analysis_pipeline(img2, user_type)
+# 健康评分较高的食品作为推荐结果
+recommend = 1 if r1["health_score"] >= r2["health_score"] else 2
+return _resp(data={
+"food1": r1,
+"food2": r2,
+"recommend": f"推荐食品{'一' if recommend == 1 else '二'}",
+})
+except ValueError as e:
+return _resp(code=400, msg=str(e))
+except Exception as e:
+return _resp(code=500, msg=f"对比失败: {str(e)}")
+@app.route("/history", methods=["GET"])
+def history():
+try:
+user_id = request.args.get("user_id", type=int)
+if not user_id:
+return _resp(code=400, msg="缺少 user_id 参数")
+with Session(engine) as session:
+records = (
+session.query(ScanHistory)
+.filter(ScanHistory.user_id == user_id)
+.order_by(ScanHistory.scan_time.desc())
+.limit(20)
+.all()
+)
+data = []
+for r in records:
+data.append({
+"id": r.id,
+"product_name": r.product_name,
+"food_category": r.food_category,
+"health_score": r.health_score,
+"risk_count": r.risk_count,
+"scan_time": r.scan_time.isoformat() if r.scan_time else None,
+})
+return _resp(data={"list": data, "total": len(data)})
+except Exception as e:
+return _resp(code=500, msg=str(e))
+@app.route("/daily", methods=["GET"])
+def daily():
+try:
+user_id = request.args.get("user_id", type=int)
+if not user_id:
+return _resp(code=400, msg="缺少 user_id 参数")
+today = date.today()
+with Session(engine) as session:
+records = (
+session.query(ScanHistory)
+.filter(
+ScanHistory.user_id == user_id,
+text("DATE(scan_time) = :today"),
+)
+.params(today=today)
+.order_by(ScanHistory.scan_time.desc())
+.all()
+)
+scan_count = len(records)
+if scan_count == 0:
+return _resp(data={
+"scan_count": 0,
+"avg_score": 0,
+"worst_food": None,
+"ai_summary": None,
+"daily_score": 0,
+})
+scores = [r.health_score for r in records if r.health_score is not None]
+avg_score = round(sum(scores) / len(scores), 1) if scores else 0
+# 找出当天健康评分最低的食品，作为重点风险提醒
+worst = min(records, key=lambda r: r.health_score or 100)
+worst_food = {
+"product_name": worst.product_name,
+"health_score": worst.health_score,
+"risk_count": worst.risk_count,
+"scan_time": worst.scan_time.isoformat() if worst.scan_time else None,
+}
+foods_context = "; ".join(
+f"{r.product_name}({r.health_score}分/{r.risk_count}风险)"
+for r in records[:10]
+)
+# 将当天摘要交给AI生成更自然的饮食建议
+from ai_analyze import generate_daily_report
+ai_summary = generate_daily_report(
+scan_count, avg_score,
+worst.product_name or "未知", foods_context,
+)
+return _resp(data={
+"scan_count": scan_count,
+"avg_score": avg_score,
+"worst_food": worst_food,
+"ai_summary": ai_summary,
+"daily_score": round(avg_score, 0),
+})
+except Exception as e:
+return _resp(code=500, msg=str(e))
+@app.route("/api/ai-compare", methods=["POST"])
+def ai_compare():
+try:
+body = request.get_json(force=True)
+food_a = body.get("food_a", {})
+food_b = body.get("food_b", {})
+from ai_analyze import generate_compare_advice
+advice = generate_compare_advice(food_a, food_b)
+return _resp(data={"advice": advice})
+except Exception as e:
+print("[AI Compare Error]", str(e))
+return _resp(code=500, msg=str(e))
+@app.route("/api/ai-suggestion", methods=["POST"])
+def ai_suggestion():
+try:
+body = request.get_json(force=True)
+categories = body.get("categories", [])
+risk_items = body.get("risk_items", [])
+avg_score = body.get("avg_score", 0)
+scan_count = body.get("scan_count", 0)
+period_label = body.get("period_label", "今日")
+from ai_analyze import generate_short_suggestion
+suggestion = generate_short_suggestion(categories, risk_items, avg_score, scan_count, period_label)
+return _resp(data={"suggestion": suggestion})
+except Exception as e:
+print("[AI Suggestion Error]", str(e))
+return _resp(code=500, msg=str(e))
+@app.route("/api/ai-chat", methods=["POST"])
+def ai_chat():
+try:
+body = request.get_json(silent=True)
+if body is None:
+raw = request.get_data(as_text=True) or "{}"
+try:
+body = json.loads(raw)
+except Exception:
+body = {}
+question = (body.get("question") or "").strip()
+if not question:
+return _resp(code=400, msg="请输入问题")
+# 保留历史对话上下文，使AI回答更连贯
+history = body.get("history", [])
+user_type = body.get("user_type") or "普通人群"
+from ai_analyze import generate_chat_answer
+answer = generate_chat_answer(question, history=history, user_type=user_type)
+return _resp(data={"answer": answer})
+except Exception as e:
+print("[AI Chat Error]", str(e))
+return _resp(code=500, msg=str(e))
+@app.route("/api/wiki-query", methods=["POST"])
+def wiki_query():
+data = request.get_json()
+name = data.get('name', '').strip()
+if not name:
+return jsonify({'error': '缺少name参数'}), 400
+import json as json_lib
+from sqlalchemy import text
+from models import WikiCache
+try:
+with Session(engine) as session:
+# 命中有效缓存时直接返回，减少AI接口调用成本并提升响应速度
+row = session.query(WikiCache).filter(
+WikiCache.name == name,
+text("updated_at > DATE_SUB(NOW(), INTERVAL 30 DAY)")
+).first()
+if row:
+cached_data = json_lib.loads(row.data) if isinstance(row.data, str) else row.data
+return jsonify({'success': True, 'data': cached_data, 'source': 'cache'})
+# 提示词要求AI严格输出JSON，便于前端直接渲染百科字段
+prompt = f"""你是专业食品安全研究员，请介绍食品添加剂「{name}」。严格按以下JSON格式返回，不要输出任何其他内容，不要有markdown格式：
+{{
+"name": "标准中文名",
+"alias": ["常见别称1", "常见别称2"],
+"category": "分类（防腐剂/甜味剂/色素/增稠剂/抗氧化剂/乳化剂/香精香料之一）",
+"origin": "来源与合成方式，天然还是人工合成，制备工艺，2-3句",
+"mechanism": "在食品中具体怎么发挥作用，原理是什么，2-3句",
+"controversy": "已知健康争议、相关研究结论、各国监管态度差异，2-3句，若无争议则如实说明",
+"usage": "主要用途",
+"common_in": "常见于哪些具体食品，列举4-6种",
+"adi": "ADI值，格式如'0-5 mg/kg体重/天'，若无限制则写'无需规定'",
+"intake_status": "普通人日常实际摄入量与ADI的关系，2句",
+"risk_level": 风险等级数字1低2中3高,
+"risk_desc": "风险等级一句话说明",
+"warning": "具体注意事项",
+"special_groups": ["需注意的特殊人群"]
+}}"""
+from openai import OpenAI
+client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+response = client.chat.completions.create(
+model=DEEPSEEK_MODEL,
+messages=[{"role": "user", "content": prompt}],
+temperature=0.3,
+)
+raw = response.choices[0].message.content.strip()
+# 兼容AI偶尔返回代码块包裹JSON的情况
+if raw.startswith('```'):
+raw = raw.split('\n', 1)[1]
+if raw.endswith('```'):
+raw = raw.rsplit('```', 1)[0]
+# 将AI返回文本解析为结构化对象，解析失败会进入JSON异常处理
+result = json_lib.loads(raw)
+with Session(engine) as session:
+existing = session.query(WikiCache).filter(WikiCache.name == name).first()
+if existing:
+existing.data = json_lib.dumps(result, ensure_ascii=False)
+else:
+session.add(WikiCache(
+name=name,
+data=json_lib.dumps(result, ensure_ascii=False),
+))
+session.commit()
+return jsonify({'success': True, 'data': result, 'source': 'deepseek'})
+except json_lib.JSONDecodeError:
+return jsonify({'error': 'AI返回格式异常'}), 500
+except Exception as e:
+return jsonify({'error': str(e)}), 500
+if __name__ == "__main__":
+app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
+import requests
+import base64
+import time
+from config import BAIDU_OCR
+OCR_URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic"
+TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token"
+TOKEN_CACHE = {"access_token": None, "expires_at": 0}
+def _get_access_token():
+now = time.time()
+if TOKEN_CACHE["access_token"] and now < TOKEN_CACHE["expires_at"] - 60:
+# 缓存令牌未过期时直接复用，提前60秒刷新避免临界过期
+return TOKEN_CACHE["access_token"]
+resp = requests.post(TOKEN_URL, params={
+"grant_type": "client_credentials",
+"client_id": BAIDU_OCR["api_key"],
+"client_secret": BAIDU_OCR["secret_key"],
+})
+data = resp.json()
+TOKEN_CACHE["access_token"] = data["access_token"]
+TOKEN_CACHE["expires_at"] = now + data["expires_in"]
+return data["access_token"]
+def ocr_image(image_path=None, image_base64=None, retries=2):
+if image_base64 is None:
+with open(image_path, "rb") as f:
+image_base64 = base64.b64encode(f.read()).decode("utf-8")
+print("[OCR] base64前50字:", image_base64[:50], "总长度:", len(image_base64))
+for attempt in range(retries + 1):
+try:
+token = _get_access_token()
+resp = requests.post(f"{OCR_URL}?access_token={token}", data={
+"image": image_base64,
+}, timeout=15)
+result = resp.json()
+if "error_code" in result:
+# 百度接口返回错误码时抛出异常，交由重试逻辑或上层接口处理
+raise Exception(f"OCR API错误: {result.get('error_msg', result)}")
+print("[OCR] 百度API返回:", result)
+words = [item["words"] for item in result.get("words_result", [])]
+return "\n".join(words)
+except Exception as e:
+if attempt < retries:
+# 短暂等待后重试，缓解网络抖动或临时接口异常
+time.sleep(1)
+continue
+raise e
+import os
+import re
+import joblib
+import pandas as pd
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "data", "models", "food_pipeline.pkl")
+CONFIDENCE_THRESHOLD = 0.55
+_pipeline = None
+# ---- 关键词分类规则（仅作为 ML 置信度低时的兜底） ----
+_KEYWORD_RULES = [
+("乳制品类", ["生牛乳", "全脂乳粉", "脱脂乳粉", "乳清蛋白", "乳清粉",
+"嗜热链球菌", "保加利亚乳杆菌", "乳酸菌", "发酵乳",
+"奶酪", "干酪"]),
+("饮料类", ["二氧化碳", "咖啡因", "浓缩果汁", "红茶", "绿茶", "乌龙茶",
+"维生素饮料", "运动饮料", "电解质", "牛磺酸", "植物饮料",
+"橙汁", "苹果汁", "葡萄汁", "山楂汁", "芒果汁", "椰果",
+"柠檬汁"]),
+("肉制品类", ["午餐肉", "火腿", "腊肉", "培根", "香肠",
+"肉松", "肉干", "肉脯", "亚硝酸钠", "卡拉胶"]),
+("零食类", ["薯片", "膨化", "马铃薯", "坚果", "核桃", "杏仁",
+"海苔", "紫菜", "果冻", "巧克力", "可可脂",
+"糖果", "口香糖", "棉花糖",
+"饼干", "曲奇", "薄脆", "威化"]),
+("正餐类", ["面条", "挂面", "方便面", "水饺", "饺子", "馄饨",
+"汤圆", "粽子", "米饭", "米粉", "米线", "河粉", "粥",
+"速冻", "罐头", "豆豉", "腐乳"]),
+("调味品类", ["酿造酱油", "生抽", "老抽", "食醋", "蚝油",
+"味精", "鸡精", "料酒", "黄豆酱", "豆瓣酱",
+"番茄酱", "沙拉酱", "火锅底料", "调味料"]),
+]
+def _classify_by_keywords(ingredients_text):
+for category, keywords in _KEYWORD_RULES:
+for kw in keywords:
+# 任一关键词命中即可判定为该食品大类
+if kw in ingredients_text:
+return category, 0.85
+return None, 0
+def _load_pipeline():
+global _pipeline
+if _pipeline is None:
+_pipeline = joblib.load(MODEL_PATH)
+return _pipeline
+def classify(ingredients_text):
+# 1. ML 模型（主分类器）
+try:
+pipeline = _load_pipeline()
+X = pd.DataFrame([{"ingredients": ingredients_text}])
+label = pipeline.predict(X)[0]
+proba = pipeline.predict_proba(X).max()
+proba = float(round(proba, 4))
+if proba >= CONFIDENCE_THRESHOLD:
+return label, proba
+except Exception:
+# 模型加载或预测异常时不中断主流程，转入规则兜底
+pass
+# 2. 关键词规则兜底（ML 置信度不足时使用）
+label, proba = _classify_by_keywords(ingredients_text)
+if label:
+return label, proba
+# 3. 宽松正则兜底
+fallback = _fallback_classify(ingredients_text)
+if fallback:
+return fallback, 0.5
+return "零食类", 0.0
+def _fallback_classify(ingredients_text):
+# 乳、奶、酪等关键词通常指向乳制品，但含糖、香精、胶时更接近零食属性
+if re.search(r'乳|奶|酪', ingredients_text):
+if re.search(r'糖|甜|香精|胶', ingredients_text):
+return "零食类"
+return "乳制品类"
+if re.search(r'二氧化碳|咖啡因|果汁|茶|饮料', ingredients_text):
+return "饮料类"
+if re.search(r'火腿|香肠|培根|肉松|肉干|肉脯|亚硝酸钠', ingredients_text):
+return "肉制品类"
+if re.search(r'小麦|面粉|面条|米|饺子|馄饨', ingredients_text):
+return "正餐类"
+if re.search(r'酱油|醋|料酒|酱|味精|鸡精|花椒|辣椒', ingredients_text):
+return "调味品类"
+if re.search(r'薯|坚果|巧克力|糖果|饼干|膨化|海苔|紫菜|果冻', ingredients_text):
+return "零食类"
+return None
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from config import SQLALCHEMY_DATABASE_URI
+from models import Additive, GroupWarning, AvoidOption, BeneficialIngredient
+RISK_PENALTY = {"高": 20, "中": 10, "低": 5}
+AVOID_PENALTY = 5
+STACK_PENALTY = 8
+STACK_THRESHOLD = 2
+BENEFIT_BONUS = {
+"蛋白质类": 5,
+"膳食纤维类": 5,
+"维生素类": 4,
+"矿物质类": 4,
+"脂肪酸类": 4,
+"氨基酸类": 3,
+"益生菌类": 3,
+"抗氧化类": 3,
+"植物化学物类": 2,
+"代糖类": 2,
+"功能成分": 2,
+}
+BENEFIT_MAX_BONUS = 25
+BENEFICIAL_ADDITIVE_NAMES = {
+"维生素C", "维生素E", "β-胡萝卜素",
+"茶多酚", "姜黄素", "植酸",
+"D-异抗坏血酸钠", "抗坏血酸钠",
+"牛磺酸", "卵磷脂",
+"赤藓糖醇", "木糖醇", "麦芽糖醇", "山梨糖醇",
+"甜菊糖苷", "罗汉果甜苷",
+"碳酸钙", "硫酸锌", "硫酸亚铁",
+}
+# 人群额外惩罚系数
+# 匹配方式: "type" 按添加剂类型字段, "name" 按名称精确匹配, "name_contains" 按名称包含
+GROUP_PENALTY_RULES = {
+"儿童": [
+("type", "着色剂", 1.5),
+("type", "甜味剂", 1.5),
+("name", "咖啡因", 1.5),
+],
+"孕妇": [
+("type", "着色剂", 2.0),
+("name", "咖啡因", 2.0),
+("name_contains", "亚硝酸", 2.0),
+],
+"糖尿病": [
+("type", "甜味剂", 1.5),
+],
+"心血管": [
+("name_contains", "钠", 1.5),
+],
+"老人": [
+("name_contains", "钠", 1.3),
+("name_contains", "明矾", 1.3),
+],
+"减肥": [
+("type", "甜味剂", 1.3),
+],
+"健身": [
+("type", "甜味剂", 1.2),
+],
+"普通人群": [],
+"其他": [],
+}
+def _get_engine():
+return create_engine(SQLALCHEMY_DATABASE_URI)
+def score_ingredients(ingredients_list, group_type=None, user_options=None, avoid_ids=None):
+engine = _get_engine()
+with Session(engine) as session:
+all_additives = session.query(Additive).all()
+matched_additives = []
+for add in all_additives:
+# 添加剂名称直接出现在配料列表中时，判定为命中
+if add.name in ingredients_list:
+matched_additives.append(add)
+elif add.alias:
+aliases = [a.strip() for a in add.alias.split(",")]
+if any(a in "".join(ingredients_list) for a in aliases):
+matched_additives.append(add)
+matched_warnings = _match_group_warnings(session, matched_additives, ingredients_list, group_type)
+avoid_warnings = _match_avoid_options(session, ingredients_list, user_options, avoid_ids)
+beneficial_ingredients = _match_beneficial_ingredients(session, ingredients_list, group_type)
+# ── 4. 计算评分 ──
+score, details = _calculate_score(matched_additives, matched_warnings, avoid_warnings, len(ingredients_list), group_type, beneficial_ingredients)
+return {
+"health_score": score,
+"risk_additives": details["risk_additives"],
+"group_warnings": details["group_warnings"],
+"beneficial_ingredients": beneficial_ingredients,
+"avoid_warnings": avoid_warnings,
+"stacking_penalty": details["stacking_penalty"],
+"ingredients_count_penalty": details["ingredients_count_penalty"],
+"group_extra_penalty": details["group_extra_penalty"],
+"group_extra_details": details["group_extra_details"],
+}
+def _match_group_warnings(session, matched_additives, ingredients_list, group_type=None):
+query = session.query(GroupWarning)
+if group_type:
+query = query.filter(GroupWarning.group_type == group_type)
+warnings = query.all()
+triggered = []
+combined_text = "".join(ingredients_list)
+for w in warnings:
+if w.nutrient:
+matched_names = [a.name for a in matched_additives]
+# 预警关键词可匹配原始配料，也可匹配已经识别出的添加剂名称
+if w.nutrient in combined_text or any(w.nutrient in name for name in matched_names):
+triggered.append(w)
+return triggered
+def _match_avoid_options(session, ingredients_list, user_options, avoid_ids=None):
+from models import AvoidOption
+avoid_warnings = []
+query = session.query(AvoidOption)
+if avoid_ids is not None:
+query = query.filter(AvoidOption.id.in_(avoid_ids))
+options = query.all()
+for opt in options:
+# 既支持名称精确匹配，也支持关键词模糊匹配
+matched = any(ing == opt.name or (opt.keywords and any(
+kw.strip() in "".join(ingredients_list) for kw in opt.keywords.split(",")
+)) for ing in ingredients_list)
+if matched:
+avoid_warnings.append({
+"name": opt.name,
+"warning_msg": opt.warning_msg,
+"suggestion": opt.suggestion,
+})
+if user_options:
+for opt_name in user_options:
+if opt_name in ingredients_list:
+avoid_warnings.append({
+"name": opt_name,
+"warning_msg": f"已避免成分: {opt_name}",
+"suggestion": "该成分已从您的配料中检出",
+})
+return avoid_warnings
+def _match_beneficial_ingredients(session, ingredients_list, group_type=None):
+query = session.query(BeneficialIngredient)
+if group_type:
+query = query.filter(BeneficialIngredient.group_type == group_type)
+candidates = query.all()
+if not candidates:
+return []
+combined_text = "".join(ingredients_list)
+matched = []
+for c in candidates:
+# 有益成分关键词出现在配料文本中即视为命中
+if c.nutrient and c.nutrient in combined_text:
+if not any(m["nutrient"] == c.nutrient for m in matched):
+matched.append({
+"nutrient": c.nutrient,
+"benefit_category": c.benefit_category,
+"benefit": c.benefit,
+"suggestion": c.suggestion,
+})
+return matched
+def _calculate_score(matched_additives, matched_warnings, avoid_warnings, ingredients_count=0, group_type=None, beneficial_ingredients=None):
+score = 100  # 基准分
+# 排除已知有益添加剂——它们不应被当作风险成分处理
+beneficial_names = set(BENEFICIAL_ADDITIVE_NAMES)
+if beneficial_ingredients:
+beneficial_names |= {b["nutrient"] for b in beneficial_ingredients}
+filtered_count = len(matched_additives)
+matched_additives = [a for a in matched_additives if a.name not in beneficial_names]
+filtered_count -= len(matched_additives)
+if filtered_count:
+print(f"[Score] 排除有益添加剂 {filtered_count}个", flush=True)
+high = [a for a in matched_additives if a.risk_level == "高"]
+mid = [a for a in matched_additives if a.risk_level == "中"]
+low = [a for a in matched_additives if a.risk_level == "低"]
+risk_additives = []
+for a in high:
+risk_additives.append({"name": a.name, "risk_level": "高", "reason": a.reason, "deduct_score": 20})
+for a in mid:
+risk_additives.append({"name": a.name, "risk_level": "中", "reason": a.reason, "deduct_score": 10})
+for a in low:
+risk_additives.append({"name": a.name, "risk_level": "低", "reason": a.reason, "deduct_score": 5})
+score -= len(high) * RISK_PENALTY["高"]
+score -= len(mid) * RISK_PENALTY["中"]
+score -= len(low) * RISK_PENALTY["低"]
+score -= len(avoid_warnings) * AVOID_PENALTY
+# 配料数量惩罚（累加）
+ingredients_count_penalty = 0
+if ingredients_count > 15:
+# 配料较多时提示加工复杂度偏高
+score -= 5
+ingredients_count_penalty = 5
+if ingredients_count > 25:
+# 配料过多时继续累加扣分
+score -= 5
+ingredients_count_penalty += 5
+# 叠加惩罚：同类添加剂（type相同）超过指定数量触发
+from collections import Counter
+type_counter = Counter(a.type for a in matched_additives if a.type)
+stacking_penalty = 0
+for t, cnt in type_counter.items():
+if cnt > STACK_THRESHOLD:
+score -= STACK_PENALTY
+stacking_penalty += STACK_PENALTY
+# ── 5. 人群额外惩罚 ──
+group_extra_penalty = 0
+group_extra_details = []
+if group_type and group_type in GROUP_PENALTY_RULES:
+for additive in matched_additives:
+base = RISK_PENALTY.get(additive.risk_level, 0)
+if base == 0:
+continue
+for match_type, match_val, multiplier in GROUP_PENALTY_RULES[group_type]:
+matched = False
+# 按类型、名称精确匹配或名称包含三种方式触发人群额外惩罚
+if match_type == "type" and additive.type == match_val:
+matched = True
+elif match_type == "name" and additive.name == match_val:
+matched = True
+elif match_type == "name_contains" and match_val in additive.name:
+matched = True
+if matched:
+extra = int(base * (multiplier - 1))
+if extra > 0:
+group_extra_penalty += extra
+group_extra_details.append({
+"name": additive.name,
+"risk_level": additive.risk_level,
+"base_deduct": base,
+"multiplier": multiplier,
+"extra_deduct": extra,
+})
+break  # 每条添加剂只触发一条规则
+extra_map = {d["name"]: {"multiplier": d["multiplier"], "extra_deduct": d["extra_deduct"]}
+for d in group_extra_details}
+for ra in risk_additives:
+if ra["name"] in extra_map:
+ra["group_multiplier"] = extra_map[ra["name"]]["multiplier"]
+ra["group_extra_deduct"] = extra_map[ra["name"]]["extra_deduct"]
+score -= group_extra_penalty
+score = max(0, min(100, score))
+print(f"[Score] 高风险:{len(high)}个x20 中风险:{len(mid)}个x10 低风险:{len(low)}个x5", flush=True)
+print(f"[Score] 排除有益添加剂:{len(beneficial_names & orig_count)}个" if hasattr(score, 'orig_count') else "", flush=True)
+print(f"[Score] 避免成分:{len(avoid_warnings)}个x5 配料数:{ingredients_count} 叠加惩罚:{stacking_penalty}", flush=True)
+print(f"[Score] 人群额外惩罚:{group_extra_penalty}", flush=True)
+print(f"[Score] 最终分数:{score}", flush=True)
+group_warnings = [{"type": w.warning_type, "msg": w.warning_msg, "suggestion": w.suggestion}
+for w in matched_warnings]
+return score, {
+"risk_additives": risk_additives,
+"group_warnings": group_warnings,
+"stacking_penalty": stacking_penalty,
+"ingredients_count_penalty": ingredients_count_penalty,
+"group_extra_penalty": group_extra_penalty,
+"group_extra_details": group_extra_details,
+}
+import json
+from openai import OpenAI
+from config import DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_BASE_URL
+client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+def generate_report(food_category, health_score, risk_additives, user_type, warnings):
+risk_text = json.dumps(risk_additives, ensure_ascii=False)
+warnings_text = json.dumps(warnings, ensure_ascii=False)
+prompt = f"""你是专业营养师和食品安全专家，请根据以下信息生成分析报告：
+食品类别：{food_category}
+健康评分：{health_score}
+风险添加剂：{risk_text}
+人群类型：{user_type or "无"}
+预警信息：{warnings_text}
+请用JSON格式返回：
+{{
+"summary": "一句话总结",
+"detail": "详细分析",
+"suggestion": "建议",
+"long_term_risk": "长期食用风险"
+}}
+只返回JSON不要其他文字"""
+resp = client.chat.completions.create(
+model=DEEPSEEK_MODEL,
+messages=[{"role": "user", "content": prompt}],
+temperature=0.7,
+)
+content = resp.choices[0].message.content.strip()
+if content.startswith("```"):
+lines = content.split("\n", 1)
+if len(lines) > 1:
+content = lines[1]
+if content.endswith("```"):
+content = content[:-3].rstrip()
+return json.loads(content)
+def generate_daily_report(scan_count, avg_score, worst_food, foods_context):
+prompt = f"""你是专业营养师，请根据以下今日扫描数据生成饮食总结：
+今日扫描次数：{scan_count}
+今日平均健康评分：{avg_score}
+今日最差食品：{worst_food}
+扫描详情：{foods_context}
+请用JSON格式返回：
+{{
+"summary": "今日饮食总结",
+"suggestion": "明日饮食建议",
+"risk_alert": "需要注意的问题"
+}}
+只返回JSON不要其他文字"""
+resp = client.chat.completions.create(
+model=DEEPSEEK_MODEL,
+messages=[{"role": "user", "content": prompt}],
+temperature=0.7,
+)
+content = resp.choices[0].message.content.strip()
+if content.startswith("```"):
+lines = content.split("\n", 1)
+if len(lines) > 1:
+content = lines[1]
+if content.endswith("```"):
+content = content[:-3].rstrip()
+return json.loads(content)
+def generate_compare_advice(food_a, food_b):
+def _fmt(f):
+name = f.get("food_category", "未知")
+score = f.get("health_score", 0)
+risks = f.get("risk_additives", [])
+warnings = f.get("group_warnings", [])
+risk_names = "、".join([r.get("name", "") for r in risks[:5]]) or "无"
+warn_names = "、".join([w.get("msg", w.get("name", "")) for w in warnings[:3]]) or "无"
+return f"{name}（{score}分），风险添加剂：{risk_names}，预警：{warn_names}"
+prompt = f"""你是专业营养师，请对比以下两款食品，给出150字以内的健康建议，指出哪款更健康及具体原因：
+食品A：{_fmt(food_a)}
+食品B：{_fmt(food_b)}
+只返回建议文字，不要JSON，150字以内。"""
+resp = client.chat.completions.create(
+model=DEEPSEEK_MODEL,
+messages=[{"role": "user", "content": prompt}],
+temperature=0.7,
+max_tokens=300,
+)
+return resp.choices[0].message.content.strip()[:150]
+def generate_short_suggestion(categories, risk_items, avg_score, scan_count, period_label="今日"):
+cat_text = "、".join(categories[:5]) if categories else "无记录"
+risk_text = "、".join([r["name"] for r in risk_items[:3]]) if risk_items else "无"
+prompt = f"""{period_label}饮食扫描：{scan_count}次，平均分{avg_score}分，品类包括{cat_text}。
+风险成分：{risk_text}。
+请给出饮食建议（100-150字左右），面向注重健康的消费者，语气亲切，建议应包含：亮点总结、待改进方面、明日饮食方向。只返回建议文字，不要JSON。"""
+resp = client.chat.completions.create(
+model=DEEPSEEK_MODEL,
+messages=[{"role": "user", "content": prompt}],
+temperature=0.7,
+max_tokens=300,
+)
+return resp.choices[0].message.content.strip()
+def generate_wiki_entry(name):
+prompt = f"""你是专业食品安全研究员，请介绍食品添加剂「{name}」。严格按以下JSON格式返回，不要输出任何其他内容，不要有markdown格式：
+{{
+"name": "标准中文名",
+"alias": ["常见别称1", "常见别称2"],
+"category": "分类（防腐剂/甜味剂/色素/增稠剂/抗氧化剂/乳化剂/香精香料之一）",
+"origin": "来源与合成方式，说明天然还是人工合成，制备工艺，2-3句",
+"mechanism": "作用机制，说明在食品中具体怎么发挥作用，原理是什么，2-3句",
+"controversy": "安全争议，已知健康争议、相关研究结论、各国监管态度差异，2-3句，若无争议则如实说明",
+"usage": "主要用途",
+"common_in": "常见于哪些具体食品，列举4-6种",
+"adi": "ADI值，格式如'0-5 mg/kg体重/天'，若无限制则写'无需规定'",
+"intake_status": "普通人日常实际摄入量与ADI的关系，2句",
+"risk_level": 风险等级数字，1为低风险，2为中风险，3为高风险,
+"risk_desc": "风险等级一句话说明",
+"warning": "具体注意事项",
+"special_groups": ["需注意的特殊人群，如儿童、孕妇、过敏者等"]
+}}"""
+resp = client.chat.completions.create(
+model=DEEPSEEK_MODEL,
+messages=[{"role": "user", "content": prompt}],
+temperature=0.7,
+max_tokens=800,
+)
+content = resp.choices[0].message.content.strip()
+if content.startswith("```"):
+lines = content.split("\n", 1)
+if len(lines) > 1:
+content = lines[1]
+if content.endswith("```"):
+content = content[:-3].rstrip()
+return json.loads(content)
+def generate_chat_answer(question, history=None, user_type="普通人群"):
+history = history or []
+safe_history = []
+for item in history[-8:]:
+role = item.get("role")
+content = (item.get("content") or "").strip()
+if role in ("user", "assistant") and content:
+safe_history.append({"role": role, "content": content[:600]})
+system_prompt = (
+"你是食安雷达里的 AI 营养师，只回答食品安全、配料表、食品添加剂、营养选择、"
+"特殊人群饮食风险相关问题。你的表达要像真人营养师在微信里解释问题：通俗、自然、少术语。"
+"回答结构固定为：先用1句话给结论；再用2到4个短段说明原因和注意点；最后给1到3条具体做法。"
+"不要使用Markdown格式，不要使用星号、井号、表格、代码块，不要写“以下是具体分析”这类报告腔。"
+"不要堆很多标准名和缩写；如果必须提到国标或ADI，用一句人话解释即可。"
+"每段尽量不超过60个字，总字数控制在260字以内。"
+"不要替代医生诊断；遇到疾病治疗、用药、急性过敏反应等问题，要建议咨询医生。"
+"如果问题明显无关，请礼貌说明只能回答食品和营养安全相关内容。"
+)
+messages = [{"role": "system", "content": system_prompt}]
+messages.extend(safe_history)
+messages.append({
+"role": "user",
+"content": f"用户人群类型：{user_type or '普通人群'}\n问题：{question}",
+})
+resp = client.chat.completions.create(
+model=DEEPSEEK_MODEL,
+messages=messages,
+temperature=0.5,
+max_tokens=600,
+)
+return resp.choices[0].message.content.strip()
+const api = require('../../utils/request')
+const family = require('../../utils/family')
+const app = getApp()
+Page({
+data: {
+foodA: null,
+foodB: null,
+ready: false,
+analyzing: false,
+winner: null,
+winnerName: '',
+cmpRows: [],
+riskListA: [],
+riskListB: [],
+aiAdvice: '',
+aiLoading: false,
+},
+onLoad(options) {
+// 从历史PK记录进入时，直接加载已保存的完整对比数据
+if (options && options.mode === 'history') {
+this.loadFromHistory()
+return
+}
+const preset = wx.getStorageSync('resultForCompare')
+if (preset && preset.food_category) {
+wx.removeStorageSync('resultForCompare')
+this.setData({ foodA: preset })
+}
+},
+loadFromHistory() {
+const pkResult = wx.getStorageSync('pkResult')
+if (!pkResult) {
+wx.showToast({ title: 'PK 数据已过期', icon: 'none' })
+wx.navigateBack()
+return
+}
+const pkData = wx.getStorageSync('pkFullData_' + pkResult.createTime)
+if (!pkData || !pkData.foodA || !pkData.foodB) {
+wx.showToast({ title: 'PK 数据已过期', icon: 'none' })
+wx.navigateBack()
+return
+}
+// 标记当前页面为历史查看模式，避免重复保存PK记录
+this._isHistoryView = true
+this.setData({ foodA: pkData.foodA, foodB: pkData.foodB })
+this.computeComparison()
+this.loadAiAdvice()
+this.setData({ ready: true })
+},
+selectFood(e) {
+const side = e.currentTarget.dataset.side
+// 分析中不允许重新选图，避免并发状态错乱
+if (!side || this.data.analyzing) return
+wx.chooseMedia({
+count: 1,
+mediaType: ['image'],
+sourceType: ['album'],
+success: (res) => {
+const path = res.tempFiles[0].tempFilePath
+const key = side === 'A' ? 'foodA' : 'foodB'
+this.setData({ [key]: { imagePath: path, status: 'pending' }, ready: false })
+}
+})
+},
+startCompare() {
+const { foodA, foodB } = this.data
+if (!foodA || !foodB || this.data.analyzing) return
+const tasks = []
+// 已分析过的食品直接复用结果，待分析图片才调用后端接口
+tasks.push(foodA.status === 'pending' ? this.analyzeImage(foodA.imagePath) : Promise.resolve(foodA))
+tasks.push(foodB.status === 'pending' ? this.analyzeImage(foodB.imagePath) : Promise.resolve(foodB))
+this.setData({ analyzing: true })
+wx.showLoading({ title: '分析中', mask: true })
+Promise.all(tasks).then(([resultA, resultB]) => {
+wx.hideLoading()
+this.setData({ foodA: resultA, foodB: resultB, analyzing: false })
+this.computeComparison()
+this.loadAiAdvice()
+this.setData({ ready: true })
+}).catch((err) => {
+wx.hideLoading()
+wx.showToast({ title: err.msg || '分析失败', icon: 'none' })
+this.setData({ analyzing: false })
+})
+},
+analyzeImage(filePath) {
+return new Promise((resolve, reject) => {
+wx.getFileSystemManager().readFile({
+filePath,
+encoding: 'base64',
+success: (fileRes) => {
+// 提交后端执行OCR、分类、评分和AI分析
+api.analyze(fileRes.data).then((data) => {
+data.imagePath = filePath
+resolve(data)
+}).catch(reject)
+},
+fail: () => reject({ msg: '读取图片失败' })
+})
+})
+},
+computeComparison() {
+const { foodA, foodB } = this.data
+if (!foodA || !foodB) return
+const scoreA = foodA.health_score || 0
+const scoreB = foodB.health_score || 0
+const riskA = foodA.risk_additives || []
+const riskB = foodB.risk_additives || []
+const benefitA = foodA.beneficial_ingredients || []
+const benefitB = foodB.beneficial_ingredients || []
+const warnA = (foodA.group_warnings || []).length + (foodA.avoid_warnings || []).length
+const warnB = (foodB.group_warnings || []).length + (foodB.avoid_warnings || []).length
+// 评分不同优先按评分判断；评分相同时选择风险项更少的一方
+const winner = scoreA === scoreB ? (riskA.length <= riskB.length ? 'A' : 'B') : (scoreA > scoreB ? 'A' : 'B')
+const winnerFood = winner === 'A' ? foodA : foodB
+const winnerName = winnerFood.food_category || (winner === 'A' ? '食品 A' : '食品 B')
+const cmpRows = [
+{ label: '健康评分', valA: scoreA + '分', valB: scoreB + '分', aWins: scoreA > scoreB, bWins: scoreB > scoreA },
+{ label: '风险成分', valA: riskA.length + '项', valB: riskB.length + '项', aWins: riskA.length < riskB.length, bWins: riskB.length < riskA.length },
+{ label: '有益成分', valA: benefitA.length + '项', valB: benefitB.length + '项', aWins: benefitA.length > benefitB.length, bWins: benefitB.length > benefitA.length },
+{ label: '人群提醒', valA: warnA + '条', valB: warnB + '条', aWins: warnA < warnB, bWins: warnB < warnA },
+]
+const riskListA = riskA.map(r => ({ name: r.name || '风险成分', level: this.riskLevelClass(r) }))
+const riskListB = riskB.map(r => ({ name: r.name || '风险成分', level: this.riskLevelClass(r) }))
+this.setData({ winner, winnerName, cmpRows, riskListA, riskListB })
+// 非历史模式下保存本次PK记录，供历史页回看
+if (!this._isHistoryView) this.savePkRecord(winner, scoreA, scoreB)
+},
+riskLevelClass(item) {
+const level = String(item.risk_level || '')
+const deduct = Number(item.deduct_score || item.deduct || 0)
+if (level.indexOf('高') !== -1 || deduct >= 20) return 'high'
+if (level.indexOf('中') !== -1 || deduct >= 10) return 'mid'
+return 'low'
+},
+savePkRecord(winner, scoreA, scoreB) {
+const { foodA, foodB } = this.data
+const createTime = new Date().toISOString()
+const pkRecord = {
+type: 'pk',
+foodName: (foodA.food_category || '食品A') + ' VS ' + (foodB.food_category || '食品B'),
+scoreA,
+scoreB,
+categoryA: foodA.food_category || '食品A',
+categoryB: foodB.food_category || '食品B',
+winner,
+imagePathA: foodA.imagePath || '',
+imagePathB: foodB.imagePath || '',
+tags: [],
+score: Math.max(scoreA, scoreB),
+riskCount: 0,
+winnerScore: Math.max(scoreA, scoreB),
+winnerRiskCount: winner === 'A' ? (foodA.risk_additives || []).length : (foodB.risk_additives || []).length,
+winnerImage: winner === 'A' ? (foodA.imagePath || '') : (foodB.imagePath || ''),
+createTime,
+}
+family.addScanRecord(pkRecord)
+// 完整分析结果单独缓存，避免历史列表记录过大
+wx.setStorageSync('pkFullData_' + createTime, { foodA, foodB })
+},
+loadAiAdvice() {
+const { foodA, foodB } = this.data
+if (!foodA || !foodB) return
+this.setData({ aiAdvice: '', aiLoading: true })
+wx.request({
+url: app.globalData.baseUrl + '/api/ai-compare',
+method: 'POST',
+data: {
+food_a: {
+food_category: foodA.food_category,
+health_score: foodA.health_score,
+risk_additives: foodA.risk_additives || [],
+group_warnings: foodA.group_warnings || [],
+},
+food_b: {
+food_category: foodB.food_category,
+health_score: foodB.health_score,
+risk_additives: foodB.risk_additives || [],
+group_warnings: foodB.group_warnings || [],
+},
+},
+timeout: 30000,
+header: { 'Content-Type': 'application/json' },
+success: (res) => {
+// AI失败时使用兜底文案，保证页面始终可展示建议
+const advice = res.data && res.data.code === 200 ? (res.data.data.advice || '') : ''
+this.setData({ aiAdvice: advice || '结合个人忌口和食用频率选择更适合的一款。', aiLoading: false })
+},
+fail: () => this.setData({ aiAdvice: '结合个人忌口和食用频率选择更适合的一款。', aiLoading: false })
+})
+},
+resetAll() {
+this.setData({
+foodA: null,
+foodB: null,
+ready: false,
+analyzing: false,
+winner: null,
+winnerName: '',
+cmpRows: [],
+riskListA: [],
+riskListB: [],
+aiAdvice: '',
+})
+}
+})
+const app = getApp()
+const { BENEFICIAL_KEYWORDS } = require('../../utils/constants')
+const { genParticles } = require('../../utils/helpers')
+const family = require('../../utils/family')
+Page({
+data: {
+records: [],
+loading: false,
+loaded: false,
+groupedRecords: [],
+totalCount: 0,
+highRiskCount: 0,
+avgScore: 0,
+renameInfo: { g: -1, index: -1, value: '' },
+pageParticles: [],
+},
+_genParticles() {
+return genParticles(14)
+},
+onShow() {
+this.setData({
+pageParticles: this._genParticles(),
+records: [],
+groupedRecords: [],
+})
+if (app.globalData.hasProfile) {
+setTimeout(() => this.loadHistory(), 50)
+}
+},
+loadHistory() {
+this.setData({ loading: true })
+const scanHistory = family.getFilteredHistory()
+const totalCount = scanHistory.length
+const highRiskCount = scanHistory.filter(r => (r.score ?? 100) < 60).length
+// 平均分用于历史页顶部概览，没有记录时显示0
+const avgScore = totalCount > 0
+? Math.round(scanHistory.reduce((s, r) => s + (r.score ?? 0), 0) / totalCount)
+: 0
+// 按日期分组
+const today = new Date()
+const fmtDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+const todayStr = fmtDate(today)
+const yesterday = new Date(today)
+yesterday.setDate(yesterday.getDate() - 1)
+const yesterdayStr = fmtDate(yesterday)
+const groupMap = new Map()
+const groupOrder = []
+scanHistory.forEach((rec, idx) => {
+const d = new Date(rec.createTime)
+const ds = fmtDate(d)
+let label
+if (ds === todayStr) label = '今天'
+else if (ds === yesterdayStr) label = '昨天'
+else label = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+let time = ''
+try {
+time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+} catch (e) { time = '' }
+// PK记录特殊处理
+if (rec.type === 'pk') {
+// PK记录没有单一食品详情，构造成对比卡片并跳转到对比页查看
+const item = {
+id: rec.createTime + '_' + idx,
+type: 'pk',
+createTime: rec.createTime,
+foodName: rec.foodName,
+categoryA: rec.categoryA,
+categoryB: rec.categoryB,
+scoreA: rec.scoreA,
+scoreB: rec.scoreB,
+winner: rec.winner,
+score: rec.score,
+time,
+imagePath: '',
+riskCount: 0,
+winnerScore: rec.winnerScore,
+winnerRiskCount: rec.winnerRiskCount,
+winnerImage: rec.winnerImage,
+}
+if (!groupMap.has(ds)) {
+groupMap.set(ds, { dateLabel: label, records: [] })
+groupOrder.push(groupMap.get(ds))
+}
+groupMap.get(ds).records.push(item)
+return
+}
+const score = rec.score ?? 0
+const scoreLevel = score >= 80 ? '优秀' : score >= 60 ? '良好' : '高风险'
+const fullResult = rec.fullResult || {}
+const riskMap = {}
+;(fullResult.risk_additives || []).forEach(a => {
+// 将后端风险等级转换为前端标签样式
+riskMap[a.name] = a.risk_level === '高' ? 'high' : a.risk_level === '中' ? 'mid' : a.risk_level === '低' ? 'low' : 'safe'
+})
+const name = rec.foodName || rec.food_category || '未知食品'
+const origCategory = rec.food_category || (rec.fullResult && rec.fullResult.food_category) || ''
+let beneficialTags = []
+const beneficialFromResult = (fullResult.beneficial_ingredients || []).map(b => b.nutrient)
+if (beneficialFromResult.length > 0) {
+// 后端已识别有益成分时优先使用结构化结果
+beneficialTags = beneficialFromResult
+} else if (fullResult.ingredients) {
+const ingText = '' + fullResult.ingredients
+for (const kw of BENEFICIAL_KEYWORDS) {
+if (ingText.indexOf(kw) !== -1 && beneficialTags.indexOf(kw) === -1) {
+beneficialTags.push(kw)
+}
+}
+}
+const item = {
+id: rec.createTime + '_' + idx,
+createTime: rec.createTime,
+foodName: name,
+category: origCategory.replace('类', ''),
+score,
+scoreLevel,
+riskCount: rec.tags ? rec.tags.length : 0,
+tags: (rec.tags || []).map(name => ({ name, level: riskMap[name] || 'safe' })),
+beneficialTags,
+time,
+imagePath: rec.imagePath || (rec.fullResult && rec.fullResult.imagePath) || '',
+}
+if (!groupMap.has(ds)) {
+// 首次遇到日期时创建分组，并保持出现顺序
+groupMap.set(ds, { dateLabel: label, records: [] })
+groupOrder.push(groupMap.get(ds))
+}
+groupMap.get(ds).records.push(item)
+})
+this.setData({
+records: scanHistory,
+groupedRecords: groupOrder,
+totalCount, highRiskCount, avgScore,
+loading: false, loaded: true,
+})
+},
+goDetail(e) {
+const { g, index } = e.currentTarget.dataset
+const group = this.data.groupedRecords[g]
+const record = group?.records?.[index]
+if (!record) return
+// PK记录：保存完整数据跳转到对比页
+if (record.type === 'pk') {
+wx.setStorageSync('pkResult', record)
+wx.navigateTo({ url: '/pages/compare/compare?mode=history' })
+return
+}
+const scanHistory = wx.getStorageSync('scanHistory') || []
+const fullRecord = scanHistory.find(r => r.createTime && r.createTime === record.createTime)
+if (fullRecord && fullRecord.fullResult) {
+const fullResult = fullRecord.fullResult
+fullResult.food_category = fullRecord.food_category || fullResult.food_category
+fullResult.imagePath = fullRecord.imagePath || fullResult.imagePath || ''
+wx.setStorageSync('lastResult', fullResult)
+} else {
+wx.setStorageSync('lastResult', {
+health_score: record.score,
+food_category: record.foodName,
+imagePath: record.imagePath || '',
+risk_additives: [],
+group_warnings: [],
+avoid_warnings: [],
+ai_report: { summary: '', detail: '', suggestion: '', long_term_risk: '' },
+})
+}
+wx.navigateTo({ url: '/pages/result/result' })
+},
+startRename(e) {
+const { g, index } = e.currentTarget.dataset
+const group = this.data.groupedRecords[g]
+const record = group?.records?.[index]
+if (!record) return
+this.setData({
+renameInfo: { g, index, value: record.foodName },
+})
+},
+confirmRename(e) {
+if (this._renaming) return
+this._renaming = true
+const { g, index } = e.currentTarget.dataset
+const value = (e.detail.value || '').trim()
+if (value) {
+const scanHistory = wx.getStorageSync('scanHistory') || []
+const group = this.data.groupedRecords[g]
+const oldRecord = group?.records?.[index]
+if (oldRecord) {
+// 通过创建时间定位原始历史记录并更新名称
+const historyRecord = scanHistory.find(r => r.createTime && r.createTime === oldRecord.createTime)
+if (historyRecord) {
+historyRecord.foodName = value
+wx.setStorageSync('scanHistory', scanHistory)
+}
+}
+}
+this.setData({ renameInfo: { g: -1, index: -1, value: '' } })
+this.loadHistory()
+setTimeout(() => { this._renaming = false }, 300)
+},
+goScan() {
+wx.switchTab({ url: '/pages/scan/scan' })
+},
+})
+const { BENEFICIAL_ADDITIVE_NAMES } = require('../../utils/constants')
+const family = require('../../utils/family')
+function fmtShort(d) {
+return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+function formatTime(value) {
+if (!value) return ''
+const d = new Date(value)
+return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+function scoreCls(score) {
+if (score >= 80) return 'good'
+if (score >= 60) return 'mid'
+if (score > 0) return 'bad'
+return 'empty'
+}
+function scoreOf(record) {
+return record.score ?? record.fullResult?.health_score ?? 0
+}
+Page({
+data: {
+nickname: '当前成员',
+memberLine: '普通人群',
+avatar: '',
+avatarText: '家',
+statusText: '等待记录',
+statusTone: 'empty',
+archiveScore: 0,
+trendText: '继续记录后生成周趋势',
+trendTone: 'empty',
+mainReason: '识别几次常吃食品后，系统会解释分数变化的主要原因。',
+suggestion: '先记录本周常吃食品，系统会给出更稳定的家庭食品安全建议。',
+nextActions: [],
+concernRows: [],
+recentRecords: [],
+latestRecord: null,
+weekScanCount: 0,
+weekAttentionCount: 0,
+riskProfiles: [],
+showRiskProfiles: false,
+profileBasis: '',
+manageActions: [
+{ title: '食品记录', desc: '查看识别历史', iconClass: 'icon-file-text', tone: 'green', type: 'history' },
+{ title: '饮食趋势', desc: '看长期变化', iconClass: 'icon-chart-line', tone: 'blue', type: 'trend' },
+{ title: '风险偏好', desc: '管理忌口限制', iconClass: 'icon-shield-warning', tone: 'orange', type: 'avoid' },
+{ title: '家庭成员', desc: '切换家庭档案', iconClass: 'icon-user-group', tone: 'purple', type: 'family' },
+],
+},
+onShow() {
+if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+this.getTabBar().setData({ selected: 1 })
+}
+this.loadHealthArchive()
+},
+loadHealthArchive() {
+// 读取当前家庭成员和其扫描历史，作为健康档案计算基础
+const member = family.getActiveMember() || {}
+const history = family.getFilteredHistory()
+.filter(r => r.type !== 'pk')
+.sort((a, b) => new Date(b.createTime || 0) - new Date(a.createTime || 0))
+// 分别取本周和上一个周期记录，用于计算趋势变化
+const weekRecords = this.getRecentDays(history, 7)
+const previousWeekRecords = this.getPreviousDays(history, 7, 7)
+const riskThemes = this.buildRiskThemes(weekRecords.length ? weekRecords : history)
+const categoryThemes = this.buildCategoryThemes(weekRecords.length ? weekRecords : history)
+const state = this.buildState(history, weekRecords, previousWeekRecords, riskThemes, categoryThemes)
+const recentRecords = history.slice(0, 3).map(record => this.buildRecord(record))
+this.setData({
+nickname: member.nickname || member.relationship || '当前成员',
+memberLine: member.userType || '普通人群',
+avatar: member.avatar || '',
+avatarText: (member.nickname || member.relationship || '家').slice(0, 1),
+statusText: state.statusText,
+statusTone: state.statusTone,
+archiveScore: state.score,
+trendText: state.trendText,
+trendTone: state.trendTone,
+mainReason: state.mainReason,
+suggestion: state.suggestion,
+nextActions: this.buildNextActions(state, riskThemes, weekRecords),
+concernRows: this.buildConcernRows(riskThemes, categoryThemes, weekRecords),
+latestRecord: recentRecords[0] || null,
+recentRecords,
+weekScanCount: weekRecords.length,
+weekAttentionCount: weekRecords.filter(r => scoreOf(r) < 70).length,
+riskProfiles: this.buildRiskProfiles(history, riskThemes, categoryThemes),
+showRiskProfiles: history.length >= 6,
+profileBasis: `基于近 ${Math.min(history.length, 30)} 条识别记录生成`,
+})
+},
+getRecentDays(history, days) {
+const start = new Date()
+start.setDate(start.getDate() - (days - 1))
+start.setHours(0, 0, 0, 0)
+return history.filter(r => r.createTime && new Date(r.createTime) >= start)
+},
+getPreviousDays(history, days, offsetDays) {
+const end = new Date()
+end.setDate(end.getDate() - offsetDays)
+end.setHours(0, 0, 0, 0)
+const start = new Date(end)
+start.setDate(start.getDate() - (days - 1))
+return history.filter(r => {
+if (!r.createTime) return false
+const t = new Date(r.createTime)
+return t >= start && t < end
+})
+},
+averageScore(records) {
+const scores = records.map(scoreOf).filter(Boolean)
+return scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0
+},
+buildState(history, weekRecords, previousWeekRecords, risks, categories) {
+if (!history.length) {
+return {
+statusText: '等待记录',
+statusTone: 'empty',
+score: 0,
+trendText: '完成几次识别后生成周趋势',
+trendTone: 'empty',
+mainReason: '识别几次常吃食品后，系统会解释分数变化的主要原因。',
+suggestion: '先记录本周常吃食品，系统会给出更稳定的家庭食品安全建议。',
+}
+}
+const recentBase = weekRecords.length ? weekRecords : history.slice(0, 10)
+const score = this.averageScore(recentBase)
+const previousScore = this.averageScore(previousWeekRecords)
+const attentionCount = weekRecords.filter(r => scoreOf(r) < 70).length
+const topRisk = risks[0]
+const topCategory = categories[0]
+const trend = this.buildTrendText(score, previousScore, weekRecords.length)
+let statusText = '整体稳定'
+let statusTone = 'good'
+// 评分低或低分记录较多时，提升健康档案风险等级
+if (score < 60 || attentionCount >= 3) {
+statusText = '需要关注'
+statusTone = 'bad'
+} else if (score < 80 || topRisk) {
+statusText = '轻度关注'
+statusTone = 'mid'
+}
+let mainReason = '近 7 天未发现明显高频风险，整体选择相对稳定。'
+if (topRisk) {
+mainReason = `${topRisk.name} 近 7 天出现 ${topRisk.count} 次，频率偏高。`
+} else if (topCategory) {
+mainReason = `${topCategory.name} 占近期记录 ${topCategory.pct}%，建议继续观察品类结构。`
+}
+let suggestion = '保持记录常吃食品，优先选择配料表更短、添加剂更少的产品。'
+if (topRisk) {
+suggestion = `减少含 ${topRisk.name} 的高添加剂食品，购买前多看配料表。`
+} else if (topCategory && topCategory.pct >= 40) {
+suggestion = `适当分散 ${topCategory.name} 摄入，搭配更简单的日常食品。`
+}
+return {
+statusText,
+statusTone,
+score,
+trendText: trend.text,
+trendTone: trend.tone,
+mainReason,
+suggestion,
+}
+},
+buildTrendText(score, previousScore, hasWeekRecord) {
+if (!hasWeekRecord) {
+return { text: '本周记录不足，先展示最近记录均值', tone: 'empty' }
+}
+if (!previousScore) {
+return { text: '继续记录后可对比上周变化', tone: 'empty' }
+}
+const diff = score - previousScore
+if (Math.abs(diff) <= 1) {
+return { text: '与上周基本持平', tone: 'flat' }
+}
+if (diff > 0) {
+return { text: `较上周上升 ${diff} 分`, tone: 'up' }
+}
+return { text: `较上周下降 ${Math.abs(diff)} 分`, tone: 'down' }
+},
+buildNextActions(state, risks, weekRecords) {
+const actions = []
+if (risks[0]) {
+actions.push({
+title: '查看高频添加剂说明',
+desc: risks[0].name,
+iconClass: 'icon-book',
+tone: 'orange',
+type: 'wiki',
+})
+} else {
+actions.push({
+title: '选择配料表更短的产品',
+desc: '优先看前 5 位成分',
+iconClass: 'icon-list',
+tone: 'green',
+type: 'wiki',
+})
+}
+// 记录少于3次时提示继续识别，提高趋势判断稳定性
+const remain = Math.max(0, 3 - weekRecords.length)
+actions.push({
+title: remain ? `本周继续识别 ${remain} 次` : '保持本周记录节奏',
+desc: remain ? '让趋势判断更稳定' : '已具备基础趋势样本',
+iconClass: 'icon-file-text',
+tone: 'blue',
+type: 'scan',
+})
+actions.push({
+title: '更新忌口与偏好',
+desc: '让建议更贴合家庭成员',
+iconClass: 'icon-shield-warning',
+tone: 'purple',
+type: 'avoid',
+})
+return actions
+},
+buildRiskThemes(history) {
+const map = {}
+history.forEach(record => {
+const risks = record.fullResult?.risk_additives || []
+risks.filter(item => !BENEFICIAL_ADDITIVE_NAMES.includes(item.name)).forEach(item => {
+const name = item.name || '风险成分'
+if (!map[name]) map[name] = { name, count: 0 }
+map[name].count += 1
+})
+})
+return Object.values(map).sort((a, b) => b.count - a.count).slice(0, 3)
+},
+buildCategoryThemes(history) {
+const map = {}
+history.forEach(record => {
+const name = record.food_category || record.fullResult?.food_category || record.foodName || '常见食品'
+map[name] = (map[name] || 0) + 1
+})
+const total = history.length || 1
+return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, count]) => ({
+name,
+count,
+pct: Math.round(count / total * 100),
+}))
+},
+buildConcernRows(risks, categories, weekRecords) {
+const rows = []
+if (risks[0]) {
+rows.push({
+title: '高频添加剂',
+desc: risks[0].name,
+meta: `近 7 天出现 ${risks[0].count} 次`,
+tone: 'warn',
+iconTone: 'orange',
+iconClass: 'icon-shield-warning',
+})
+}
+const attentionCount = weekRecords.filter(r => scoreOf(r) < 70).length
+rows.push({
+title: '近期风险',
+desc: attentionCount ? '存在需留意记录' : '暂无明显低分记录',
+meta: attentionCount ? `本周 ${attentionCount} 次低于 70 分` : '继续保持观察',
+tone: attentionCount ? 'warn' : 'info',
+iconTone: attentionCount ? 'orange' : 'green',
+iconClass: attentionCount ? 'icon-shield-warning' : 'icon-shield-check',
+})
+if (categories[0]) {
+rows.push({
+title: '重点品类',
+desc: categories[0].name,
+meta: `占近期记录 ${categories[0].pct}%`,
+tone: 'info',
+iconTone: 'blue',
+iconClass: 'icon-chart-line',
+})
+}
+while (rows.length < 3) {
+rows.push({
+title: '记录样本',
+desc: '继续识别常吃食品',
+meta: '生成更稳定判断',
+tone: 'muted',
+iconTone: 'green',
+iconClass: 'icon-file-text',
+})
+}
+return rows.slice(0, 3)
+},
+buildRiskProfiles(history, risks, categories) {
+if (history.length < 6) return []
+const profiles = []
+if (risks.length >= 2) {
+profiles.push({ name: '添加剂敏感', desc: '多种风险成分反复出现' })
+}
+if (categories.some(item => /饮料|糖|甜|零食/.test(item.name) && item.pct >= 30)) {
+profiles.push({ name: '甜食倾向', desc: '甜食或饮料类占比较高' })
+}
+if (!profiles.length) {
+profiles.push({ name: '整体稳定', desc: '近期食品选择相对均衡' })
+}
+return profiles.slice(0, 2)
+},
+buildRecord(record) {
+const score = scoreOf(record)
+const d = record.createTime ? new Date(record.createTime) : null
+return {
+foodName: record.foodName || record.food_category || record.fullResult?.food_category || '未命名食品',
+category: record.food_category || record.fullResult?.food_category || '食品',
+score,
+cls: scoreCls(score),
+levelText: score >= 80 ? '安心' : score >= 60 ? '需留意' : score > 0 ? '谨慎' : '待分析',
+dateLabel: d ? fmtShort(d) : '',
+time: formatTime(record.createTime),
+createTime: record.createTime,
+}
+},
+goManage(e) {
+const type = e.currentTarget.dataset.type
+if (type === 'history') wx.navigateTo({ url: '/pages/history/history' })
+else if (type === 'trend') wx.navigateTo({ url: '/pages/card-report/card-report' })
+else if (type === 'avoid') wx.navigateTo({ url: '/pages/avoid/avoid' })
+else if (type === 'family') wx.navigateTo({ url: '/pages/family-manage/family-manage' })
+},
+goNextAction(e) {
+const type = e.currentTarget.dataset.type
+if (type === 'scan') wx.switchTab({ url: '/pages/scan/scan' })
+else if (type === 'avoid') wx.navigateTo({ url: '/pages/avoid/avoid' })
+else wx.navigateTo({ url: '/pages/wiki/wiki' })
+},
+goScan() { wx.switchTab({ url: '/pages/scan/scan' }) },
+goRecordDetail(e) {
+const createTime = e.currentTarget.dataset.time
+const scanHistory = wx.getStorageSync('scanHistory') || []
+const fullRecord = scanHistory.find(r => r.createTime === createTime)
+if (fullRecord && fullRecord.fullResult) {
+const fullResult = fullRecord.fullResult
+fullResult.imagePath = fullRecord.imagePath || fullResult.imagePath || ''
+wx.setStorageSync('lastResult', fullResult)
+wx.navigateTo({ url: '/pages/result/result' })
+}
+},
+})
+const app = getApp()
+var AVOID_GROUPS = [
+{ key: 'red', name: '过敏类', ids: ['peanut','nuts','milk_allergy','egg','wheat','soy','seafood','sesame'] },
+{ key: 'orange', name: '不耐受类', ids: ['lactose','fructose','caffeine','alcohol','msg'] },
+{ key: 'green', name: '主动回避类', ids: ['trans_fat','artificial_color','artificial_sweet','preservative','hfcs','nitrite','flavor'] },
+]
+var AVOID_NAMES = {
+peanut: '花生过敏', nuts: '坚果过敏', milk_allergy: '牛奶过敏',
+egg: '鸡蛋过敏', wheat: '小麦/麸质过敏', soy: '大豆过敏',
+seafood: '海鲜过敏', sesame: '芝麻过敏',
+lactose: '乳糖不耐受', fructose: '果糖不耐受', caffeine: '咖啡因敏感',
+alcohol: '酒精不耐受', msg: '味精敏感',
+trans_fat: '反式脂肪', artificial_color: '人工色素', artificial_sweet: '人工甜味剂',
+preservative: '防腐剂', hfcs: '高果糖浆', nitrite: '亚硝酸盐', flavor: '香精香料',
+}
+Page({
+data: {
+nickname: '',
+gender: '',
+age: '',
+height: '',
+weight: '',
+userType: '普通人群',
+showGenderPicker: false,
+showTypePicker: false,
+genderIndex: 0,
+typeIndex: 0,
+mode: '',
+genderList: ['男', '女', '保密'],
+typeList: [
+'普通人群', '减肥', '健身',
+'儿童', '老人', '孕妇',
+'糖尿病', '心血管',
+],
+avoidGroups: [],
+selectedAvoids: [],
+avoidExpanded: false,
+avoidSummary: '点击设置',
+},
+onLoad: function(options) {
+this.setData({
+mode: (options && options.mode) || '',
+})
+this.loadAvoids()
+var profile = wx.getStorageSync('userProfile')
+if (profile && profile.userId && this.data.mode !== 'edit' && this.data.mode !== 'edit_type') {
+wx.reLaunch({ url: '/pages/index/index' })
+return
+}
+if (profile) {
+var typeIdx = this.data.typeList.indexOf(profile.userType)
+var genderIdx = this.data.genderList.indexOf(profile.gender)
+this.setData({
+nickname: profile.nickname || '',
+gender: profile.gender || '',
+age: profile.age || '',
+height: profile.height || '',
+weight: profile.weight || '',
+userType: profile.userType || '普通人群',
+typeIndex: typeIdx > -1 ? typeIdx : 0,
+genderIndex: genderIdx > -1 ? genderIdx : 0,
+})
+}
+},
+onShow: function() {
+this.loadAvoids()
+},
+loadAvoids: function() {
+var profile = wx.getStorageSync('userProfile') || {}
+var saved = profile.selectedAvoids || []
+var groups = AVOID_GROUPS.map(function(g) {
+var items = g.ids.map(function(id) {
+return { id: id, name: AVOID_NAMES[id], checked: saved.indexOf(id) !== -1 }
+})
+return { name: g.name, key: g.key, expanded: false, items: items }
+})
+var total = saved.length
+this.setData({
+selectedAvoids: saved,
+avoidGroups: groups,
+avoidSummary: total > 0 ? '已选' + total + '项' : '点击设置',
+})
+},
+toggleAvoidSection: function() {
+this.setData({ avoidExpanded: !this.data.avoidExpanded })
+},
+toggleGroup: function(e) {
+var key = e.currentTarget.dataset.key
+var groups = this.data.avoidGroups
+for (var i = 0; i < groups.length; i++) {
+if (groups[i].key === key) {
+groups[i].expanded = !groups[i].expanded
+break
+}
+}
+this.setData({ avoidGroups: groups })
+},
+toggleAvoidItem: function(e) {
+var id = e.currentTarget.dataset.id
+var saved = this.data.selectedAvoids.slice()
+var idx = saved.indexOf(id)
+if (idx === -1) {
+// 未选择时加入忌口列表
+saved.push(id)
+} else {
+// 已选择时从忌口列表移除
+saved.splice(idx, 1)
+}
+var groups = this.data.avoidGroups
+for (var i = 0; i < groups.length; i++) {
+for (var j = 0; j < groups[i].items.length; j++) {
+if (groups[i].items[j].id === id) {
+groups[i].items[j].checked = !groups[i].items[j].checked
+break
+}
+}
+}
+this.setData({
+selectedAvoids: saved,
+avoidGroups: groups,
+avoidSummary: saved.length > 0 ? '已选' + saved.length + '项' : '点击设置',
+})
+},
+onNicknameInput(e) {
+this.setData({ nickname: e.detail.value })
+},
+onAgeInput(e) {
+this.setData({ age: e.detail.value })
+},
+onHeightInput(e) {
+this.setData({ height: e.detail.value })
+},
+onWeightInput(e) {
+this.setData({ weight: e.detail.value })
+},
+showGenderPicker() {
+this.setData({ showGenderPicker: true })
+},
+confirmGender(e) {
+const idx = e.detail.value[0]
+this.setData({
+gender: this.data.genderList[idx],
+genderIndex: idx,
+showGenderPicker: false,
+})
+},
+cancelGender() {
+this.setData({ showGenderPicker: false })
+},
+showTypePicker() {
+this.setData({ showTypePicker: true })
+},
+confirmType(e) {
+const idx = e.detail.value
+const type = this.data.typeList[idx]
+this.setData({
+userType: type,
+typeIndex: idx,
+showTypePicker: false,
+})
+},
+cancelType() {
+this.setData({ showTypePicker: false })
+},
+saveProfile() {
+if (!this.data.nickname) {
+wx.showToast({ title: '请输入昵称', icon: 'none' })
+return
+}
+const existing = wx.getStorageSync('userProfile') || {}
+// 没有历史用户ID时使用当前时间生成本地用户ID
+const userId = existing.userId || Date.now()
+wx.setStorageSync('userProfile', {
+...existing,
+userId: userId,
+nickname: this.data.nickname,
+gender: this.data.gender,
+age: this.data.age,
+height: this.data.height,
+weight: this.data.weight,
+userType: this.data.userType,
+selectedAvoids: this.data.selectedAvoids,
+})
+wx.setStorageSync('hasProfile', true)
+const g = app.globalData
+g.userId = userId
+g.userType = this.data.userType
+g.hasProfile = true
+wx.showToast({ title: this.data.mode ? '修改成功' : '保存成功' })
+if (this.data.mode === 'edit' || this.data.mode === 'edit_type') {
+setTimeout(function () { wx.navigateBack() }, 1200)
+} else {
+wx.switchTab({ url: '/pages/index/index' })
+}
+},
+skipProfile() {
+const existing = wx.getStorageSync('userProfile') || {}
+const userId = existing.userId || Date.now()
+wx.setStorageSync('userProfile', {
+userId: userId,
+userType: '普通人群',
+})
+wx.setStorageSync('hasProfile', true)
+const g = app.globalData
+g.userId = userId
+g.userType = '普通人群'
+g.hasProfile = true
+wx.switchTab({ url: '/pages/index/index' })
+},
+})
+const family = require('../../utils/family')
+var AVOID_GROUPS = [
+{ key: 'red', name: '过敏类', ids: ['peanut','nuts','milk_allergy','egg','wheat','soy','seafood','sesame'] },
+{ key: 'orange', name: '不耐受类', ids: ['lactose','fructose','caffeine','alcohol','msg'] },
+{ key: 'green', name: '主动回避类', ids: ['trans_fat','artificial_color','artificial_sweet','preservative','hfcs','nitrite','flavor'] },
+]
+var AVOID_NAMES = {
+peanut: '花生过敏', nuts: '坚果过敏', milk_allergy: '牛奶过敏',
+egg: '鸡蛋过敏', wheat: '小麦/麸质过敏', soy: '大豆过敏',
+seafood: '海鲜过敏', sesame: '芝麻过敏',
+lactose: '乳糖不耐受', fructose: '果糖不耐受', caffeine: '咖啡因敏感',
+alcohol: '酒精不耐受', msg: '味精敏感',
+trans_fat: '反式脂肪', artificial_color: '人工色素', artificial_sweet: '人工甜味剂',
+preservative: '防腐剂', hfcs: '高果糖浆', nitrite: '亚硝酸盐', flavor: '香精香料',
+}
+var USER_TYPES = ['普通人群', '减肥', '健身', '儿童', '老人', '孕妇', '糖尿病', '心血管']
+var GENDERS = ['男', '女', '保密']
+var RELATIONS = ['爸爸', '妈妈', '爷爷', '奶奶', '外公', '外婆', '儿子', '女儿', '老公', '老婆', '哥哥', '姐姐', '弟弟', '妹妹', '我自己']
+Page({
+data: {
+isEdit: false,
+memberId: '',
+nickname: '',
+gender: '',
+genderIndex: 0,
+age: '',
+height: '',
+weight: '',
+userType: '普通人群',
+typeIndex: 0,
+avoidGroups: [],
+selectedAvoids: [],
+avoidExpanded: false,
+avoidSummary: '点击设置',
+avatar: '',
+avatarLetter: '+',
+genders: ['男', '女', '保密'],
+relations: ['爸爸', '妈妈', '爷爷', '奶奶', '外公', '外婆', '儿子', '女儿', '老公', '老婆', '哥哥', '姐姐', '弟弟', '妹妹', '我自己'],
+relationship: ''
+},
+onLoad: function (options) {
+var memberId = options.memberId || ''
+var isEdit = !!memberId
+var self = this
+if (isEdit) {
+var members = family.getMembers()
+var member = members.find(function (m) { return m.memberId === memberId })
+if (member) {
+// 编辑模式下回填成员资料、健康类型、忌口选项和头像
+var avoids = member.selectedAvoids || []
+var typeIdx = USER_TYPES.indexOf(member.userType || '普通人群')
+var genderIdx = GENDERS.indexOf(member.gender || '')
+self.setData({
+isEdit: true,
+memberId: memberId,
+nickname: member.nickname || '',
+gender: member.gender || '',
+genderIndex: genderIdx > -1 ? genderIdx : 0,
+age: member.age || '',
+height: member.height || '',
+weight: member.weight || '',
+userType: member.userType || '普通人群',
+typeIndex: typeIdx > -1 ? typeIdx : 0,
+selectedAvoids: avoids,
+avoidSummary: avoids.length > 0 ? '已选' + avoids.length + '项' : '点击设置',
+avatar: member.avatar || '',
+avatarLetter: (member.nickname || '成').slice(0, 1),
+relationship: member.relationship || ''
+})
+wx.setNavigationBarTitle({ title: '编辑成员' })
+}
+}
+self._buildAvoidGroups(self.data.selectedAvoids)
+},
+_buildAvoidGroups: function (saved) {
+saved = saved || []
+var groups = AVOID_GROUPS.map(function (g) {
+var items = g.ids.map(function (id) {
+return { id: id, name: AVOID_NAMES[id], checked: saved.indexOf(id) !== -1 }
+})
+return { name: g.name, key: g.key, expanded: false, items: items }
+})
+this.setData({ avoidGroups: groups })
+},
+onNicknameInput: function (e) {
+var nickname = e.detail.value || ''
+this.setData({
+nickname: nickname,
+avatarLetter: nickname ? nickname.slice(0, 1) : '+'
+})
+},
+confirmGender: function (e) {
+var idx = e.detail.value
+this.setData({ gender: GENDERS[idx], genderIndex: idx })
+},
+onAgeInput: function (e) { this.setData({ age: e.detail.value }) },
+onHeightInput: function (e) { this.setData({ height: e.detail.value }) },
+onWeightInput: function (e) { this.setData({ weight: e.detail.value }) },
+confirmType: function (e) {
+var idx = e.detail.value
+this.setData({ userType: USER_TYPES[idx], typeIndex: idx })
+},
+confirmRelation: function (e) {
+var idx = e.detail.value
+this.setData({ relationship: RELATIONS[idx] })
+},
+// ─── 忌口设置 ───
+toggleAvoidSection: function () {
+this.setData({ avoidExpanded: !this.data.avoidExpanded })
+},
+toggleGroup: function (e) {
+var key = e.currentTarget.dataset.key
+var groups = this.data.avoidGroups
+for (var i = 0; i < groups.length; i++) {
+if (groups[i].key === key) {
+groups[i].expanded = !groups[i].expanded
+break
+}
+}
+this.setData({ avoidGroups: groups })
+},
+toggleAvoidItem: function (e) {
+var id = e.currentTarget.dataset.id
+var saved = this.data.selectedAvoids.slice()
+var idx = saved.indexOf(id)
+if (idx === -1) {
+saved.push(id)
+} else {
+saved.splice(idx, 1)
+}
+var groups = this.data.avoidGroups
+for (var i = 0; i < groups.length; i++) {
+for (var j = 0; j < groups[i].items.length; j++) {
+if (groups[i].items[j].id === id) {
+groups[i].items[j].checked = !groups[i].items[j].checked
+break
+}
+}
+}
+this.setData({
+selectedAvoids: saved,
+avoidGroups: groups,
+avoidSummary: saved.length > 0 ? '已选' + saved.length + '项' : '点击设置'
+})
+},
+// ─── 头像 ───
+chooseAvatar: function () {
+var self = this
+wx.chooseMedia({
+count: 1,
+mediaType: ['image'],
+sourceType: ['album'],
+success: function (res) {
+var tempPath = res.tempFiles[0].tempFilePath
+wx.saveFile({
+tempFilePath: tempPath,
+success: function (saveRes) {
+self.setData({ avatar: saveRes.savedFilePath })
+},
+fail: function () {
+// 保存失败时退回临时路径，保证头像即时可见
+self.setData({ avatar: tempPath })
+}
+})
+}
+})
+},
+saveMember: function () {
+var nickname = (this.data.nickname || '').trim()
+if (!nickname) {
+wx.showToast({ title: '请输入昵称', icon: 'none' })
+return
+}
+var form = {
+nickname: nickname,
+gender: this.data.gender,
+age: this.data.age,
+height: this.data.height,
+weight: this.data.weight,
+relationship: this.data.relationship,
+userType: this.data.userType,
+selectedAvoids: this.data.selectedAvoids,
+avatar: this.data.avatar
+}
+if (this.data.isEdit) {
+// 编辑已有成员时按memberId更新资料
+family.updateMember(this.data.memberId, form)
+wx.showToast({ title: '已更新', icon: 'success' })
+} else {
+// 新增成员时校验家庭成员数量限制
+var result = family.addMember(form)
+if (!result.ok) {
+wx.showToast({ title: result.msg, icon: 'none' })
+return
+}
+wx.showToast({ title: '已添加', icon: 'success' })
+}
+setTimeout(function () { wx.navigateBack() }, 800)
+},
+// ─── 删除成员 ───
+deleteMember: function () {
+var self = this
+var members = family.getMembers()
+var member = members.find(function (m) { return m.memberId === self.data.memberId })
+var name = member ? member.nickname : '该成员'
+wx.showModal({
+title: '确认删除',
+content: '确定要移除「' + name + '」吗？',
+confirmColor: '#DC2626',
+success: function (res) {
+if (res.confirm) {
+// 删除逻辑由family工具统一处理，包括成员数量和当前成员切换
+var result = family.deleteMember(self.data.memberId)
+if (result.ok) {
+wx.showToast({ title: '已移除', icon: 'success' })
+setTimeout(function () { wx.navigateBack() }, 800)
+} else {
+wx.showToast({ title: result.msg, icon: 'none' })
+}
+}
+}
+})
+}
+})
+const { additives } = require('../../data/additives')
+const app = getApp()
+function getRiskView(level) {
+const num = Number(level)
+if (num === 1) return { text: '低风险', tone: 'low', width: '33%' }
+if (num === 2) return { text: '中风险', tone: 'mid', width: '66%' }
+if (num === 3) return { text: '高风险', tone: 'high', width: '100%' }
+return { text: '待确认', tone: 'unknown', width: '18%' }
+}
+function normalizeEntry(entry, fromApi) {
+const risk = getRiskView(entry.risk_level)
+const alias = (entry.alias || []).filter(item => item && item !== entry.name)
+return {
+...entry,
+fromApi,
+riskText: risk.text,
+riskTone: risk.tone,
+riskWidth: risk.width,
+aliasText: alias.join(' / '),
+specialGroupsText: (entry.special_groups || []).join('、'),
+infoRows: [
+{ label: '主要用途', value: entry.usage || '暂无数据' },
+{ label: '常见食品', value: entry.common_in || '暂无数据' },
+{ label: 'ADI 值', value: entry.adi || '暂无数据' },
+{ label: '类别', value: entry.category || '未分类' },
+],
+}
+}
+Page({
+data: {
+additive: null,
+loading: true,
+errorText: '',
+},
+onLoad(options) {
+const name = decodeURIComponent(options.name || '').trim()
+if (!name) {
+wx.showToast({ title: '缺少参数', icon: 'none' })
+wx.navigateBack()
+return
+}
+const found = additives.find(item =>
+item.name === name ||
+(item.alias || []).some(alias => alias === name)
+)
+if (found) {
+wx.setNavigationBarTitle({ title: found.name })
+this.setData({
+additive: normalizeEntry(found, false),
+loading: false,
+errorText: '',
+})
+return
+}
+const cacheKey = 'wiki_cache_' + name
+const cached = wx.getStorageSync(cacheKey)
+if (cached) {
+try {
+// 命中本地缓存时直接展示，减少重复调用后端AI百科接口
+const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached
+wx.setNavigationBarTitle({ title: parsed.name || name })
+this.setData({
+additive: normalizeEntry(parsed, true),
+loading: false,
+errorText: '',
+})
+return
+} catch (err) {
+// 缓存结构异常时清理缓存，避免后续继续读取坏数据
+wx.removeStorageSync(cacheKey)
+}
+}
+this.fetchFromApi(name, cacheKey)
+},
+fetchFromApi(name, cacheKey) {
+this.setData({ loading: true, errorText: '' })
+wx.request({
+url: app.globalData.baseUrl + '/api/wiki-query',
+method: 'POST',
+data: { name },
+timeout: 30000,
+header: { 'Content-Type': 'application/json' },
+success: (res) => {
+if (res.data && res.data.success && res.data.data) {
+const entry = res.data.data
+// AI结果写入本地缓存，后续再次查看同一添加剂可直接使用
+wx.setStorageSync(cacheKey, entry)
+wx.setNavigationBarTitle({ title: entry.name || name })
+this.setData({
+additive: normalizeEntry(entry, true),
+loading: false,
+errorText: '',
+})
+} else {
+// 接口返回不完整时展示兜底百科结构
+this.showFallback(name)
+}
+},
+fail: () => {
+this.showFallback(name)
+},
+})
+},
+showFallback(name) {
+const fallback = {
+name,
+usage: '暂无详细数据',
+common_in: '暂无数据',
+adi: '暂无数据',
+risk_level: 0,
+warning: '该添加剂暂未收录，请结合配料表上下文和可靠来源判断。',
+special_groups: [],
+intro: '',
+alias: [],
+category: '未分类',
+}
+this.setData({
+additive: normalizeEntry(fallback, true),
+loading: false,
+errorText: '百科库未命中，已展示临时信息',
+})
+},
+goBack() {
+wx.navigateBack()
+},
+})
+const api = require('../../utils/request')
+const family = require('../../utils/family')
+const BOT_AVATAR = '/images/ai-nutritionist-avatar.png'
+function cleanAnswer(text) {
+return String(text || '')
+.replace(/\*\*/g, '')
+.replace(/#{1,6}\s*/g, '')
+.replace(/```[\s\S]*?```/g, '')
+.replace(/\n{3,}/g, '\n\n')
+.trim()
+}
+Page({
+data: {
+question: '',
+loading: false,
+botAvatar: BOT_AVATAR,
+userAvatar: '',
+userAvatarText: '我',
+messages: [
+{
+role: 'assistant',
+text: '你好，我是 AI 营养师。你可以问我配料表、食品添加剂、控糖减脂、儿童或孕妇饮食风险相关的问题。',
+avatar: BOT_AVATAR,
+}
+],
+examples: [
+'山梨酸钾安全吗？',
+'儿童能喝含阿斯巴甜的饮料吗？',
+'配料表里哪些添加剂需要少吃？'
+]
+},
+onLoad() {
+this.syncAvatar()
+},
+onShow() {
+this.syncAvatar()
+},
+syncAvatar() {
+const activeMember = family.getActiveMember && family.getActiveMember()
+const profile = wx.getStorageSync('userProfile') || {}
+const nickname = (activeMember && (activeMember.nickname || activeMember.relationship)) || profile.nickname || '我'
+this.setData({
+userAvatar: (activeMember && activeMember.avatar) || profile.avatar || '',
+userAvatarText: nickname.slice(0, 1) || '我',
+})
+},
+onInput(e) {
+this.setData({ question: e.detail.value })
+},
+useExample(e) {
+this.setData({ question: e.currentTarget.dataset.text })
+},
+sendQuestion() {
+const question = (this.data.question || '').trim()
+if (!question || this.data.loading) return
+const userMessage = {
+role: 'user',
+text: question,
+avatar: this.data.userAvatar,
+avatarText: this.data.userAvatarText,
+}
+// 仅保留最近8条消息作为上下文，控制接口请求体大小
+const history = this.data.messages.slice(-8).map(item => ({
+role: item.role,
+content: item.text,
+}))
+const messages = this.data.messages.concat([userMessage])
+this.setData({ messages, question: '', loading: true })
+api.aiChat(question, history)
+.then(res => {
+// 对AI回答做展示清洗，去除可能出现的Markdown格式
+const answer = cleanAnswer(res.answer || '暂时没有生成有效回答，请换个问法再试。')
+this.setData({
+messages: this.data.messages.concat([{ role: 'assistant', text: answer, avatar: BOT_AVATAR }]),
+loading: false,
+})
+})
+.catch(err => {
+// 接口失败时追加兜底回复，保持聊天流程连续
+this.setData({
+messages: this.data.messages.concat([
+{ role: 'assistant', text: err.msg || 'AI 问答暂时不可用，请稍后再试。', avatar: BOT_AVATAR }
+]),
+loading: false,
+})
+})
+}
+})
+const FAMILY_KEY = 'familyMembers'
+const ACTIVE_KEY = 'activeMemberId'
+const HISTORY_KEY = 'scanHistory'
+function generateId() {
+return 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+}
+function getMembers() {
+return wx.getStorageSync(FAMILY_KEY) || []
+}
+function getActiveMemberId() {
+return wx.getStorageSync(ACTIVE_KEY) || ''
+}
+function getActiveMember() {
+const members = getMembers()
+const activeId = getActiveMemberId()
+return members.find(m => m.memberId === activeId) || members[0] || null
+}
+function setActiveMember(id) {
+wx.setStorageSync(ACTIVE_KEY, id)
+}
+function addMember(info) {
+const members = getMembers()
+if (members.length >= 6) {
+return { ok: false, msg: '最多添加6位家庭成员' }
+}
+const member = {
+memberId: generateId(),
+nickname: info.nickname || '',
+gender: info.gender || '',
+age: info.age || '',
+height: info.height || '',
+weight: info.weight || '',
+relationship: info.relationship || '',
+userType: info.userType || '普通人群',
+selectedAvoids: info.selectedAvoids || [],
+avatar: info.avatar || '',
+createTime: Date.now()
+}
+members.push(member)
+// 家庭成员资料保存在本地缓存，供首页、报告页和扫描页共享
+wx.setStorageSync(FAMILY_KEY, members)
+return { ok: true, member }
+}
+function updateMember(id, info) {
+const members = getMembers()
+const idx = members.findIndex(m => m.memberId === id)
+if (idx === -1) return false
+if (info.nickname !== undefined) members[idx].nickname = info.nickname
+if (info.gender !== undefined) members[idx].gender = info.gender
+if (info.age !== undefined) members[idx].age = info.age
+if (info.height !== undefined) members[idx].height = info.height
+if (info.weight !== undefined) members[idx].weight = info.weight
+if (info.relationship !== undefined) members[idx].relationship = info.relationship
+if (info.userType !== undefined) members[idx].userType = info.userType
+if (info.selectedAvoids !== undefined) members[idx].selectedAvoids = info.selectedAvoids
+if (info.avatar !== undefined) members[idx].avatar = info.avatar
+wx.setStorageSync(FAMILY_KEY, members)
+return true
+}
+function deleteMember(id) {
+const members = getMembers()
+if (members.length <= 1) {
+return { ok: false, msg: '至少保留一位家庭成员' }
+}
+const filtered = members.filter(m => m.memberId !== id)
+if (filtered.length === members.length) {
+return { ok: false, msg: '成员不存在' }
+}
+wx.setStorageSync(FAMILY_KEY, filtered)
+if (getActiveMemberId() === id) {
+// 删除当前成员后自动切换到剩余列表第一位
+setActiveMember(filtered[0].memberId)
+}
+return { ok: true }
+}
+function getFilteredHistory() {
+const history = wx.getStorageSync(HISTORY_KEY) || []
+const activeId = getActiveMemberId()
+if (!activeId) return history
+return history.filter(r => !r.memberId || r.memberId === activeId)
+}
+function addScanRecord(record) {
+const activeId = getActiveMemberId()
+const fullRecord = Object.assign({}, record, { memberId: activeId })
+const history = wx.getStorageSync(HISTORY_KEY) || []
+history.unshift(fullRecord)
+// 只保留最近50条记录，控制本地缓存体积
+if (history.length > 50) history.length = 50
+wx.setStorageSync(HISTORY_KEY, history)
+return fullRecord
+}
+function initFamily() {
+const members = getMembers()
+if (members.length > 0) {
+if (!getActiveMemberId()) {
+// 已有成员但未设置当前成员时，默认选中第一位
+setActiveMember(members[0].memberId)
+}
+return false
+}
+// 首次启用家庭功能时，以旧版用户画像创建“我自己”成员
+const profile = wx.getStorageSync('userProfile') || {}
+const memberId = generateId()
+const firstMember = {
+memberId: memberId,
+nickname: profile.nickname || '我自己',
+gender: profile.gender || '',
+age: profile.age || '',
+height: profile.height || '',
+weight: profile.weight || '',
+relationship: '我自己',
+userType: profile.userType || '普通人群',
+selectedAvoids: profile.selectedAvoids || [],
+avatar: profile.avatar || '',
+createTime: Date.now()
+}
+wx.setStorageSync(FAMILY_KEY, [firstMember])
+wx.setStorageSync(ACTIVE_KEY, memberId)
+const history = wx.getStorageSync(HISTORY_KEY) || []
+if (history.length > 0) {
+// 旧历史记录没有memberId，迁移时统一归属到默认成员
+history.forEach(function (r) {
+if (!r.memberId) r.memberId = memberId
+})
+wx.setStorageSync(HISTORY_KEY, history)
+}
+return true
+}
+module.exports = {
+getMembers: getMembers,
+getActiveMemberId: getActiveMemberId,
+getActiveMember: getActiveMember,
+setActiveMember: setActiveMember,
+addMember: addMember,
+updateMember: updateMember,
+deleteMember: deleteMember,
+getFilteredHistory: getFilteredHistory,
+addScanRecord: addScanRecord,
+initFamily: initFamily
+}
+const app = getApp()
+const BASE_URL = app.globalData.baseUrl
+function _request(url, method, data) {
+return new Promise((resolve, reject) => {
+wx.request({
+url: BASE_URL + url,
+method: method,
+data: data,
+timeout: 30000,
+header: { 'Content-Type': 'application/json' },
+success(res) {
+if (res.data.code === 200) {
+// 后端统一返回code=200时取data字段作为业务结果
+resolve(res.data.data)
+} else {
+reject({ msg: res.data.msg || '请求失败', code: res.data.code })
+}
+},
+fail(err) {
+reject({ msg: '网络错误: ' + err.errMsg, code: -1 })
+},
+})
+})
+}
+function analyze(image, userType, avoidIds) {
+return _request('/analyze', 'POST', {
+image,
+user_type: userType || app.globalData.userType,
+avoid_ids: avoidIds ? avoidIds.join(',') : undefined,
+user_id: app.globalData.userId,
+})
+}
+function compare(image1, image2, userType) {
+return _request('/compare', 'POST', {
+image1,
+image2,
+user_type: userType || app.globalData.userType,
+})
+}
+function getHistory() {
+return _request('/history?user_id=' + app.globalData.userId, 'GET')
+}
+function getReport(type, date) {
+if (type === 'daily') {
+// 日报使用专用接口，包含AI日总结等字段
+return _request('/daily?user_id=' + app.globalData.userId, 'GET')
+}
+return _request('/history?user_id=' + app.globalData.userId + '&type=' + type + '&date=' + date, 'GET')
+}
+function compareReport(type, date1, date2) {
+return Promise.all([
+getReport(type, date1),
+getReport(type, date2),
+]).then(([r1, r2]) => ({ report1: r1, report2: r2 }))
+}
+function aiChat(question, history) {
+return _request('/api/ai-chat', 'POST', {
+question,
+history: history || [],
+user_type: app.globalData.userType,
+user_id: app.globalData.userId,
+})
+}
+function saveProfile(profile) {
+wx.setStorageSync('userProfile', profile)
+const g = app.globalData
+g.userId = profile.userId
+g.userType = profile.userType
+g.hasProfile = true
+return Promise.resolve({ success: true })
+}
+module.exports = {
+analyze,
+compare,
+getHistory,
+getReport,
+compareReport,
+aiChat,
+saveProfile,
+}
+const BENEFICIAL_KEYWORDS = [
+'蛋白', '膳食纤维', '维生素A', '维生素C', '维生素D', '维生素E', '维生素K', '维生素B',
+'叶酸', '钙', '铁', '锌', '钾', '镁', '硒', '碘', 'DHA', 'EPA',
+'不饱和脂肪酸', 'ω-3', 'Ω-3', '卵磷脂', '益生菌', '乳酸菌', '茶多酚',
+'花青素', '辅酶Q10', '叶黄素', '番茄红素', '燕麦', '全麦', '亚麻籽', '奇亚籽',
+'赤藓糖醇', '甜菊糖苷', '罗汉果', '木糖醇', '胶原蛋白', '透明质酸',
+'GABA', '牛磺酸', '芦荟', '枸杞',
+]
+const BENEFICIAL_MAP = {
+'蛋白': { cat: '蛋白质类', benefit: '优质蛋白来源，维持肌肉和免疫健康' },
+'乳清蛋白': { cat: '蛋白质类', benefit: '吸收快氨基酸谱完整，运动后肌肉修复和合成的理想蛋白' },
+'酪蛋白': { cat: '蛋白质类', benefit: '缓慢释放氨基酸，提供持久蛋白供应' },
+'大豆蛋白': { cat: '蛋白质类', benefit: '植物优质蛋白，含大豆异黄酮有助心血管健康' },
+'胶原蛋白': { cat: '蛋白质类', benefit: '维持皮肤弹性和关节健康，促进骨骼韧性' },
+'肽': { cat: '蛋白质类', benefit: '小分子蛋白肽吸收快，有助快速补充氮源和修复组织' },
+'氨基酸': { cat: '氨基酸类', benefit: '蛋白质基本构成单位，参与新陈代谢和肌肉修复' },
+'支链氨基酸': { cat: '氨基酸类', benefit: '直接促进肌肉蛋白合成，减少运动后肌肉酸痛' },
+'谷氨酰胺': { cat: '氨基酸类', benefit: '维持肠道健康和免疫功能，加速高强度训练后恢复' },
+'肌酸': { cat: '氨基酸类', benefit: '提升力量输出和爆发力，促进肌肉体积增长' },
+'赖氨酸': { cat: '氨基酸类', benefit: '必需氨基酸促进生长发育，谷物中常缺乏需额外补充' },
+'牛磺酸': { cat: '氨基酸类', benefit: '维持心脏功能和视力健康，缓解运动疲劳' },
+'左旋肉碱': { cat: '氨基酸类', benefit: '促进脂肪酸进入线粒体氧化供能，辅助脂肪代谢' },
+'膳食纤维': { cat: '膳食纤维类', benefit: '促进肠道蠕动，维持消化健康，辅助血糖血脂管理' },
+'菊粉': { cat: '膳食纤维类', benefit: '可溶性膳食纤维，促进肠道健康，调节食欲激素' },
+'低聚果糖': { cat: '膳食纤维类', benefit: '益生元不升血糖，促进肠道菌群平衡' },
+'低聚半乳糖': { cat: '膳食纤维类', benefit: '益生元促进有益菌增殖，改善肠道微生态' },
+'聚葡萄糖': { cat: '膳食纤维类', benefit: '水溶性膳食纤维，增加饱腹感促进排便' },
+'魔芋': { cat: '膳食纤维类', benefit: '葡甘露聚糖遇水膨胀数十倍，提供强烈饱腹感' },
+'燕麦': { cat: '膳食纤维类', benefit: '富含β-葡聚糖，有助降低胆固醇和稳定血糖' },
+'全麦': { cat: '膳食纤维类', benefit: '保留麸皮胚芽的全谷物，富含B族维生素和膳食纤维' },
+'奇亚籽': { cat: '膳食纤维类', benefit: '富含Ω-3和膳食纤维，吸水膨胀增加饱腹感' },
+'亚麻籽': { cat: '膳食纤维类', benefit: '富含Ω-3和木脂素，有助心血管健康和抗氧化' },
+'抗性糊精': { cat: '膳食纤维类', benefit: '水溶性膳食纤维，调节肠道功能延缓餐后血糖上升' },
+'维生素A': { cat: '维生素类', benefit: '保护视力维护皮肤健康，增强免疫功能' },
+'维生素C': { cat: '维生素类', benefit: '增强免疫力促进铁吸收抗氧化保护细胞健康' },
+'维生素D': { cat: '维生素类', benefit: '促进钙吸收维持骨骼健康调节免疫功能' },
+'维生素E': { cat: '维生素类', benefit: '强抗氧化剂保护细胞膜防止脂质过氧化延缓衰老' },
+'维生素K': { cat: '维生素类', benefit: '参与骨骼代谢促进钙沉积有助预防骨质疏松' },
+'维生素B': { cat: '维生素类', benefit: '参与能量代谢维持神经系统健康和红细胞生成' },
+'维生素B1': { cat: '维生素类', benefit: '参与碳水化合物能量代谢维持神经和心脏功能' },
+'维生素B2': { cat: '维生素类', benefit: '参与能量代谢维护皮肤和黏膜健康' },
+'维生素B6': { cat: '维生素类', benefit: '参与蛋白质代谢和神经递质合成维持免疫健康' },
+'维生素B12': { cat: '维生素类', benefit: '维持神经系统健康和红细胞生成预防巨幼细胞贫血' },
+'烟酰胺': { cat: '维生素类', benefit: '参与能量代谢维护皮肤健康和神经系统功能' },
+'叶酸': { cat: '维生素类', benefit: '预防胎儿神经管畸形，维持心血管健康降低同型半胱氨酸' },
+'泛酸': { cat: '维生素类', benefit: '参与能量代谢和激素合成维持神经系统健康' },
+'生物素': { cat: '维生素类', benefit: '参与脂肪酸合成和糖异生维持毛发皮肤健康' },
+'β-胡萝卜素': { cat: '维生素类', benefit: '维生素A前体强抗氧化剂清除自由基保护视力' },
+'叶黄素': { cat: '维生素类', benefit: '保护视网膜免受蓝光损伤降低黄斑变性风险' },
+'钙': { cat: '矿物质类', benefit: '维持骨骼和牙齿健康参与神经传导和肌肉收缩' },
+'铁': { cat: '矿物质类', benefit: '血红蛋白核心成分预防贫血和认知功能下降' },
+'锌': { cat: '矿物质类', benefit: '促进生长发育维持食欲和免疫功能加速伤口愈合' },
+'钾': { cat: '矿物质类', benefit: '维持正常血压和心脏功能参与神经肌肉活动' },
+'镁': { cat: '矿物质类', benefit: '维持心脏节律参与能量代谢改善睡眠质量' },
+'硒': { cat: '矿物质类', benefit: '强抗氧化剂保护细胞免受氧化损伤维持甲状腺功能' },
+'碘': { cat: '矿物质类', benefit: '甲状腺激素核心成分孕期影响胎儿大脑发育' },
+'铬': { cat: '矿物质类', benefit: '增强胰岛素活性改善糖代谢和脂代谢' },
+'铜': { cat: '矿物质类', benefit: '参与铁代谢和红细胞生成维持免疫和神经健康' },
+'锰': { cat: '矿物质类', benefit: '参与骨骼发育和抗氧化防御维持糖脂代谢' },
+'磷': { cat: '矿物质类', benefit: '参与骨骼牙齿构成和能量代谢维持酸碱平衡' },
+'钼': { cat: '矿物质类', benefit: '多种酶的重要组成成分参与嘌呤代谢' },
+'氯': { cat: '矿物质类', benefit: '维持体液酸碱平衡和胃酸分泌' },
+'DHA': { cat: '脂肪酸类', benefit: '促进大脑和视网膜发育维持认知功能预防认知衰退' },
+'EPA': { cat: '脂肪酸类', benefit: '降低甘油三酯水平抗炎保护血管内皮预防冠心病' },
+'不饱和脂肪酸': { cat: '脂肪酸类', benefit: '降低坏胆固醇保护心血管健康维持细胞膜流动性' },
+'ω-3': { cat: '脂肪酸类', benefit: '抗炎抗血栓降低甘油三酯保护心血管和大脑健康' },
+'Ω-3': { cat: '脂肪酸类', benefit: '抗炎抗血栓降低甘油三酯保护心血管和大脑健康' },
+'亚油酸': { cat: '脂肪酸类', benefit: '必需脂肪酸维持皮肤和细胞膜健康参与脂质代谢' },
+'α-亚麻酸': { cat: '脂肪酸类', benefit: '植物源Ω-3脂肪酸可在体内转化为DHA和EPA' },
+'卵磷脂': { cat: '脂肪酸类', benefit: '神经细胞膜重要成分促进大脑发育和学习记忆' },
+'中链脂肪酸': { cat: '脂肪酸类', benefit: '代谢快不易储存可直接供能有助于控制体重' },
+'MCT': { cat: '脂肪酸类', benefit: '快速供能不易储存为脂肪适合生酮和运动人群' },
+'植物甾醇': { cat: '植物化学物类', benefit: '竞争性抑制胆固醇吸收降低血总胆固醇和LDL' },
+'磷脂': { cat: '脂肪酸类', benefit: '细胞膜重要组成成分参与神经信号传导和脂质运输' },
+'辅酶Q10': { cat: '抗氧化类', benefit: '线粒体能量代谢关键成分保护心肌细胞抗氧化' },
+'虾青素': { cat: '抗氧化类', benefit: '天然强抗氧化剂保护皮肤和眼睛抗炎增强免疫力' },
+'花青素': { cat: '抗氧化类', benefit: '强抗氧化剂保护血管健康改善视力和认知功能' },
+'原花青素': { cat: '抗氧化类', benefit: '高效抗氧化保护心血管和胶原蛋白改善皮肤弹性' },
+'茶多酚': { cat: '抗氧化类', benefit: '强抗氧化剂清除自由基有助预防心血管疾病和抗癌' },
+'儿茶素': { cat: '抗氧化类', benefit: '绿茶主要活性成分抗氧化促进脂肪代谢保护心血管' },
+'白藜芦醇': { cat: '抗氧化类', benefit: '天然多酚抗氧化延缓衰老保护心血管有助抗炎' },
+'番茄红素': { cat: '抗氧化类', benefit: '强抗氧化剂降低前列腺癌风险保护心血管健康' },
+'姜黄素': { cat: '抗氧化类', benefit: '天然抗炎抗氧化成分有助缓解关节炎症和氧化应激' },
+'SOD': { cat: '抗氧化类', benefit: '超氧化物歧化酶清除超氧阴离子自由基延缓衰老' },
+'谷胱甘肽': { cat: '抗氧化类', benefit: '体内重要抗氧化剂解毒保护肝脏维持免疫功能' },
+'α-硫辛酸': { cat: '抗氧化类', benefit: '强抗氧化剂改善胰岛素敏感性保护神经细胞' },
+'益生菌': { cat: '益生菌类', benefit: '调节肠道菌群平衡增强免疫改善消化和排便功能' },
+'乳酸菌': { cat: '益生菌类', benefit: '促进肠道健康抑制有害菌增强免疫力改善乳糖消化' },
+'双歧杆菌': { cat: '益生菌类', benefit: '肠道关键有益菌抑制有害菌增强黏膜免疫' },
+'嗜酸乳杆菌': { cat: '益生菌类', benefit: '耐胃酸定植肠道有助改善乳糖不耐和肠道炎症' },
+'发酵': { cat: '益生菌类', benefit: '天然发酵工艺产生有益物质有助改善消化吸收' },
+'酵母': { cat: '益生菌类', benefit: '天然发酵菌种富含B族维生素和蛋白质改善消化' },
+'纳豆': { cat: '益生菌类', benefit: '纳豆激酶有助溶解血栓预防心血管疾病富含维生素K2' },
+'大蒜素': { cat: '植物化学物类', benefit: '扩张血管降低血压抑制血小板聚集抗动脉粥样硬化' },
+'芦荟': { cat: '植物化学物类', benefit: '芦荟苷和芦荟多糖有助润肠通便和皮肤保湿' },
+'枸杞': { cat: '植物化学物类', benefit: '枸杞多糖和玉米黄质抗氧化保护视力增强免疫力' },
+'赤藓糖醇': { cat: '代糖类', benefit: '几乎零热量不升血糖不引起龋齿适合减糖饮食' },
+'甜菊糖苷': { cat: '代糖类', benefit: '零热量天然甜味剂不升血糖不影响胰岛素水平' },
+'罗汉果甜苷': { cat: '代糖类', benefit: '零热量天然甜味剂从罗汉果提取安全性高' },
+'木糖醇': { cat: '代糖类', benefit: '天然糖醇有防龋齿作用不引起血糖剧烈波动' },
+'麦芽糖醇': { cat: '代糖类', benefit: '低热量不升血糖适合糖尿病患者适量食用' },
+'山梨糖醇': { cat: '代糖类', benefit: '天然糖醇低热量广泛用于无糖食品' },
+'GABA': { cat: '功能成分', benefit: 'γ-氨基丁酸有助放松神经改善睡眠质量和缓解焦虑' },
+'透明质酸钠': { cat: '功能成分', benefit: '透明质酸锁水保湿有助维护关节健康和皮肤水润' },
+'胶原蛋白肽': { cat: '功能成分', benefit: '小分子肽更易吸收有助改善皮肤弹性和关节健康' },
+'神经酰胺': { cat: '功能成分', benefit: '维护皮肤屏障功能锁水保湿改善皮肤干燥' },
+'壳聚糖': { cat: '功能成分', benefit: '几丁质衍生物有助吸附油脂辅助降低胆固醇' },
+'软骨素': { cat: '功能成分', benefit: '维持关节软骨健康缓解关节磨损和炎症' },
+'氨基葡萄糖': { cat: '功能成分', benefit: '关节软骨重要组成成分有助修复关节和缓解炎症' },
+'γ-氨基丁酸': { cat: '功能成分', benefit: '抑制神经兴奋有助改善睡眠缓解焦虑和稳定情绪' },
+'L-茶氨酸': { cat: '功能成分', benefit: '茶叶特有氨基酸放松身心提高注意力和认知表现' },
+'PS': { cat: '功能成分', benefit: '磷脂酰丝氨酸有助改善记忆和认知功能缓解压力' },
+'吡啶甲酸铬': { cat: '功能成分', benefit: '高吸收铬源增强胰岛素活性改善血糖控制' },
+}
+const BENEFICIAL_ADDITIVE_NAMES = [
+'维生素C', '维生素E', 'β-胡萝卜素',
+'茶多酚', '姜黄素', '植酸',
+'D-异抗坏血酸钠', '抗坏血酸钠',
+'牛磺酸', '卵磷脂',
+'赤藓糖醇', '木糖醇', '麦芽糖醇', '山梨糖醇',
+'甜菊糖苷', '罗汉果甜苷',
+'碳酸钙', '硫酸锌', '硫酸亚铁',
+]
+module.exports = {
+BENEFICIAL_KEYWORDS,
+BENEFICIAL_MAP,
+BENEFICIAL_ADDITIVE_NAMES,
+}

@@ -4,9 +4,7 @@ from datetime import datetime
 
 Base = declarative_base()
 
-
 class Additive(Base):
-    """添加剂知识库"""
     __tablename__ = "additives"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -18,9 +16,7 @@ class Additive(Base):
     reason = Column(Text, comment="风险原因")
     standard = Column(String(100), comment="标准限量")
 
-
 class GroupWarning(Base):
-    """人群预警规则"""
     __tablename__ = "group_warnings"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -32,9 +28,7 @@ class GroupWarning(Base):
     warning_msg = Column(Text, comment="预警信息")
     suggestion = Column(Text, comment="建议")
 
-
 class BeneficialIngredient(Base):
-    """有益成分知识库"""
     __tablename__ = "beneficial_ingredients"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -44,9 +38,7 @@ class BeneficialIngredient(Base):
     benefit = Column(Text, comment="益处描述")
     suggestion = Column(Text, comment="摄入建议")
 
-
 class AvoidOption(Base):
-    """自定义成分选项"""
     __tablename__ = "avoid_options"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -55,9 +47,7 @@ class AvoidOption(Base):
     warning_msg = Column(Text, comment="预警信息")
     suggestion = Column(Text, comment="建议")
 
-
 class ScanHistory(Base):
-    """扫描历史"""
     __tablename__ = "scan_history"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -70,9 +60,7 @@ class ScanHistory(Base):
     result_json = Column(Text, comment="完整结果JSON")
     scan_time = Column(DateTime, default=datetime.now, comment="扫描时间")
 
-
 class User(Base):
-    """用户信息"""
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -82,9 +70,7 @@ class User(Base):
     nickname = Column(String(100), comment="昵称")
     created_at = Column(DateTime, default=datetime.now, comment="创建时间")
 
-
 class WikiCache(Base):
-    """添加剂百科缓存"""
     __tablename__ = "wiki_cache"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

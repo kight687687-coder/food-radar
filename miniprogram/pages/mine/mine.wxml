@@ -74,7 +74,7 @@
       <view class="setting-row" bindtap="editAvoid"><text>忌口设置</text><view class="setting-value"><text>{{selectedAvoidNames.length}} 项</text><text class="iconfont setting-arrow icon-arrow-right"></text></view></view>
       <view class="setting-row" bindtap="goFamilyManage"><text>家庭管理</text><text class="iconfont setting-arrow icon-arrow-right"></text></view>
       <view class="setting-row" bindtap="clearCache"><text>清除缓存</text><text class="iconfont setting-arrow icon-arrow-right"></text></view>
-      <view class="setting-row"><text>关于食安雷达</text><text>2.0</text></view>
+      <view class="setting-row"><text>关于食安雷达</text><text>1.0</text></view>
     </view>
   </view>
 </view>

@@ -31,15 +31,13 @@ _KEYWORD_RULES = [
                   "番茄酱", "沙拉酱", "火锅底料", "调味料"]),
 ]
 
-
 def _classify_by_keywords(ingredients_text):
-    """基于关键词规则匹配大类，返回 (类别, 置信度) 或 (None, 0)"""
     for category, keywords in _KEYWORD_RULES:
         for kw in keywords:
+            # 任一关键词命中即可判定为该食品大类
             if kw in ingredients_text:
                 return category, 0.85
     return None, 0
-
 
 def _load_pipeline():
     global _pipeline
@@ -47,15 +45,7 @@ def _load_pipeline():
         _pipeline = joblib.load(MODEL_PATH)
     return _pipeline
 
-
 def classify(ingredients_text):
-    """输入配料表文字，返回 (食品类别, 置信度)
-
-    策略：
-    1. ML 模型主分类（置信度 ≥ 50% 即采纳）
-    2. ML 置信度低时使用关键词规则兜底
-    3. 关键词也未命中时使用宽松正则兜底
-    """
     # 1. ML 模型（主分类器）
     try:
         pipeline = _load_pipeline()
@@ -67,6 +57,7 @@ def classify(ingredients_text):
         if proba >= CONFIDENCE_THRESHOLD:
             return label, proba
     except Exception:
+        # 模型加载或预测异常时不中断主流程，转入规则兜底
         pass
 
     # 2. 关键词规则兜底（ML 置信度不足时使用）
@@ -80,9 +71,8 @@ def classify(ingredients_text):
         return fallback, 0.5
     return "零食类", 0.0
 
-
 def _fallback_classify(ingredients_text):
-    """宽松关键词兜底——仅通过明显特征判断"""
+    # 乳、奶、酪等关键词通常指向乳制品，但含糖、香精、胶时更接近零食属性
     if re.search(r'乳|奶|酪', ingredients_text):
         if re.search(r'糖|甜|香精|胶', ingredients_text):
             return "零食类"

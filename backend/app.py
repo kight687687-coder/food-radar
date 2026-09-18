@@ -20,13 +20,10 @@ CORS(app)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
-
 def _resp(code=200, msg="success", data=None):
     return jsonify({"code": code, "msg": msg, "data": data or {}})
 
-
 def _parse_ingredients(text):
-    """从OCR文本中提取配料列表——先定位配料表标记位置，再截取"""
     # 配料表标记列表（按优先级）
     MARKERS = ["配料表", "配料", "成分表", "成分", "原料表", "原料"]
     # 截断标记——遇到这些就停止（配料表之后的内容）
@@ -35,7 +32,6 @@ def _parse_ingredients(text):
                "制造商", "厂家", "服务热线", "客服", "二维码", "扫码",
                "微信公众号", "微博", "网址", "www.", "http"]
 
-    # 找到第一个标记的位置，截取从标记开始的内容
     start = 0
     for marker in MARKERS:
         idx = text.find(marker)
@@ -43,24 +39,19 @@ def _parse_ingredients(text):
             start = idx + len(marker)
             break
 
-    # 从标记处截取
     text = text[start:]
 
-    # 在截取后的文本中找截断标记，截断后半段（生产日期、保质期等之后的内容）
     for stop in STOP_KW:
         idx = text.find(stop)
         if idx != -1:
             text = text[:idx]
             break
 
-    # 去掉开头非内容字符
     text = re.sub(r"^[：:\s、，,；;\n\r]*", "", text)
 
-    # 按常见分隔符拆分
     parts = re.split(r"[、，,；;。\n\r]+", text)
     parts = [p.strip() for p in parts if p.strip()]
 
-    # 过滤
     FILTER_KW = ['生产', '厂家', '地址', '保质期', '净含量', '营养', '每100',
                  '执行', '标准', '温度', '储存', '食用方法', '产地',
                  '服务热线', '热线', '商标', '公司', '有限', '科技',
@@ -76,10 +67,13 @@ def _parse_ingredients(text):
                  '电话', '邮编']
     result = []
     for p in parts:
+        # 过长文本通常是地址、说明或宣传语，不作为单个配料处理
         if len(p) > 15:
             continue
+        # 命中生产、标准、联系方式等关键词时，判定为非配料字段
         if any(kw in p for kw in FILTER_KW):
             continue
+        # 纯数字或纯英文一般不是中文配料名称
         if re.match(r'^\d+$', p) or re.match(r'^[a-zA-Z]+$', p):
             continue
         if re.match(r'^[\d.]+%?$', p) or re.match(r'^[\d.]+(g|mg|ml|kcal|kJ|%)$', p):
@@ -89,7 +83,6 @@ def _parse_ingredients(text):
         if re.search(r'\d{3,}', p):
             continue
         result.append(p)
-    # 过滤过度保护：剩余少于2个且原始文本中有内容，退回宽松提取
     if len(result) < 2 and parts:
         # 至少去掉明显非配料的条目
         loose = [p for p in parts if len(p) <= 15
@@ -98,11 +91,10 @@ def _parse_ingredients(text):
         return loose[:20] if loose else parts[:20]
     return result
 
-
 def _get_subcategory(main_category, ingredients_list):
-    """根据大类和小类关键词返回具体小类名称"""
     ing_text = ",".join(ingredients_list)
 
+    # 饮料类根据碳酸、咖啡因、茶多酚、果汁等关键词细分
     if main_category == "饮料类":
         if "碳酸" in ing_text or "二氧化碳" in ing_text:
             return "碳酸饮料"
@@ -114,6 +106,7 @@ def _get_subcategory(main_category, ingredients_list):
             return "果汁饮料"
         return "饮料"
 
+    # 乳制品类根据菌种、乳粉、奶酪等关键词细分
     if main_category == "乳制品类":
         if "嗜热链球菌" in ing_text or "乳酸菌" in ing_text or "保加利亚" in ing_text:
             return "酸奶"
@@ -134,6 +127,7 @@ def _get_subcategory(main_category, ingredients_list):
             return "海苔零食"
         return "零食"
 
+    # 正餐类根据速冻、方便面、罐头等关键词细分
     if main_category == "正餐类":
         if "速冻" in ing_text or "糯米" in ing_text:
             return "速冻食品"
@@ -152,13 +146,9 @@ def _get_subcategory(main_category, ingredients_list):
             return "鸡肉制品"
         return "肉制品"
 
-    # 其余大类直接用大类名
     return main_category
 
-
 def _validate_ingredients(ingredients_list, ocr_text):
-    """验证配料表是否可信——清洗后的配料列表长度及有效性判断"""
-    # 清洗后超过80条才判定为异常
     if len(ingredients_list) > 80:
         return False, "配料表异常（条目过多），请重新拍摄配料表区域"
 
@@ -167,6 +157,7 @@ def _validate_ingredients(ingredients_list, ocr_text):
         _FOOD_CHARS = ["糖", "粉", "油", "酸", "钠", "胶", "脂", "水", "盐",
                        "肉", "奶", "乳", "蛋", "豆", "米", "麦",
                        "淀", "素", "色", "香", "精", "料", "醋", "酱", "芡"]
+        # 统计食品相关字出现比例，用于判断识别结果是否像真实配料
         food_count = sum(1 for ing in ingredients_list if any(c in ing for c in _FOOD_CHARS))
         food_ratio = food_count / len(ingredients_list)
         if food_ratio < 0.3:
@@ -179,9 +170,7 @@ def _validate_ingredients(ingredients_list, ocr_text):
     # 没有识别到任何配料
     return False, "无法识别有效配料表，请重新拍摄"
 
-
 def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
-    """执行完整分析管线"""
     from ocr import ocr_image
     from classifier import classify
     from score import score_ingredients
@@ -193,7 +182,6 @@ def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
         raise ValueError("OCR未能识别到文字")
 
     # 1.5 强制检查原文是否有配料表标识（在解析之前）
-    # 精确匹配——避免"成分"命中"营养成分表"，"原料"命中品牌标语
     _INGREDIENT_PATTERNS = [
         r'配\s*料',                          # 配料：/配料表（标点可选）
         r'成\s*分[：:;.]',                   # 成分：/成分:（排除"营养成分表"）
@@ -204,6 +192,7 @@ def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
     # 排除——OCR 识别到"营养成分表"但没识别到"配料/原料/配方"
     if re.search(r'营\s*养\s*成\s*分', ocr_text) and not re.search(r'配\s*料|原\s*料|配\s*方', ocr_text):
         raise ValueError("识别到营养成分表，请翻转包装找到配料表重新拍摄")
+    # 未命中配料相关标识时，直接中断分析，避免后续评分建立在错误文本上
     if not any(re.search(p, ocr_text) for p in _INGREDIENT_PATTERNS):
         raise ValueError("未找到配料表，请翻转包装找到以'配料：'开头的文字重新拍摄")
 
@@ -218,6 +207,7 @@ def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
     # 3. 分类
     print(f"[Classify] 输入配料: {','.join(ingredients_list[:10])}... 共{len(ingredients_list)}条")
     food_category_main, confidence = classify(",".join(ingredients_list))
+    # 分类置信度过低且配料数量不足时，认为图片质量或识别区域不可靠
     if confidence < 0.3 and len(ingredients_list) < 2:
         raise ValueError("未能识别到有效配料表，请对准配料表重新拍摄")
     food_category = _get_subcategory(food_category_main, ingredients_list)
@@ -254,14 +244,9 @@ def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
         "ai_report": ai_report,
     }
 
-
-# ──── 路由 ────
-
-
 @app.route("/health", methods=["GET"])
 def health():
     return _resp(data={"status": "ok", "time": datetime.now().isoformat()})
-
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -276,14 +261,15 @@ def analyze():
         else:
             return _resp(code=400, msg="缺少 image 参数")
 
+        # 将前端传入的逗号分隔编号转换为整数列表，供评分模块匹配避开项
         if avoid_ids:
             avoid_ids = [int(i) for i in avoid_ids.split(",") if i.strip()]
         else:
             avoid_ids = None
 
+        # 调用统一分析管线，得到识别、分类、评分和AI分析结果
         result = _run_analysis_pipeline(image, user_type, avoid_ids)
 
-        # 存入 scan_history
         with Session(engine) as session:
             record = ScanHistory(
                 user_id=body.get("user_id"),
@@ -308,7 +294,6 @@ def analyze():
         print(traceback.format_exc())
         return _resp(code=500, msg=f"分析失败: {str(e)}")
 
-
 @app.route("/compare", methods=["POST"])
 def compare():
     try:
@@ -323,6 +308,7 @@ def compare():
         r1 = _run_analysis_pipeline(img1, user_type)
         r2 = _run_analysis_pipeline(img2, user_type)
 
+        # 健康评分较高的食品作为推荐结果
         recommend = 1 if r1["health_score"] >= r2["health_score"] else 2
 
         return _resp(data={
@@ -335,7 +321,6 @@ def compare():
         return _resp(code=400, msg=str(e))
     except Exception as e:
         return _resp(code=500, msg=f"对比失败: {str(e)}")
-
 
 @app.route("/history", methods=["GET"])
 def history():
@@ -368,7 +353,6 @@ def history():
 
     except Exception as e:
         return _resp(code=500, msg=str(e))
-
 
 @app.route("/daily", methods=["GET"])
 def daily():
@@ -403,6 +387,7 @@ def daily():
         scores = [r.health_score for r in records if r.health_score is not None]
         avg_score = round(sum(scores) / len(scores), 1) if scores else 0
 
+        # 找出当天健康评分最低的食品，作为重点风险提醒
         worst = min(records, key=lambda r: r.health_score or 100)
         worst_food = {
             "product_name": worst.product_name,
@@ -416,6 +401,7 @@ def daily():
             for r in records[:10]
         )
 
+        # 将当天摘要交给AI生成更自然的饮食建议
         from ai_analyze import generate_daily_report
         ai_summary = generate_daily_report(
             scan_count, avg_score,
@@ -433,7 +419,6 @@ def daily():
     except Exception as e:
         return _resp(code=500, msg=str(e))
 
-
 @app.route("/api/ai-compare", methods=["POST"])
 def ai_compare():
     try:
@@ -449,7 +434,6 @@ def ai_compare():
     except Exception as e:
         print("[AI Compare Error]", str(e))
         return _resp(code=500, msg=str(e))
-
 
 @app.route("/api/ai-suggestion", methods=["POST"])
 def ai_suggestion():
@@ -470,7 +454,6 @@ def ai_suggestion():
         print("[AI Suggestion Error]", str(e))
         return _resp(code=500, msg=str(e))
 
-
 @app.route("/api/ai-chat", methods=["POST"])
 def ai_chat():
     try:
@@ -485,6 +468,7 @@ def ai_chat():
         if not question:
             return _resp(code=400, msg="请输入问题")
 
+        # 保留历史对话上下文，使AI回答更连贯
         history = body.get("history", [])
         user_type = body.get("user_type") or "普通人群"
 
@@ -496,7 +480,6 @@ def ai_chat():
     except Exception as e:
         print("[AI Chat Error]", str(e))
         return _resp(code=500, msg=str(e))
-
 
 @app.route("/api/wiki-query", methods=["POST"])
 def wiki_query():
@@ -510,8 +493,8 @@ def wiki_query():
     from models import WikiCache
 
     try:
-        # 先查数据库缓存，30天内有效
         with Session(engine) as session:
+            # 命中有效缓存时直接返回，减少AI接口调用成本并提升响应速度
             row = session.query(WikiCache).filter(
                 WikiCache.name == name,
                 text("updated_at > DATE_SUB(NOW(), INTERVAL 30 DAY)")
@@ -521,7 +504,7 @@ def wiki_query():
                 cached_data = json_lib.loads(row.data) if isinstance(row.data, str) else row.data
                 return jsonify({'success': True, 'data': cached_data, 'source': 'cache'})
 
-        # 缓存没有或已过期，调用 DeepSeek
+        # 提示词要求AI严格输出JSON，便于前端直接渲染百科字段
         prompt = f"""你是专业食品安全研究员，请介绍食品添加剂「{name}」。严格按以下JSON格式返回，不要输出任何其他内容，不要有markdown格式：
 {{
   "name": "标准中文名",
@@ -548,14 +531,15 @@ def wiki_query():
             temperature=0.3,
         )
         raw = response.choices[0].message.content.strip()
+        # 兼容AI偶尔返回代码块包裹JSON的情况
         if raw.startswith('```'):
             raw = raw.split('\n', 1)[1]
         if raw.endswith('```'):
             raw = raw.rsplit('```', 1)[0]
 
+        # 将AI返回文本解析为结构化对象，解析失败会进入JSON异常处理
         result = json_lib.loads(raw)
 
-        # 存入数据库
         with Session(engine) as session:
             existing = session.query(WikiCache).filter(WikiCache.name == name).first()
             if existing:
@@ -573,7 +557,6 @@ def wiki_query():
         return jsonify({'error': 'AI返回格式异常'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

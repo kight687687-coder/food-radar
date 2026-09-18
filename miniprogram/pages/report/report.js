@@ -60,10 +60,12 @@ Page({
   },
 
   loadHealthArchive() {
+    // 读取当前家庭成员和其扫描历史，作为健康档案计算基础
     const member = family.getActiveMember() || {}
     const history = family.getFilteredHistory()
       .filter(r => r.type !== 'pk')
       .sort((a, b) => new Date(b.createTime || 0) - new Date(a.createTime || 0))
+    // 分别取本周和上一个周期记录，用于计算趋势变化
     const weekRecords = this.getRecentDays(history, 7)
     const previousWeekRecords = this.getPreviousDays(history, 7, 7)
     const riskThemes = this.buildRiskThemes(weekRecords.length ? weekRecords : history)
@@ -143,6 +145,7 @@ Page({
 
     let statusText = '整体稳定'
     let statusTone = 'good'
+    // 评分低或低分记录较多时，提升健康档案风险等级
     if (score < 60 || attentionCount >= 3) {
       statusText = '需要关注'
       statusTone = 'bad'
@@ -213,6 +216,7 @@ Page({
       })
     }
 
+    // 记录少于3次时提示继续识别，提高趋势判断稳定性
     const remain = Math.max(0, 3 - weekRecords.length)
     actions.push({
       title: remain ? `本周继续识别 ${remain} 次` : '保持本周记录节奏',

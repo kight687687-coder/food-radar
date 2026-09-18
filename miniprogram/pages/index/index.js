@@ -1,4 +1,3 @@
-
 const { BENEFICIAL_KEYWORDS, BENEFICIAL_ADDITIVE_NAMES } = require('../../utils/constants')
 const family = require('../../utils/family')
 const app = getApp()
@@ -181,6 +180,7 @@ Page({
       const key = formatDateKey(d)
       const scores = history.filter(r => r.createTime && formatDateKey(new Date(r.createTime)) === key)
         .map(r => r.score ?? r.fullResult?.health_score ?? 0).filter(Boolean)
+      // 同一天有多次扫描时取平均分，避免单次记录过度影响趋势
       const score = scores.length ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length) : 0
       const day = d.getDay()
       const label = labels[day === 0 ? 6 : day - 1]
@@ -205,6 +205,7 @@ Page({
     const riskMap = {}
     history.forEach(r => {
       const risks = r.fullResult?.risk_additives || []
+      // 已知有益添加剂不计入风险事件，避免首页误报
       risks.filter(a => !BENEFICIAL_ADDITIVE_NAMES.includes(a.name)).forEach(a => {
         const key = a.name || '风险成分'
         if (!riskMap[key]) riskMap[key] = { name: key, count: 0, sources: [] }

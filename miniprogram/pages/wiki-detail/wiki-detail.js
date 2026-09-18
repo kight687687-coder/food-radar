@@ -63,6 +63,7 @@ Page({
     const cached = wx.getStorageSync(cacheKey)
     if (cached) {
       try {
+        // 命中本地缓存时直接展示，减少重复调用后端AI百科接口
         const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached
         wx.setNavigationBarTitle({ title: parsed.name || name })
         this.setData({
@@ -72,6 +73,7 @@ Page({
         })
         return
       } catch (err) {
+        // 缓存结构异常时清理缓存，避免后续继续读取坏数据
         wx.removeStorageSync(cacheKey)
       }
     }
@@ -91,6 +93,7 @@ Page({
       success: (res) => {
         if (res.data && res.data.success && res.data.data) {
           const entry = res.data.data
+          // AI结果写入本地缓存，后续再次查看同一添加剂可直接使用
           wx.setStorageSync(cacheKey, entry)
           wx.setNavigationBarTitle({ title: entry.name || name })
           this.setData({
@@ -99,6 +102,7 @@ Page({
             errorText: '',
           })
         } else {
+          // 接口返回不完整时展示兜底百科结构
           this.showFallback(name)
         }
       },

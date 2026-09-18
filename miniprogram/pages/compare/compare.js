@@ -1,4 +1,3 @@
-
 const api = require('../../utils/request')
 const family = require('../../utils/family')
 const app = getApp()
@@ -19,6 +18,7 @@ Page({
   },
 
   onLoad(options) {
+    // 从历史PK记录进入时，直接加载已保存的完整对比数据
     if (options && options.mode === 'history') {
       this.loadFromHistory()
       return
@@ -43,6 +43,7 @@ Page({
       wx.navigateBack()
       return
     }
+    // 标记当前页面为历史查看模式，避免重复保存PK记录
     this._isHistoryView = true
     this.setData({ foodA: pkData.foodA, foodB: pkData.foodB })
     this.computeComparison()
@@ -52,6 +53,7 @@ Page({
 
   selectFood(e) {
     const side = e.currentTarget.dataset.side
+    // 分析中不允许重新选图，避免并发状态错乱
     if (!side || this.data.analyzing) return
     wx.chooseMedia({
       count: 1,
@@ -69,6 +71,7 @@ Page({
     const { foodA, foodB } = this.data
     if (!foodA || !foodB || this.data.analyzing) return
     const tasks = []
+    // 已分析过的食品直接复用结果，待分析图片才调用后端接口
     tasks.push(foodA.status === 'pending' ? this.analyzeImage(foodA.imagePath) : Promise.resolve(foodA))
     tasks.push(foodB.status === 'pending' ? this.analyzeImage(foodB.imagePath) : Promise.resolve(foodB))
     this.setData({ analyzing: true })
@@ -92,6 +95,7 @@ Page({
         filePath,
         encoding: 'base64',
         success: (fileRes) => {
+          // 提交后端执行OCR、分类、评分和AI分析
           api.analyze(fileRes.data).then((data) => {
             data.imagePath = filePath
             resolve(data)
@@ -113,6 +117,7 @@ Page({
     const benefitB = foodB.beneficial_ingredients || []
     const warnA = (foodA.group_warnings || []).length + (foodA.avoid_warnings || []).length
     const warnB = (foodB.group_warnings || []).length + (foodB.avoid_warnings || []).length
+    // 评分不同优先按评分判断；评分相同时选择风险项更少的一方
     const winner = scoreA === scoreB ? (riskA.length <= riskB.length ? 'A' : 'B') : (scoreA > scoreB ? 'A' : 'B')
     const winnerFood = winner === 'A' ? foodA : foodB
     const winnerName = winnerFood.food_category || (winner === 'A' ? '食品 A' : '食品 B')
@@ -125,6 +130,7 @@ Page({
     const riskListA = riskA.map(r => ({ name: r.name || '风险成分', level: this.riskLevelClass(r) }))
     const riskListB = riskB.map(r => ({ name: r.name || '风险成分', level: this.riskLevelClass(r) }))
     this.setData({ winner, winnerName, cmpRows, riskListA, riskListB })
+    // 非历史模式下保存本次PK记录，供历史页回看
     if (!this._isHistoryView) this.savePkRecord(winner, scoreA, scoreB)
   },
 
@@ -158,6 +164,7 @@ Page({
       createTime,
     }
     family.addScanRecord(pkRecord)
+    // 完整分析结果单独缓存，避免历史列表记录过大
     wx.setStorageSync('pkFullData_' + createTime, { foodA, foodB })
   },
 
@@ -185,6 +192,7 @@ Page({
       timeout: 30000,
       header: { 'Content-Type': 'application/json' },
       success: (res) => {
+        // AI失败时使用兜底文案，保证页面始终可展示建议
         const advice = res.data && res.data.code === 200 ? (res.data.data.advice || '') : ''
         this.setData({ aiAdvice: advice || '结合个人忌口和食用频率选择更适合的一款。', aiLoading: false })
       },

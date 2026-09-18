@@ -52,6 +52,7 @@ Page({
       var members = family.getMembers()
       var member = members.find(function (m) { return m.memberId === memberId })
       if (member) {
+        // 编辑模式下回填成员资料、健康类型、忌口选项和头像
         var avoids = member.selectedAvoids || []
         var typeIdx = USER_TYPES.indexOf(member.userType || '普通人群')
         var genderIdx = GENDERS.indexOf(member.gender || '')
@@ -90,7 +91,6 @@ Page({
     this.setData({ avoidGroups: groups })
   },
 
-  // ─── 昵称 ───
   onNicknameInput: function (e) {
     var nickname = e.detail.value || ''
     this.setData({
@@ -99,24 +99,20 @@ Page({
     })
   },
 
-  // ─── 性别 ───
   confirmGender: function (e) {
     var idx = e.detail.value
     this.setData({ gender: GENDERS[idx], genderIndex: idx })
   },
 
-  // ─── 数字输入 ───
   onAgeInput: function (e) { this.setData({ age: e.detail.value }) },
   onHeightInput: function (e) { this.setData({ height: e.detail.value }) },
   onWeightInput: function (e) { this.setData({ weight: e.detail.value }) },
 
-  // ─── 人群类型 ───
   confirmType: function (e) {
     var idx = e.detail.value
     this.setData({ userType: USER_TYPES[idx], typeIndex: idx })
   },
 
-  // ─── 家庭关系 ───
   confirmRelation: function (e) {
     var idx = e.detail.value
     this.setData({ relationship: RELATIONS[idx] })
@@ -179,6 +175,7 @@ Page({
             self.setData({ avatar: saveRes.savedFilePath })
           },
           fail: function () {
+            // 保存失败时退回临时路径，保证头像即时可见
             self.setData({ avatar: tempPath })
           }
         })
@@ -186,7 +183,6 @@ Page({
     })
   },
 
-  // ─── 保存 ───
   saveMember: function () {
     var nickname = (this.data.nickname || '').trim()
     if (!nickname) {
@@ -207,9 +203,11 @@ Page({
     }
 
     if (this.data.isEdit) {
+      // 编辑已有成员时按memberId更新资料
       family.updateMember(this.data.memberId, form)
       wx.showToast({ title: '已更新', icon: 'success' })
     } else {
+      // 新增成员时校验家庭成员数量限制
       var result = family.addMember(form)
       if (!result.ok) {
         wx.showToast({ title: result.msg, icon: 'none' })
@@ -234,6 +232,7 @@ Page({
       confirmColor: '#DC2626',
       success: function (res) {
         if (res.confirm) {
+          // 删除逻辑由family工具统一处理，包括成员数量和当前成员切换
           var result = family.deleteMember(self.data.memberId)
           if (result.ok) {
             wx.showToast({ title: '已移除', icon: 'success' })

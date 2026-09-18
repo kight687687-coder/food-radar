@@ -8,7 +8,6 @@ AVOID_PENALTY = 5
 STACK_PENALTY = 8
 STACK_THRESHOLD = 2
 
-# 有益成分加分
 BENEFIT_BONUS = {
     "蛋白质类": 5,
     "膳食纤维类": 5,
@@ -24,26 +23,17 @@ BENEFIT_BONUS = {
 }
 BENEFIT_MAX_BONUS = 25
 
-# 已知有益/安全的食品添加剂：虽然作为食品添加剂使用（多为抗氧化剂、甜味剂等），
-# 但同时也是有益营养素，不应标记为风险成分，也不应扣分
 BENEFICIAL_ADDITIVE_NAMES = {
-    # 维生素类
     "维生素C", "维生素E", "β-胡萝卜素",
-    # 天然抗氧化剂
     "茶多酚", "姜黄素", "植酸",
-    # 维生素C衍生物
     "D-异抗坏血酸钠", "抗坏血酸钠",
-    # 氨基酸/营养素类
     "牛磺酸", "卵磷脂",
-    # 天然代糖
     "赤藓糖醇", "木糖醇", "麦芽糖醇", "山梨糖醇",
     "甜菊糖苷", "罗汉果甜苷",
-    # 营养强化剂
     "碳酸钙", "硫酸锌", "硫酸亚铁",
 }
 
 # 人群额外惩罚系数
-# (匹配方式, 匹配值, 倍率)  —  base_deduct × (multiplier - 1) 为额外扣分
 # 匹配方式: "type" 按添加剂类型字段, "name" 按名称精确匹配, "name_contains" 按名称包含
 GROUP_PENALTY_RULES = {
     "儿童": [
@@ -76,28 +66,18 @@ GROUP_PENALTY_RULES = {
     "其他": [],
 }
 
-
 def _get_engine():
     return create_engine(SQLALCHEMY_DATABASE_URI)
 
-
 def score_ingredients(ingredients_list, group_type=None, user_options=None, avoid_ids=None):
-    """
-    综合评分主函数
-    :param ingredients_list: 配料列表，如 ["水", "白砂糖", "柠檬酸", ...]
-    :param group_type: 人群类型，如 "儿童"、"孕妇"，None 表示不触发人群预警
-    :param user_options: 用户自定义避免成分，如 ["味精", "人工色素"]
-    :param avoid_ids: 指定要匹配的AvoidOption ID列表，None表示匹配全部
-    :return: dict
-    """
     engine = _get_engine()
 
     with Session(engine) as session:
 
-        # ── 1. 匹配添加剂 ──
         all_additives = session.query(Additive).all()
         matched_additives = []
         for add in all_additives:
+            # 添加剂名称直接出现在配料列表中时，判定为命中
             if add.name in ingredients_list:
                 matched_additives.append(add)
             elif add.alias:
@@ -105,13 +85,10 @@ def score_ingredients(ingredients_list, group_type=None, user_options=None, avoi
                 if any(a in "".join(ingredients_list) for a in aliases):
                     matched_additives.append(add)
 
-        # ── 2. 人群预警 ──
         matched_warnings = _match_group_warnings(session, matched_additives, ingredients_list, group_type)
 
-        # ── 3. 自定义成分 ──
         avoid_warnings = _match_avoid_options(session, ingredients_list, user_options, avoid_ids)
 
-        # ── 4. 有益成分 ──
         beneficial_ingredients = _match_beneficial_ingredients(session, ingredients_list, group_type)
 
     # ── 4. 计算评分 ──
@@ -129,9 +106,7 @@ def score_ingredients(ingredients_list, group_type=None, user_options=None, avoi
         "group_extra_details": details["group_extra_details"],
     }
 
-
 def _match_group_warnings(session, matched_additives, ingredients_list, group_type=None):
-    """匹配人群预警：按人群类型 + 营养关键词匹配"""
     query = session.query(GroupWarning)
     if group_type:
         query = query.filter(GroupWarning.group_type == group_type)
@@ -141,13 +116,12 @@ def _match_group_warnings(session, matched_additives, ingredients_list, group_ty
     for w in warnings:
         if w.nutrient:
             matched_names = [a.name for a in matched_additives]
+            # 预警关键词可匹配原始配料，也可匹配已经识别出的添加剂名称
             if w.nutrient in combined_text or any(w.nutrient in name for name in matched_names):
                 triggered.append(w)
     return triggered
 
-
 def _match_avoid_options(session, ingredients_list, user_options, avoid_ids=None):
-    """匹配自定义避免成分"""
     from models import AvoidOption
 
     avoid_warnings = []
@@ -156,6 +130,7 @@ def _match_avoid_options(session, ingredients_list, user_options, avoid_ids=None
         query = query.filter(AvoidOption.id.in_(avoid_ids))
     options = query.all()
     for opt in options:
+        # 既支持名称精确匹配，也支持关键词模糊匹配
         matched = any(ing == opt.name or (opt.keywords and any(
             kw.strip() in "".join(ingredients_list) for kw in opt.keywords.split(",")
         )) for ing in ingredients_list)
@@ -166,7 +141,6 @@ def _match_avoid_options(session, ingredients_list, user_options, avoid_ids=None
                 "suggestion": opt.suggestion,
             })
 
-    # 也检查用户自定义选项
     if user_options:
         for opt_name in user_options:
             if opt_name in ingredients_list:
@@ -178,9 +152,7 @@ def _match_avoid_options(session, ingredients_list, user_options, avoid_ids=None
 
     return avoid_warnings
 
-
 def _match_beneficial_ingredients(session, ingredients_list, group_type=None):
-    """匹配有益成分：按人群类型 + 营养关键词匹配配料"""
     query = session.query(BeneficialIngredient)
     if group_type:
         query = query.filter(BeneficialIngredient.group_type == group_type)
@@ -191,8 +163,8 @@ def _match_beneficial_ingredients(session, ingredients_list, group_type=None):
     combined_text = "".join(ingredients_list)
     matched = []
     for c in candidates:
+        # 有益成分关键词出现在配料文本中即视为命中
         if c.nutrient and c.nutrient in combined_text:
-            # 去重：同一营养成分只保留一个
             if not any(m["nutrient"] == c.nutrient for m in matched):
                 matched.append({
                     "nutrient": c.nutrient,
@@ -203,9 +175,7 @@ def _match_beneficial_ingredients(session, ingredients_list, group_type=None):
 
     return matched
 
-
 def _calculate_score(matched_additives, matched_warnings, avoid_warnings, ingredients_count=0, group_type=None, beneficial_ingredients=None):
-    """计算健康评分（仅扣分体系）"""
     score = 100  # 基准分
 
     # 排除已知有益添加剂——它们不应被当作风险成分处理
@@ -218,7 +188,6 @@ def _calculate_score(matched_additives, matched_warnings, avoid_warnings, ingred
     if filtered_count:
         print(f"[Score] 排除有益添加剂 {filtered_count}个", flush=True)
 
-    # 按风险等级统计
     high = [a for a in matched_additives if a.risk_level == "高"]
     mid = [a for a in matched_additives if a.risk_level == "中"]
     low = [a for a in matched_additives if a.risk_level == "低"]
@@ -231,20 +200,20 @@ def _calculate_score(matched_additives, matched_warnings, avoid_warnings, ingred
     for a in low:
         risk_additives.append({"name": a.name, "risk_level": "低", "reason": a.reason, "deduct_score": 5})
 
-    # 添加剂扣分
     score -= len(high) * RISK_PENALTY["高"]
     score -= len(mid) * RISK_PENALTY["中"]
     score -= len(low) * RISK_PENALTY["低"]
 
-    # 避免成分扣分
     score -= len(avoid_warnings) * AVOID_PENALTY
 
     # 配料数量惩罚（累加）
     ingredients_count_penalty = 0
     if ingredients_count > 15:
+        # 配料较多时提示加工复杂度偏高
         score -= 5
         ingredients_count_penalty = 5
     if ingredients_count > 25:
+        # 配料过多时继续累加扣分
         score -= 5
         ingredients_count_penalty += 5
 
@@ -268,6 +237,7 @@ def _calculate_score(matched_additives, matched_warnings, avoid_warnings, ingred
                 continue
             for match_type, match_val, multiplier in GROUP_PENALTY_RULES[group_type]:
                 matched = False
+                # 按类型、名称精确匹配或名称包含三种方式触发人群额外惩罚
                 if match_type == "type" and additive.type == match_val:
                     matched = True
                 elif match_type == "name" and additive.name == match_val:
@@ -287,7 +257,6 @@ def _calculate_score(matched_additives, matched_warnings, avoid_warnings, ingred
                         })
                     break  # 每条添加剂只触发一条规则
 
-        # 把额外扣分信息写入 risk_additives
         extra_map = {d["name"]: {"multiplier": d["multiplier"], "extra_deduct": d["extra_deduct"]}
                      for d in group_extra_details}
         for ra in risk_additives:
@@ -297,7 +266,6 @@ def _calculate_score(matched_additives, matched_warnings, avoid_warnings, ingred
 
     score -= group_extra_penalty
 
-    # 限制在 0-100 范围
     score = max(0, min(100, score))
 
     print(f"[Score] 高风险:{len(high)}个x20 中风险:{len(mid)}个x10 低风险:{len(low)}个x5", flush=True)

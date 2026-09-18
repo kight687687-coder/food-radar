@@ -111,8 +111,10 @@ Page({
     var saved = this.data.selectedAvoids.slice()
     var idx = saved.indexOf(id)
     if (idx === -1) {
+      // 未选择时加入忌口列表
       saved.push(id)
     } else {
+      // 已选择时从忌口列表移除
       saved.splice(idx, 1)
     }
     var groups = this.data.avoidGroups
@@ -189,6 +191,7 @@ Page({
     }
 
     const existing = wx.getStorageSync('userProfile') || {}
+    // 没有历史用户ID时使用当前时间生成本地用户ID
     const userId = existing.userId || Date.now()
 
     wx.setStorageSync('userProfile', {

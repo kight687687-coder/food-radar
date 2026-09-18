@@ -43,6 +43,7 @@ function addMember(info) {
     createTime: Date.now()
   }
   members.push(member)
+  // 家庭成员资料保存在本地缓存，供首页、报告页和扫描页共享
   wx.setStorageSync(FAMILY_KEY, members)
   return { ok: true, member }
 }
@@ -75,6 +76,7 @@ function deleteMember(id) {
   }
   wx.setStorageSync(FAMILY_KEY, filtered)
   if (getActiveMemberId() === id) {
+    // 删除当前成员后自动切换到剩余列表第一位
     setActiveMember(filtered[0].memberId)
   }
   return { ok: true }
@@ -92,6 +94,7 @@ function addScanRecord(record) {
   const fullRecord = Object.assign({}, record, { memberId: activeId })
   const history = wx.getStorageSync(HISTORY_KEY) || []
   history.unshift(fullRecord)
+  // 只保留最近50条记录，控制本地缓存体积
   if (history.length > 50) history.length = 50
   wx.setStorageSync(HISTORY_KEY, history)
   return fullRecord
@@ -101,11 +104,13 @@ function initFamily() {
   const members = getMembers()
   if (members.length > 0) {
     if (!getActiveMemberId()) {
+      // 已有成员但未设置当前成员时，默认选中第一位
       setActiveMember(members[0].memberId)
     }
     return false
   }
 
+  // 首次启用家庭功能时，以旧版用户画像创建“我自己”成员
   const profile = wx.getStorageSync('userProfile') || {}
   const memberId = generateId()
   const firstMember = {
@@ -126,6 +131,7 @@ function initFamily() {
 
   const history = wx.getStorageSync(HISTORY_KEY) || []
   if (history.length > 0) {
+    // 旧历史记录没有memberId，迁移时统一归属到默认成员
     history.forEach(function (r) {
       if (!r.memberId) r.memberId = memberId
     })

@@ -4,9 +4,7 @@ from config import DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_BASE_URL
 
 client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
 
-
 def generate_report(food_category, health_score, risk_additives, user_type, warnings):
-    """调用 DeepSeek 生成分析报告"""
     risk_text = json.dumps(risk_additives, ensure_ascii=False)
     warnings_text = json.dumps(warnings, ensure_ascii=False)
 
@@ -34,7 +32,6 @@ def generate_report(food_category, health_score, risk_additives, user_type, warn
     )
 
     content = resp.choices[0].message.content.strip()
-    # 去除可能的 markdown 代码围栏
     if content.startswith("```"):
         lines = content.split("\n", 1)
         if len(lines) > 1:
@@ -44,9 +41,7 @@ def generate_report(food_category, health_score, risk_additives, user_type, warn
 
     return json.loads(content)
 
-
 def generate_daily_report(scan_count, avg_score, worst_food, foods_context):
-    """生成每日总结报告"""
     prompt = f"""你是专业营养师，请根据以下今日扫描数据生成饮食总结：
 
 今日扫描次数：{scan_count}
@@ -78,9 +73,7 @@ def generate_daily_report(scan_count, avg_score, worst_food, foods_context):
 
     return json.loads(content)
 
-
 def generate_compare_advice(food_a, food_b):
-    """生成食品对比建议（150字以内）"""
     def _fmt(f):
         name = f.get("food_category", "未知")
         score = f.get("health_score", 0)
@@ -106,9 +99,7 @@ def generate_compare_advice(food_a, food_b):
 
     return resp.choices[0].message.content.strip()[:150]
 
-
 def generate_short_suggestion(categories, risk_items, avg_score, scan_count, period_label="今日"):
-    """生成饮食建议（100-150字）"""
     cat_text = "、".join(categories[:5]) if categories else "无记录"
     risk_text = "、".join([r["name"] for r in risk_items[:3]]) if risk_items else "无"
 
@@ -125,9 +116,7 @@ def generate_short_suggestion(categories, risk_items, avg_score, scan_count, per
 
     return resp.choices[0].message.content.strip()
 
-
 def generate_wiki_entry(name):
-    """调用 DeepSeek 生成添加剂百科条目"""
     prompt = f"""你是专业食品安全研究员，请介绍食品添加剂「{name}」。严格按以下JSON格式返回，不要输出任何其他内容，不要有markdown格式：
 {{
   "name": "标准中文名",
@@ -163,9 +152,7 @@ def generate_wiki_entry(name):
 
     return json.loads(content)
 
-
 def generate_chat_answer(question, history=None, user_type="普通人群"):
-    """AI 营养师问答，限定在食品安全和配料表相关场景。"""
     history = history or []
     safe_history = []
     for item in history[-8:]:

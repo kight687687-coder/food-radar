@@ -69,6 +69,7 @@ Page({
       avatar: this.data.userAvatar,
       avatarText: this.data.userAvatarText,
     }
+    // 仅保留最近8条消息作为上下文，控制接口请求体大小
     const history = this.data.messages.slice(-8).map(item => ({
       role: item.role,
       content: item.text,
@@ -78,6 +79,7 @@ Page({
 
     api.aiChat(question, history)
       .then(res => {
+        // 对AI回答做展示清洗，去除可能出现的Markdown格式
         const answer = cleanAnswer(res.answer || '暂时没有生成有效回答，请换个问法再试。')
         this.setData({
           messages: this.data.messages.concat([{ role: 'assistant', text: answer, avatar: BOT_AVATAR }]),
@@ -85,6 +87,7 @@ Page({
         })
       })
       .catch(err => {
+        // 接口失败时追加兜底回复，保持聊天流程连续
         this.setData({
           messages: this.data.messages.concat([
             { role: 'assistant', text: err.msg || 'AI 问答暂时不可用，请稍后再试。', avatar: BOT_AVATAR }

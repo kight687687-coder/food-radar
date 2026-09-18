@@ -21,7 +21,6 @@ Page({
   },
 
   onShow() {
-    // 清空记录，触发飞入动画重播
     this.setData({
       pageParticles: this._genParticles(),
       records: [],
@@ -39,6 +38,7 @@ Page({
 
     const totalCount = scanHistory.length
     const highRiskCount = scanHistory.filter(r => (r.score ?? 100) < 60).length
+    // 平均分用于历史页顶部概览，没有记录时显示0
     const avgScore = totalCount > 0
       ? Math.round(scanHistory.reduce((s, r) => s + (r.score ?? 0), 0) / totalCount)
       : 0
@@ -70,6 +70,7 @@ Page({
 
       // PK记录特殊处理
       if (rec.type === 'pk') {
+        // PK记录没有单一食品详情，构造成对比卡片并跳转到对比页查看
         const item = {
           id: rec.createTime + '_' + idx,
           type: 'pk',
@@ -99,20 +100,20 @@ Page({
       const score = rec.score ?? 0
       const scoreLevel = score >= 80 ? '优秀' : score >= 60 ? '良好' : '高风险'
 
-      // 从该记录的 fullResult 提取添加剂风险等级
       const fullResult = rec.fullResult || {}
       const riskMap = {}
       ;(fullResult.risk_additives || []).forEach(a => {
+        // 将后端风险等级转换为前端标签样式
         riskMap[a.name] = a.risk_level === '高' ? 'high' : a.risk_level === '中' ? 'mid' : a.risk_level === '低' ? 'low' : 'safe'
       })
 
       const name = rec.foodName || rec.food_category || '未知食品'
       const origCategory = rec.food_category || (rec.fullResult && rec.fullResult.food_category) || ''
 
-      // 有益成分标签：优先从 fullResult 提取，没有时从配料表关键词匹配
       let beneficialTags = []
       const beneficialFromResult = (fullResult.beneficial_ingredients || []).map(b => b.nutrient)
       if (beneficialFromResult.length > 0) {
+        // 后端已识别有益成分时优先使用结构化结果
         beneficialTags = beneficialFromResult
       } else if (fullResult.ingredients) {
         const ingText = '' + fullResult.ingredients
@@ -138,6 +139,7 @@ Page({
       }
 
       if (!groupMap.has(ds)) {
+        // 首次遇到日期时创建分组，并保持出现顺序
         groupMap.set(ds, { dateLabel: label, records: [] })
         groupOrder.push(groupMap.get(ds))
       }
@@ -165,13 +167,11 @@ Page({
       return
     }
 
-    // 尝试从 scanHistory 中找回完整结果
     const scanHistory = wx.getStorageSync('scanHistory') || []
     const fullRecord = scanHistory.find(r => r.createTime && r.createTime === record.createTime)
 
     if (fullRecord && fullRecord.fullResult) {
       const fullResult = fullRecord.fullResult
-      // 确保使用原始的 food_category（未改名前的模型结果）
       fullResult.food_category = fullRecord.food_category || fullResult.food_category
       fullResult.imagePath = fullRecord.imagePath || fullResult.imagePath || ''
       wx.setStorageSync('lastResult', fullResult)
@@ -210,6 +210,7 @@ Page({
       const group = this.data.groupedRecords[g]
       const oldRecord = group?.records?.[index]
       if (oldRecord) {
+        // 通过创建时间定位原始历史记录并更新名称
         const historyRecord = scanHistory.find(r => r.createTime && r.createTime === oldRecord.createTime)
         if (historyRecord) {
           historyRecord.foodName = value
