@@ -1,0 +1,13 @@
+.env
+.env.local
+.venv/
+.pytest_cache/
+__pycache__/
+tests/
+*.pyc
+*.log
+deploy.sh
+food-radar.service
+init_db.py
+import_data.py
+train.py

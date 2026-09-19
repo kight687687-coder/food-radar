@@ -43,3 +43,18 @@ python app.py
 ## 说明
 
 本项目提供的分析结果仅用于日常食品风险参考，不替代医学、营养或监管结论。
+
+## Web 版
+
+The original WeChat mini-program remains under `miniprogram/`. The browser migration is an independent React/Vite app under `web/`.
+
+不要通过 `file:///.../web/index.html` 直接打开。最简单的本地启动方式是双击仓库根目录的 `启动Web版.bat`。
+
+From the repository root:
+
+```bash
+npm install
+npm run build
+```
+
+For local development run `npm run dev` and open the URL printed by Vite. For Vercel, set Root Directory to `web`, Build Command to `npm run build`, and Output Directory to `dist`. See `web/README.md` for the backend environment variable and deployment notes.

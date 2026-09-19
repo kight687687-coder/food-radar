@@ -1,4 +1,8 @@
 .env
+.env.local
+.venv/
+.pytest_cache/
+.vercel/
 __pycache__/
 *.pyc
 *.pyo

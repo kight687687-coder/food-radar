@@ -14,3 +14,11 @@ backend/logs/
 # Local secrets
 backend/.env
 miniprogram/project.private.config.json
+
+# Web build artifacts
+node_modules/
+web/node_modules/
+web/dist/
+
+# Local visual QA artifacts
+.tmp-mobile-qa/
