@@ -55,7 +55,28 @@ export function ScanPage() {
   return (
     <Page title="AI 食品识别中心" subtitle="上传配料表图片，识别风险与建议" className="scan-page">
       <input ref={inputRef} className="visually-hidden" type="file" accept="image/*" onChange={handleFile} />
-      <div className="scan-hero"><div className="scan-visual" aria-hidden="true"><div className="label-paper"><i /><i /><i /><span><b /></span></div><em>AI</em><small>配料表</small></div><h2>上传配料表图片</h2><p>从相册选择包装背面或配料表截图</p><button className="button primary scan-button" type="button" onClick={() => inputRef.current?.click()} disabled={analyzing}>{analyzing ? '分析中' : '选择图片'}</button></div>
+      <div className="scan-hero">
+        <div className="scan-visual" aria-hidden="true">
+          <div className="label-paper">
+            <span className="label-line label-head" />
+            <span className="label-line long" />
+            <span className="label-line" />
+            <span className="label-line short" />
+            <span className="scan-frame">
+              <span className="scan-line" />
+              <i className="scan-corner lt" />
+              <i className="scan-corner rt" />
+              <i className="scan-corner lb" />
+              <i className="scan-corner rb" />
+            </span>
+          </div>
+          <em>AI</em>
+          <small>配料表</small>
+        </div>
+        <h2>上传配料表图片</h2>
+        <p>从相册选择包装背面或配料表截图</p>
+        <button className="button primary scan-button" type="button" onClick={() => inputRef.current?.click()} disabled={analyzing}>{analyzing ? '分析中' : '选择图片'}</button>
+      </div>
       <Section><Card className="scan-advice"><h2>上传建议</h2><div className="upload-tips"><span>配料表文字尽量清晰</span><span>避免反光和大角度倾斜</span><span>上传包装背面的完整配料区域</span></div></Card></Section>
       <Section><Card className="scan-support"><h2>支持识别</h2><div className="tag-row"><span className="tag success">配料表</span><span className="tag success">食品标签</span><span className="tag success">添加剂名称</span></div></Card></Section>
       <Section title="AI 分析能力"><div className="capability-grid">{capabilities.map(([image, label]) => <Card key={label} className="capability"><img className="feature-entry-image" src={image} alt="" /><strong>{label}</strong></Card>)}</div></Section>

@@ -43,7 +43,11 @@ export function AppShell() {
         </aside>
       )}
 
-      <main className="app-main"><Outlet /></main>
+      <main className="app-main">
+        <div className="route-stage" key={location.pathname}>
+          <Outlet />
+        </div>
+      </main>
 
       {!hideNavigation && showMobileTabs && (
         <nav className="bottom-tabs" aria-label="主导航">
