@@ -10,14 +10,11 @@ export function AiAnalysisStages({ stages, introVisible, onComplete }) {
   const [completedCount, setCompletedCount] = useState(0)
 
   useEffect(() => {
-    if (introVisible) {
-      setActiveIndex(-1)
+    if (introVisible) return undefined
+    const startTimer = window.setTimeout(() => {
+      setActiveIndex(0)
       setCompletedCount(0)
-      return undefined
-    }
-
-    setActiveIndex(0)
-    setCompletedCount(0)
+    }, 0)
     const timers = STAGE_IDS.map((_, index) => window.setTimeout(() => {
       setCompletedCount(index + 1)
       if (index < STAGE_IDS.length - 1) {
@@ -28,7 +25,10 @@ export function AiAnalysisStages({ stages, introVisible, onComplete }) {
       }
     }, index * STAGE_INTERVAL + STAGE_DURATION))
 
-    return () => timers.forEach(window.clearTimeout)
+    return () => {
+      window.clearTimeout(startTimer)
+      timers.forEach(window.clearTimeout)
+    }
   }, [introVisible, onComplete])
 
   return (

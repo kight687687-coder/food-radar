@@ -262,6 +262,40 @@
 .result-score-card { margin-top: 14px; padding: 16px; border: 1px solid rgba(7,193,96,.15); border-radius: 12px; text-align: center; background: linear-gradient(135deg,#fff,var(--success-soft)); }.result-score-card > small { display: block; color: var(--body); font-size: 13px; font-weight: 800; text-align: left; }.result-score-card > strong { display: block; margin-top: 9px; font-size: 52px; line-height: 1; }.result-score-card > strong.good { color: var(--success); }.result-score-card > strong.mid { color: var(--warning); }.result-score-card > strong.bad { color: var(--danger); }.result-score-card h2 { margin-top: 8px; font-size: 15px; }.result-score-card p { margin-top: 5px; color: var(--body); font-size: 12px; }.result-score-card em { display: block; margin-top: 6px; color: var(--weak); font-size: 10px; font-style: normal; }
 .result-food-strip { padding: 14px; display: flex; align-items: center; gap: 9px; }.result-food-thumb { width: 47px; height: 47px; flex: 0 0 47px; border-radius: 12px; object-fit: cover; }.result-food-strip strong, .result-food-strip small { display: block; }.result-food-strip strong { font-size: 15px; }.result-food-strip small { margin-top: 4px; color: var(--body); font-size: 11px; }
 .result-ai-card, .result-avoid-card, .result-warning-card, .result-risk-card, .result-benefit-card, .result-suggestion-card { padding: 14px; }.result-ai-card { border-left: 3px solid var(--ai); }.result-ai-card h2 { color: var(--ai); }.result-ai-card h2, .result-avoid-card h2, .result-warning-card h2, .result-risk-card h2, .result-benefit-card h2, .result-suggestion-card h2 { font-size: 15px; }.result-ai-card .tag-row, .result-avoid-card .tag-row, .result-benefit-card .tag-row { margin-top: 9px; }.result-ai-card p, .result-avoid-card p, .result-warning-card p, .result-benefit-card p, .result-suggestion-card > p { margin-top: 9px; color: var(--body); font-size: 13px; line-height: 1.65; }.result-avoid-card { border-left: 3px solid var(--danger); background: var(--danger-soft); }.result-avoid-card p { color: var(--danger-dark); }.result-warning-card { border-left: 3px solid var(--warning); }.result-warning-card p + p { margin-top: 8px; }
+.ai-analysis-stack { display: grid; gap: 12px; }
+.ai-stage-card { padding: 14px; border-left: 3px solid var(--ai); transition: opacity .18s ease, border-color .18s ease; }
+.ai-stage-card.is-pending { opacity: .62; border-left-color: var(--border); }
+.ai-stage-card.is-analyzing { animation: aiStageIn .28s ease-out both; }
+.ai-stage-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ai-stage-title { min-width: 0; display: flex; align-items: center; gap: 8px; color: var(--ai); font-size: 15px; }
+.ai-stage-icon { width: 27px; height: 27px; flex: 0 0 27px; border-radius: 9px; display: grid; place-items: center; color: #fff; background: var(--ai); font-size: 10px; font-weight: 900; }
+.ai-stage-status { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; }
+.ai-stage-status.complete { color: var(--success-dark); }
+.ai-stage-body { margin-top: 11px; color: var(--body); font-size: 13px; line-height: 1.6; }
+.ai-stage-source { margin-top: 10px; color: var(--weak); font-size: 10px; line-height: 1.4; }
+.ai-stage-thinking { color: var(--ai); }
+.ai-stage-waiting, .ai-stage-empty { color: var(--muted); }
+.ai-stage-findings { display: grid; gap: 11px; }
+.ai-stage-finding-group h4 { color: var(--title); font-size: 12px; }
+.ai-stage-finding-group .tag-row { margin-top: 7px; }
+.ai-ingredient-tags { margin-top: 9px; max-height: 126px; overflow-y: auto; padding-right: 2px; }
+.ai-stage-loading { width: 11px; height: 11px; border: 2px solid var(--ai-soft); border-top-color: var(--ai); border-radius: 50%; animation: aiStageSpin .7s linear infinite; }
+.ai-stage-advice-score { display: flex; align-items: baseline; gap: 5px; color: var(--ai); }
+.ai-stage-advice-score strong { font-size: 30px; line-height: 1; }
+.ai-stage-advice-score span { color: var(--muted); font-size: 12px; }
+.ai-stage-advice-score em { margin-left: 5px; color: var(--body); font-size: 12px; font-style: normal; }
+.ai-stage-advice-score + p, .ai-stage-advice-score + p + p, .ai-stage-advice-score + p + p + p { margin-top: 9px; }
+.ai-stage-long-term { margin-top: 12px; padding-top: 11px; border-top: 1px solid #f3f4f6; }
+.ai-stage-long-term strong, .ai-stage-long-term span { display: block; }
+.ai-stage-long-term strong { color: var(--title); font-size: 12px; }
+.ai-stage-long-term span { margin-top: 4px; color: var(--body); font-size: 12px; line-height: 1.55; }
+.ai-intro-modal { width: min(100%, 320px); padding: 24px 18px; border-radius: 12px; text-align: center; background: #fff; box-shadow: 0 16px 44px rgba(15,23,42,.16); animation: aiIntroIn .22s ease-out both; }
+.ai-intro-modal h2 { margin-top: 12px; font-size: 17px; }
+.ai-intro-modal p { margin-top: 6px; color: var(--body); font-size: 12px; }
+.ai-intro-icon { width: 42px; height: 42px; margin: 0 auto; border-radius: 12px; display: grid; place-items: center; color: #fff; background: var(--ai); font-size: 13px; font-weight: 900; }
+@keyframes aiStageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes aiStageSpin { to { transform: rotate(360deg); } }
+@keyframes aiIntroIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 .result-risk-row { width: 100%; padding: 11px 0; border-bottom: 1px solid #f3f4f6; display: flex; gap: 9px; color: inherit; background: transparent; text-align: left; }.result-risk-row:last-child { border-bottom: 0; padding-bottom: 0; }.result-risk-row > i { width: 3px; flex: 0 0 3px; border-radius: 99px; }.result-risk-row > i.danger { background: var(--danger); }.result-risk-row > i.warning { background: var(--warning); }.result-risk-row > i.success { background: var(--success); }.result-risk-row > span { min-width: 0; flex: 1; }.result-risk-row strong, .result-risk-row small, .result-risk-row p { display: block; }.result-risk-row strong { font-size: 14px; }.result-risk-row small { margin-top: 4px; color: var(--body); font-size: 11px; }.result-risk-row p { margin-top: 4px; color: var(--body); font-size: 11px; line-height: 1.5; }.result-native-empty { padding: 20px 10px 5px; color: var(--muted); text-align: center; font-size: 13px; }.result-benefit-card > span { display: block; margin-top: 8px; color: var(--body); font-size: 13px; }.result-suggestion-card > div { margin-top: 12px; padding-top: 11px; border-top: 1px solid #f3f4f6; }.result-suggestion-card > div strong, .result-suggestion-card > div span { display: block; }.result-suggestion-card > div strong { font-size: 13px; }.result-suggestion-card > div span { margin-top: 5px; color: var(--body); font-size: 13px; line-height: 1.55; }.result-native-actions { margin-top: 17px; padding-bottom: 12px; }.result-native-actions > div { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.result-avoid-modal { width: min(100%,360px); padding: 20px 14px; border-radius: 12px; background: #fff; }.result-avoid-modal h2 { font-size: 17px; }.result-avoid-modal p { margin-top: 8px; color: var(--body); font-size: 13px; }.result-avoid-modal .tag-row { margin-top: 10px; }.result-avoid-modal .button { margin-top: 14px; }
 
 /* Compare parity */
