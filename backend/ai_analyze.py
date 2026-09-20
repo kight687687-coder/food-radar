@@ -55,8 +55,31 @@ def _json_content(content: str) -> dict:
     return result
 
 
-def build_fallback_report(food_category, health_score, risk_additives, user_type, warnings):
+def build_fallback_report(
+    food_category,
+    health_score,
+    risk_additives,
+    user_type,
+    warnings,
+    *,
+    beneficial_ingredients=None,
+    avoid_warnings=None,
+    score_details=None,
+    ingredients=None,
+):
+    risk_additives = risk_additives or []
+    warnings = warnings or []
+    beneficial_ingredients = beneficial_ingredients or []
+    avoid_warnings = avoid_warnings or []
+    score_details = score_details or {}
+    ingredients = ingredients or []
     risk_names = "、".join(item.get("name", "") for item in risk_additives[:3] if item.get("name"))
+    benefit_names = "、".join(
+        item.get("nutrient") or item.get("name", "")
+        for item in beneficial_ingredients[:3]
+        if item.get("nutrient") or item.get("name")
+    )
+    avoid_names = "、".join(item.get("name", "") for item in avoid_warnings[:3] if item.get("name"))
     warning_text = "；".join(item.get("msg", "") for item in warnings[:2] if item.get("msg"))
     audience = user_type or "普通人群"
 
@@ -75,32 +98,81 @@ def build_fallback_report(food_category, health_score, risk_additives, user_type
     if not risk_names and not warning_text:
         detail_parts.append("当前规则库未检出明确的高风险添加剂或人群预警。")
 
+    judgment_parts = [f"当前分析对象为{audience}。"]
+    if risk_names:
+        judgment_parts.append(f"需要重点判断的风险成分为{risk_names}。")
+    if benefit_names:
+        judgment_parts.append(f"同时识别到{benefit_names}等有益成分，但其正向作用不能抵消全部风险。")
+    if avoid_names:
+        judgment_parts.append(f"命中个人忌口：{avoid_names}，应优先回避。")
+    if score_details.get("group_extra_penalty"):
+        judgment_parts.append(f"当前人群适配额外扣分为{score_details['group_extra_penalty']}分。")
+
+    recommendation = f"建议{audience}结合食用频率和份量判断，优先选择配料更简单、风险成分更少的同类食品。"
+    if avoid_names:
+        recommendation = f"建议{audience}优先避免命中的忌口成分（{avoid_names}），并选择配料更简单的替代品。"
+    elif risk_names:
+        recommendation = f"建议{audience}减少高频食用{risk_names}的食品，必要时选择同类低风险替代品。"
+
     return {
         "summary": f"{food_category}健康评分 {health_score} 分，{level}。",
         "detail": "".join(detail_parts),
         "suggestion": f"建议{audience}结合食用频率和份量判断，优先选择配料更简单、风险成分更少的同类食品。",
         "long_term_risk": "单次识别不能代替医学诊断；若长期高频食用，应关注配料叠加、总糖总盐以及个人过敏或疾病限制。",
+        "judgment": "".join(judgment_parts),
+        "recommendation": recommendation,
     }
 
 
-def generate_report(food_category, health_score, risk_additives, user_type, warnings):
+def generate_report(
+    food_category,
+    health_score,
+    risk_additives,
+    user_type,
+    warnings,
+    *,
+    beneficial_ingredients=None,
+    avoid_warnings=None,
+    score_details=None,
+    ingredients=None,
+):
+    beneficial_ingredients = beneficial_ingredients or []
+    avoid_warnings = avoid_warnings or []
+    score_details = score_details or {}
+    ingredients = ingredients or []
     prompt = f"""你是专业营养师和食品安全专家，请根据以下信息生成分析报告：
 
 食品类别：{food_category}
 健康评分：{health_score}
+配料表：{json.dumps(ingredients, ensure_ascii=False)}
 风险添加剂：{json.dumps(risk_additives, ensure_ascii=False)}
+有益成分：{json.dumps(beneficial_ingredients, ensure_ascii=False)}
+忌口命中：{json.dumps(avoid_warnings, ensure_ascii=False)}
 人群类型：{user_type or '无'}
 预警信息：{json.dumps(warnings, ensure_ascii=False)}
+评分明细：{json.dumps(score_details, ensure_ascii=False)}
 
-请用JSON格式返回 summary、detail、suggestion、long_term_risk 四个字符串字段。只返回JSON。"""
+请用JSON格式返回以下六个字符串字段：summary、detail、suggestion、long_term_risk、judgment、recommendation。
+judgment 解释风险成分、有益成分、忌口命中对当前人群的意义；recommendation 给出食用频率、注意事项或同类替代方向。
+只返回JSON，不要输出Markdown。"""
     try:
         result = _json_content(_completion([{"role": "user", "content": prompt}], temperature=0.7))
-        required = ("summary", "detail", "suggestion", "long_term_risk")
+        required = ("summary", "detail", "suggestion", "long_term_risk", "judgment", "recommendation")
         if not all(isinstance(result.get(key), str) and result[key].strip() for key in required):
             raise AIProviderError("AI 返回格式异常，请稍后重试")
         return {key: result[key].strip() for key in required}
     except (ProviderConfigurationError, AIProviderError):
-        return build_fallback_report(food_category, health_score, risk_additives, user_type, warnings)
+        return build_fallback_report(
+            food_category,
+            health_score,
+            risk_additives,
+            user_type,
+            warnings,
+            beneficial_ingredients=beneficial_ingredients,
+            avoid_warnings=avoid_warnings,
+            score_details=score_details,
+            ingredients=ingredients,
+        )
 
 
 def generate_daily_report(scan_count, avg_score, worst_food, foods_context):

@@ -190,12 +190,23 @@ def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
         raise ValueError("未能识别到有效配料表，请对准配料表重新拍摄")
     food_category = _get_subcategory(main_category, ingredients_list)
     score_result = score_ingredients(ingredients_list, group_type=user_type, avoid_ids=avoid_ids)
+    score_details = {
+        "beneficial_bonus": score_result["beneficial_bonus"],
+        "stacking_penalty": score_result["stacking_penalty"],
+        "ingredients_count_penalty": score_result["ingredients_count_penalty"],
+        "group_extra_penalty": score_result["group_extra_penalty"],
+        "group_extra_details": score_result["group_extra_details"],
+    }
     ai_report = generate_report(
         food_category,
         score_result["health_score"],
         score_result["risk_additives"],
         user_type,
         score_result["group_warnings"],
+        beneficial_ingredients=score_result["beneficial_ingredients"],
+        avoid_warnings=score_result["avoid_warnings"],
+        score_details=score_details,
+        ingredients=ingredients_list,
     )
     return {
         "ingredients": ",".join(ingredients_list),
@@ -212,6 +223,7 @@ def _run_analysis_pipeline(image_base64, user_type, avoid_ids=None):
         "ingredients_count_penalty": score_result["ingredients_count_penalty"],
         "group_extra_penalty": score_result["group_extra_penalty"],
         "group_extra_details": score_result["group_extra_details"],
+        "score_details": score_details,
         "ai_report": ai_report,
     }
 
