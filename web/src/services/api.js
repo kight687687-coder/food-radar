@@ -63,10 +63,10 @@ export function getAiComparison(foodA, foodB) {
   })
 }
 
-export function askNutritionist(question, history, userType, userId) {
+export function askNutritionist(question, history, userType, userId, context) {
   return request('/api/ai-chat', {
     method: 'POST',
-    body: { question, history, user_type: userType, user_id: userId },
+    body: { question, history, user_type: userType, user_id: userId, context },
   })
 }
 

@@ -153,7 +153,7 @@ def generate_report(
 评分明细：{json.dumps(score_details, ensure_ascii=False)}
 
 请用JSON格式返回以下六个字符串字段：summary、detail、suggestion、long_term_risk、judgment、recommendation。
-judgment 解释风险成分、有益成分、忌口命中对当前人群的意义；recommendation 给出食用频率、注意事项或同类替代方向。
+judgment 用不超过3句短句，分别说明主要风险、正向信息和当前人群需要采取的判断；不要重复食品类别或评分。recommendation 给出食用频率、注意事项或同类替代方向。
 只返回JSON，不要输出Markdown。"""
     try:
         result = _json_content(_completion([{"role": "user", "content": prompt}], temperature=0.7))
@@ -240,7 +240,7 @@ intake_status, risk_level(1到3数字), risk_desc, warning, special_groups(数�
     return _json_content(_completion([{"role": "user", "content": prompt}], temperature=0.3, max_tokens=900))
 
 
-def generate_chat_answer(question, history=None, user_type="普通人群"):
+def generate_chat_answer(question, history=None, user_type="普通人群", context=None):
     safe_history = []
     for item in (history or [])[-8:]:
         role = item.get("role")
@@ -254,5 +254,14 @@ def generate_chat_answer(question, history=None, user_type="普通人群"):
         "不要替代医生诊断；涉及急性过敏、疾病治疗或用药时建议咨询医生。"
     )
     messages = [{"role": "system", "content": system_prompt}, *safe_history]
-    messages.append({"role": "user", "content": f"用户人群类型：{user_type or '普通人群'}\n问题：{question}"})
+    context_text = json.dumps(context or {}, ensure_ascii=False)
+    messages.append({
+        "role": "user",
+        "content": (
+            f"用户人群类型：{user_type or '普通人群'}\n"
+            f"当前扫描结果（只能依据这些信息回答）：{context_text}\n"
+            f"问题：{question}\n"
+            "回答必须明确引用当前食品的评分、风险成分或人群信息；如果上下文没有相关信息，直接说明暂未识别到，不要编造。"
+        ),
+    })
     return _completion(messages, temperature=0.5, max_tokens=600)

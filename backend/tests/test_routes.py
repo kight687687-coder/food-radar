@@ -35,6 +35,26 @@ def test_analyze_validates_missing_image():
     assert "image" in response.get_json()["msg"]
 
 
+def test_parse_ingredients_removes_nutrition_claims_and_splits_amounts():
+    app_module, _ = _client()
+
+    text = (
+        "配料表：生牛乳添加量≥92%白砂糖添加量≤7%每百克含活性乳酸菌（出厂时）\n"
+        "水、乳粉、营养成分表：能量 320千焦 蛋白质 3.2克 脂肪 3.6克\n"
+        "本产品含有乳制品 原信息：含乳制品 单 双 项"
+    )
+
+    assert app_module._parse_ingredients(text) == ["生牛乳", "白砂糖", "水", "乳粉"]
+
+
+def test_parse_ingredients_keeps_real_single_character_ingredients():
+    app_module, _ = _client()
+
+    assert app_module._parse_ingredients("配料：水、糖、盐、维生素C、钠、能量 120 千焦") == [
+        "水", "糖", "盐", "维生素C"
+    ]
+
+
 def test_analyze_preserves_response_contract_and_skips_optional_persistence(monkeypatch):
     app_module, client = _client()
     expected = {

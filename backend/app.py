@@ -83,6 +83,7 @@ def _parse_ingredients(text):
         "生产日期", "保质期", "储存条件", "贮藏", "贮存", "食用方法", "产品标准",
         "生产许可证", "产地", "委托方", "受委托方", "制造商", "厂家", "服务热线",
         "客服", "二维码", "扫码", "微信公众号", "微博", "网址", "www.", "http",
+        "营养成分表", "营养成分", "本产品含有", "原信息",
     ]
     start = 0
     for marker in markers:
@@ -96,23 +97,40 @@ def _parse_ingredients(text):
         if index != -1:
             value = value[:index]
             break
+    # OCR often glues a real ingredient to its claim, for example
+    # “生牛乳添加量≥92%白砂糖添加量≤7%每百克含…”. Keep the ingredients
+    # on the left of these claims and discard the label/marketing suffix.
+    value = re.sub(r"[（(][^）)]*(?:出厂|本品|产品|时)[^）)]*[）)]", "、", value)
+    value = re.sub(r"(?:每\s*(?:100|百)\s*(?:克|毫升|g|ml)?)[^、，,；;。\n\r]*", "、", value, flags=re.IGNORECASE)
+    value = re.sub(
+        r"(?:添加量|含量)\s*[≥≤<>＝=]?\s*[\d.]+\s*(?:[%％]|克|g|毫升|ml)?",
+        "、",
+        value,
+        flags=re.IGNORECASE,
+    )
     value = re.sub(r"^[：:\s、，,；;\n\r]*", "", value)
     parts = [item.strip() for item in re.split(r"[、，,；;。\n\r]+", value) if item.strip()]
     filter_keywords = [
         "生产", "厂家", "地址", "保质期", "净含量", "营养", "每100", "执行", "标准",
         "温度", "储存", "食用方法", "产地", "服务热线", "热线", "商标", "公司", "有限",
         "许可证", "QS", "SC", "℃", "毫克", "克/", "mg/", "日期", "电话", "邮编",
-        "网址", "扫码", "活动", "二维码", "联系电话", "GB",
+        "网址", "扫码", "活动", "二维码", "联系电话", "GB", "营养成分", "原信息",
     ]
+    junk_tokens = {"单", "双", "项", "每", "克", "毫升", "千焦", "kJ", "g", "mg", "ml", "%"}
+    nutrition_tokens = {"能量", "蛋白质", "脂肪", "碳水化合物", "钠", "钙"}
     result = []
     for item in parts:
+        item = re.sub(r"^[*＊]+|[*＊]+$", "", item).strip()
+        if not item or item in junk_tokens or item in nutrition_tokens:
+            continue
         if len(item) > 15 or any(keyword in item for keyword in filter_keywords):
             continue
         if re.fullmatch(r"\d+|[a-zA-Z]+|[\d.]+%?", item):
             continue
-        if re.search(r"\d{3,}", item):
+        if re.search(r"\d", item) and re.search(r"(?:克|毫升|千焦|kJ|mg|ml|%|≥|≤|添加量|含量)", item, re.IGNORECASE):
             continue
-        result.append(item)
+        if item not in result:
+            result.append(item)
     if len(result) < 2 and parts:
         loose = [
             item for item in parts
@@ -120,7 +138,7 @@ def _parse_ingredients(text):
             and not re.fullmatch(r"\d+", item)
             and not any(keyword in item for keyword in filter_keywords)
         ]
-        return (loose or parts)[:20]
+        return (result or loose)[:20]
     return result
 
 
@@ -318,7 +336,12 @@ def ai_chat():
         question = str(body.get("question") or "").strip()
         if not question:
             return _resp(code=400, msg="请输入问题")
-        answer = generate_chat_answer(question, body.get("history", []), body.get("user_type") or "普通人群")
+        answer = generate_chat_answer(
+            question,
+            body.get("history", []),
+            body.get("user_type") or "普通人群",
+            context=body.get("context") or {},
+        )
         return _resp(data={"answer": answer})
     except ValueError as exc:
         return _resp(code=400, msg=str(exc))

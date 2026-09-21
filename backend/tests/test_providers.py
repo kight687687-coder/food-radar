@@ -98,3 +98,25 @@ def test_generate_report_falls_back_when_provider_fails(monkeypatch):
 
     assert report["summary"]
     assert "80" in report["summary"] or "80" in report["detail"]
+
+
+def test_chat_prompt_includes_current_scan_context(monkeypatch):
+    import ai_analyze
+
+    captured = {}
+
+    def fake_completion(messages, **kwargs):
+        captured["content"] = messages[-1]["content"]
+        return "基于当前结果，建议适量食用。"
+
+    monkeypatch.setattr(ai_analyze, "_completion", fake_completion)
+    answer = ai_analyze.generate_chat_answer(
+        "为什么只有58分？",
+        user_type="儿童",
+        context={"food_category": "能量饮料", "health_score": 58, "risk_additives": [{"name": "咖啡因"}]},
+    )
+
+    assert answer
+    assert "能量饮料" in captured["content"]
+    assert "咖啡因" in captured["content"]
+    assert "只能依据这些信息" in captured["content"]
