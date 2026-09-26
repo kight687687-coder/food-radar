@@ -17,9 +17,10 @@ export function ComparePage() {
   const historyId = searchParams.get('recordId')
   const historyData = historyId ? getCompareData(historyId) : null
   const preset = !historyId ? getComparePreset() : null
-  const [foods, setFoods] = useState({ A: historyData?.foodA || preset || null, B: historyData?.foodB || null })
+  const presetFoods = preset?.foodA && preset?.foodB ? preset : { foodA: preset, foodB: null }
+  const [foods, setFoods] = useState({ A: historyData?.foodA || presetFoods.foodA || null, B: historyData?.foodB || presetFoods.foodB || null })
   const [analyzing, setAnalyzing] = useState(false)
-  const [advice, setAdvice] = useState(historyData?.advice || '')
+  const [advice, setAdvice] = useState(historyData?.advice || preset?.advice || '')
   const [adviceLoading, setAdviceLoading] = useState(false)
   const inputA = useRef(null), inputB = useRef(null)
   const isHistory = Boolean(historyData)
@@ -68,7 +69,7 @@ export function ComparePage() {
 }
 
 function FoodSlot({ label, food, inputRef, disabled, onFile }) {
-  return <Card as="button" className="compare-food-slot" type="button" disabled={disabled} onClick={() => inputRef.current?.click()}><input ref={inputRef} className="visually-hidden" type="file" accept="image/*" onChange={event => { onFile(event.target.files?.[0]); event.target.value = '' }} /><small>{label}</small>{food ? (food.previewUrl ? <img src={food.previewUrl} alt="" /> : food.imageKey ? <StoredImage imageKey={food.imageKey} className="compare-food-image" alt="" /> : <span className="compare-food-placeholder"><OriginalIcon name="list" /><em>选择图片</em></span>) : <span className="compare-food-placeholder"><OriginalIcon name="list" /><em>选择图片</em></span>}{food && <><strong>{food.food_category || '待分析图片'}</strong>{food.health_score && <b>{food.health_score}分</b>}</>}</Card>
+  return <Card as="button" className="compare-food-slot" type="button" disabled={disabled} onClick={() => inputRef.current?.click()}><input ref={inputRef} className="visually-hidden" type="file" accept="image/*" onChange={event => { onFile(event.target.files?.[0]); event.target.value = '' }} /><small>{label}</small>{food ? (food.previewUrl || food.imageSrc ? <img src={food.previewUrl || food.imageSrc} alt={`${food.food_category || '食品'}配料表`} /> : food.imageKey ? <StoredImage imageKey={food.imageKey} className="compare-food-image" alt="" /> : <span className="compare-food-placeholder"><OriginalIcon name="list" /><em>选择图片</em></span>) : <span className="compare-food-placeholder"><OriginalIcon name="list" /><em>选择图片</em></span>}{food && <><strong>{food.food_category || '待分析图片'}</strong>{food.health_score && <b>{food.health_score}分</b>}</>}</Card>
 }
 
 function computeComparison(foodA, foodB) {

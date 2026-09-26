@@ -285,6 +285,24 @@
 .example-card-copy > span { margin-top: 7px; min-height: 34px; color: var(--body); font-size: 12px; line-height: 1.45; }
 .example-card-action { padding: 11px 14px 14px; display: flex; align-items: center; gap: 4px; color: var(--success-dark); font-size: 12px; font-weight: 800; }
 .example-card-action svg { width: 15px; height: 15px; }
+.example-compare-card { width: 100%; padding: 14px; text-align: left; }
+.example-compare-images { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); align-items: center; gap: 8px; }
+.example-compare-images img { width: 100%; height: 104px; border-radius: 10px; object-fit: contain; background: var(--module); }
+.example-compare-images > span { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; color: var(--muted); background: var(--module); font-size: 10px; font-weight: 900; }
+.example-compare-copy { margin-top: 9px; display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
+.example-compare-copy strong, .example-compare-copy small { display: block; }
+.example-compare-copy strong { color: var(--title); font-size: 14px; }
+.example-compare-copy small { margin-top: 3px; color: var(--success-dark); font-size: 11px; }
+.example-compare-card .example-card-action { padding: 12px 0 0; }
+.example-tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.example-tool-card { min-width: 0; padding: 13px; display: flex; align-items: center; gap: 9px; color: inherit; text-align: left; }
+.example-tool-card > span:nth-child(2) { min-width: 0; flex: 1; }
+.example-tool-card strong, .example-tool-card small { display: block; }
+.example-tool-card strong { overflow: hidden; color: var(--title); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.example-tool-card small { margin-top: 4px; color: var(--body); font-size: 10px; line-height: 1.4; }
+.example-tool-card > .iconfont:last-child { flex: 0 0 auto; color: var(--weak); font-size: 16px; }
+.example-tool-icon { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 10px; color: var(--success-dark); background: var(--success-soft); }
+.example-tool-icon .iconfont { font-size: 17px; }
 .example-upload { width: 100%; padding: 14px 16px; display: flex; align-items: center; gap: 12px; color: inherit; text-align: left; }
 .example-upload span { min-width: 0; flex: 1; }
 .example-upload strong, .example-upload small { display: block; }
@@ -425,6 +443,8 @@
   .example-card-copy { padding: 13px 13px 0; }
   .example-card-copy > span { min-height: 0; }
   .example-card-action { padding: 9px 13px 13px; }
+  .example-tools-grid { grid-template-columns: 1fr; }
+  .example-compare-images img { height: 96px; }
   .wiki-page { padding-bottom: 24px; }.wiki-page .category-scroll { margin: 12px -14px 0; padding: 0 14px 2px; }.wiki-page .category-scroll button { min-height: 29px; padding: 0 12px; border: 1px solid var(--border); background: #fff; }.wiki-page .category-scroll button.active { color: #fff; background: var(--title); border-color: var(--title); }
   .result-page { padding-top: 16px; }.result-page .section { margin-top: 16px; }
   .compare-page .page-header { margin-bottom: 14px; }.compare-page .section { margin-top: 16px; }

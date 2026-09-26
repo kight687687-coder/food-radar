@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { OriginalIcon } from '../components/OriginalIcon'
 import { Card, Page, Section } from '../components/Page'
-import { EXAMPLE_FOODS } from '../data/exampleFoods'
-import { setLastResult } from '../services/storage'
+import { EXAMPLE_FOODS, getExampleComparisonPreset } from '../data/exampleFoods'
+import { setComparePreset, setLastResult } from '../services/storage'
 
 export function ExamplesPage() {
   const navigate = useNavigate()
@@ -12,8 +12,14 @@ export function ExamplesPage() {
     navigate('/result')
   }
 
+  function startExampleComparison() {
+    const preset = getExampleComparisonPreset('xiaokaochang', 'ice-black-tea')
+    if (preset) setComparePreset(preset)
+    navigate('/compare')
+  }
+
   return (
-    <Page title="示例食品" subtitle="选择一款，查看完整食品安全分析" back className="examples-page">
+    <Page title="快速体验" subtitle="选择一种方式，快速了解食安雷达" back className="examples-page">
       <Section>
         <div className="example-grid">
           {EXAMPLE_FOODS.map(item => (
@@ -27,6 +33,34 @@ export function ExamplesPage() {
               <span className="example-card-action">开始体验 <OriginalIcon name="arrow-right" /></span>
             </Card>
           ))}
+        </div>
+      </Section>
+      <Section title="配料表 PK" subtitle="用两款常见食品，直接看评分与风险差异">
+        <Card as="button" className="example-compare-card" type="button" onClick={startExampleComparison}>
+          <div className="example-compare-images">
+            <img src="/images/demo/xiaokaochang.jpg" alt="小烤肠配料表图片" />
+            <span>VS</span>
+            <img src="/images/demo/ice-black-tea.jpg" alt="冰红茶配料表图片" />
+          </div>
+          <div className="example-compare-copy">
+            <span><strong>小烤肠</strong><small>肉制品</small></span>
+            <span><strong>冰红茶</strong><small>饮料</small></span>
+          </div>
+          <span className="example-card-action">查看 PK 结果 <OriginalIcon name="arrow-right" /></span>
+        </Card>
+      </Section>
+      <Section title="更多工具">
+        <div className="example-tools-grid">
+          <Card as="button" className="example-tool-card" type="button" onClick={() => navigate('/ai-chat')}>
+            <span className="example-tool-icon"><OriginalIcon name="ai" /></span>
+            <span><strong>AI 营养师</strong><small>咨询配料表、添加剂和饮食问题</small></span>
+            <OriginalIcon name="arrow-right" />
+          </Card>
+          <Card as="button" className="example-tool-card" type="button" onClick={() => navigate('/wiki')}>
+            <span className="example-tool-icon"><OriginalIcon name="book" /></span>
+            <span><strong>150+ 种添加剂百科</strong><small>查询风险等级与人群提醒</small></span>
+            <OriginalIcon name="arrow-right" />
+          </Card>
         </div>
       </Section>
       <Section>

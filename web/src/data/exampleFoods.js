@@ -113,6 +113,18 @@ export function getExampleFood(id) {
   return EXAMPLE_FOODS.find(item => item.id === id) || null
 }
 
+export function getExampleComparisonPreset(foodAId, foodBId) {
+  const foodA = getExampleFood(foodAId)
+  const foodB = getExampleFood(foodBId)
+  if (!foodA || !foodB) return null
+  return {
+    type: 'example-compare',
+    foodA: { ...foodA.result, imageSrc: foodA.imageSrc, exampleId: foodA.id },
+    foodB: { ...foodB.result, imageSrc: foodB.imageSrc, exampleId: foodB.id },
+    advice: `小烤肠和冰红茶适合不同场景：小烤肠提供一定蛋白质，冰红茶需要重点关注糖分和饮用频率。`,
+  }
+}
+
 export function isExampleResult(result) {
   return Boolean(result?.exampleId && getExampleFood(result.exampleId))
 }
