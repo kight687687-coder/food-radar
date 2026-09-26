@@ -132,6 +132,14 @@
   .scan-page .scan-pk-section .pk-banner small { display: none; }
   .scan-page .pk-banner { min-height: 132px; padding: 22px 24px; }
   .scan-page .pk-banner-action { min-height: 36px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--success); box-shadow: 0 7px 14px rgba(7, 193, 96, .18); font-size: 13px; font-weight: 800; white-space: nowrap; }
+  .toolbox-page .roadmap-card { padding: 8px 24px; }
+  .toolbox-page .roadmap-item { min-height: 76px; padding: 17px 0; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #f3f4f6; }
+  .toolbox-page .roadmap-item:last-child { border-bottom: 0; }
+  .toolbox-page .roadmap-item > span { min-width: 0; flex: 1; }
+  .toolbox-page .roadmap-item strong, .toolbox-page .roadmap-item small { display: block; }
+  .toolbox-page .roadmap-item strong { color: var(--title); font-size: 16px; line-height: 1.35; }
+  .toolbox-page .roadmap-item small { margin-top: 5px; color: var(--body); font-size: 13px; line-height: 1.5; }
+  .toolbox-page .roadmap-item b { min-height: 28px; padding: 0 11px; border-radius: 999px; flex: 0 0 auto; color: var(--muted); background: var(--module); font-size: 12px; line-height: 28px; font-weight: 750; }
 }
 
 @media (min-width: 900px) and (max-width: 1199px) {
