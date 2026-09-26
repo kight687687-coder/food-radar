@@ -36,7 +36,7 @@ export function ExamplesPage() {
         </div>
       </Section>
       <Section title="配料表 PK" subtitle="用两款常见食品，直接看评分与风险差异">
-        <Card as="button" className="example-compare-card" type="button" onClick={startExampleComparison}>
+        <Card className="example-compare-card">
           <div className="example-compare-images">
             <img src="/images/demo/xiaokaochang.jpg" alt="小烤肠配料表图片" />
             <span>VS</span>
@@ -46,7 +46,7 @@ export function ExamplesPage() {
             <span><strong>小烤肠</strong><small>肉制品</small></span>
             <span><strong>冰红茶</strong><small>饮料</small></span>
           </div>
-          <span className="example-card-action">开始 PK <OriginalIcon name="arrow-right" /></span>
+          <button className="button primary example-compare-action" type="button" onClick={startExampleComparison}>开始 PK <OriginalIcon name="arrow-right" /></button>
         </Card>
       </Section>
       <Section title="更多工具">
