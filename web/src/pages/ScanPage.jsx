@@ -80,12 +80,12 @@ export function ScanPage() {
         </div>
       </div>
       <div className="scan-info-grid">
-        <Section><Card className="scan-advice"><h2>上传建议</h2><div className="upload-tips"><span>配料表文字尽量清晰</span><span>避免反光和大角度倾斜</span><span>上传包装背面的完整配料区域</span></div></Card></Section>
-        <Section><Card className="scan-support"><h2>支持识别</h2><div className="tag-row"><span className="tag success">配料表</span><span className="tag success">食品标签</span><span className="tag success">添加剂名称</span></div></Card></Section>
+        <Section title="上传建议"><Card className="scan-advice"><h2 className="scan-info-card-title">上传建议</h2><div className="upload-tips"><span>配料表文字尽量清晰</span><span>避免反光和大角度倾斜</span><span>上传包装背面的完整配料区域</span></div></Card></Section>
+        <Section title="支持识别"><Card className="scan-support"><h2 className="scan-info-card-title">支持识别</h2><div className="tag-row"><span className="tag success">配料表</span><span className="tag success">食品标签</span><span className="tag success">添加剂名称</span></div></Card></Section>
       </div>
       <Section title="AI 分析能力"><div className="capability-grid">{capabilities.map(([image, label]) => <Card key={label} className="capability"><img className="feature-entry-image" src={image} alt="" /><strong>{label}</strong></Card>)}</div></Section>
       <div className="scan-bottom-grid">
-        <Section><Card as="button" className="pk-banner" type="button" onClick={() => navigate('/compare')}><span><small>配料表 PK</small><strong>对比两款食品</strong><p>比较评分与风险成分，帮你选更适合的一款。</p></span><b>开始 PK</b></Card></Section>
+        <Section title="配料表 PK" className="scan-pk-section"><Card as="button" className="pk-banner" type="button" onClick={() => navigate('/compare')}><span className="pk-banner-copy"><small>配料表 PK</small><strong>对比两款食品</strong><p>比较评分与风险成分，帮你选更适合的一款。</p></span><span className="pk-banner-action">开始 PK</span></Card></Section>
         <Section title="最近识别" action={<button className="section-action" type="button" onClick={() => navigate('/history')}>查看全部</button>}>{recent ? <Card as="button" className="recent-record" type="button" onClick={openRecent}><StoredImage imageKey={recent.imageKey} className="record-thumb" alt={recent.foodName || '食品图片'} /><span className="list-main"><strong className="list-title">{recent.foodName || '未命名食品'}</strong><small className="list-description">{recent.food_category || '食品'} · 最近识别</small></span><span className={`record-score ${scoreMeta(Number(recent.score)).className}`}>{recent.score || 0}<small>分</small></span></Card> : <Card className="scan-empty">上传配料表图片后，会在这里显示最近一次结果。</Card>}</Section>
       </div>
       {analyzing && <LoadingOverlay />}

@@ -83,7 +83,7 @@
 .scan-hero-copy { min-width: 0; display: grid; justify-items: center; align-content: center; }
 .upload-tips { display: grid; gap: 11px; }.upload-tips span { display: flex; align-items: center; gap: 8px; color: var(--body); font-size: 13px; }.upload-tips svg { color: var(--success); }
 .capability-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }.capability { min-height: 126px; padding: 13px 8px; display: grid; justify-items: center; align-content: center; gap: 10px; text-align: center; }.capability .feature-image-box { width: 58px; height: 58px; }.capability .feature-image-box img { width: 50px; height: 50px; }.capability strong { font-size: 12px; }
-.pk-banner { width: 100%; padding: 17px; display: flex; align-items: center; gap: 13px; color: inherit; text-align: left; }.pk-banner > span:nth-child(2) { min-width: 0; flex: 1; }.pk-banner small, .pk-banner strong, .pk-banner p { display: block; }.pk-banner small { color: var(--warning-dark); font-size: 11px; font-weight: 800; }.pk-banner strong { margin-top: 3px; font-size: 16px; }.pk-banner p { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.pk-banner { width: 100%; padding: 17px; display: flex; align-items: center; gap: 13px; color: inherit; text-align: left; }.pk-banner-copy { min-width: 0; flex: 1; }.pk-banner small, .pk-banner strong, .pk-banner p { display: block; }.pk-banner small { color: var(--warning-dark); font-size: 11px; font-weight: 800; }.pk-banner strong { margin-top: 3px; font-size: 16px; }.pk-banner p { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.45; }.pk-banner-action { flex: 0 0 auto; }
 
 @keyframes scanHeroIn {
   from { opacity: 0; transform: translateY(9px); }
@@ -122,6 +122,16 @@
   .scan-page .scan-hero-copy > p { max-width: 360px; font-size: 15px; }
   .scan-page .scan-button { min-width: 184px; }
   .scan-page .scan-info-grid, .scan-page .scan-bottom-grid { margin-top: 28px; }
+  .scan-page .scan-info-grid, .scan-page .scan-bottom-grid { align-items: stretch; }
+  .scan-page .scan-info-grid > .section, .scan-page .scan-bottom-grid > .section { display: flex; flex-direction: column; }
+  .scan-page .scan-info-grid > .section > .card, .scan-page .scan-bottom-grid > .section > .card { flex: 1; }
+  .scan-page .scan-info-grid .section-header { margin-bottom: 14px; }
+  .scan-page .scan-info-card-title { display: none; }
+  .scan-page .scan-advice, .scan-page .scan-support { padding: 22px 24px; }
+  .scan-page .scan-advice .upload-tips, .scan-page .scan-support .tag-row { margin-top: 15px; }
+  .scan-page .scan-pk-section .pk-banner small { display: none; }
+  .scan-page .pk-banner { min-height: 132px; padding: 22px 24px; }
+  .scan-page .pk-banner-action { min-height: 36px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: var(--success); box-shadow: 0 7px 14px rgba(7, 193, 96, .18); font-size: 13px; font-weight: 800; white-space: nowrap; }
 }
 
 @media (min-width: 900px) and (max-width: 1199px) {
@@ -220,9 +230,12 @@
   .scan-visual { width: 165px; height: 115px; margin-bottom: 13px; }.label-paper { top: 5px; left: 19px; width: 125px; height: 95px; padding: 14px; border-radius: 10px; box-shadow: 0 9px 18px rgba(22,119,255,.12); transform: rotate(-3deg); }.label-line { height: 6px; margin-bottom: 10px; }.label-line.long { width: 89px; }.label-line.short { width: 55px; }.label-line.label-head { width: 36px; }.scan-frame { --scan-distance: 43px; top: 27px; right: 17px; bottom: 17px; left: 17px; border-radius: 8px; }.scan-visual em { top: 14px; right: 5px; width: 35px; height: 29px; border-radius: 10px; color: var(--ai); background: var(--ai-soft); box-shadow: none; font-size: 12px; }.scan-visual small { left: 5px; right: auto; bottom: 4px; padding: 6px 9px; color: var(--success-dark); background: var(--success-soft); box-shadow: none; }
   .scan-hero h2 { font-size: 19px; }.scan-hero-copy > p { margin-top: 6px; color: var(--muted); font-size: 13px; }.scan-button { width: 150px; min-height: 44px; margin-top: 17px; padding: 0 18px; font-size: 15px; }
   .scan-advice, .scan-support { padding: 14px; }.scan-advice h2, .scan-support h2 { font-size: 15px; }.upload-tips { margin-top: 11px; gap: 9px; }.upload-tips span { position: relative; padding-left: 12px; font-size: 13px; line-height: 1.5; }.upload-tips span::before { content: ''; position: absolute; top: 8px; left: 0; width: 4px; height: 4px; border-radius: 50%; background: var(--success); }.scan-support .tag-row { margin-top: 11px; gap: 7px; }
+  .scan-info-grid .section-header { display: none; }
   .scan-info-grid, .scan-bottom-grid { grid-template-columns: 1fr; gap: 0; }
+  .scan-info-grid .section, .scan-bottom-grid .section { margin-top: 18px; }
   .capability-grid { grid-template-columns: repeat(3,1fr); gap: 8px; }.capability { min-height: 83px; padding: 8px 4px 7px; gap: 5px; border-radius: 8px; box-shadow: none; }.capability strong { font-size: 12px; color: var(--body); }.capability .feature-entry-image { width: 45px; height: 45px; object-fit: contain; }
-  .pk-banner { padding: 14px; justify-content: space-between; gap: 14px; }.pk-banner > span { min-width: 0; flex: 1; }.pk-banner small, .pk-banner strong, .pk-banner p { display: block; }.pk-banner small { color: var(--info); font-size: 11px; }.pk-banner strong { margin-top: 5px; font-size: 15px; }.pk-banner p { margin-top: 5px; color: var(--body); font-size: 12px; }.pk-banner > b { flex: 0 0 auto; color: var(--success); font-size: 13px; }.scan-empty { padding: 20px 10px; color: var(--muted); text-align: center; font-size: 13px; line-height: 1.6; }
+  .scan-pk-section .section-header { display: none; }
+  .pk-banner { padding: 14px; justify-content: space-between; gap: 14px; }.pk-banner > .pk-banner-copy { min-width: 0; flex: 1; }.pk-banner small, .pk-banner strong, .pk-banner p { display: block; }.pk-banner small { color: var(--info); font-size: 11px; }.pk-banner strong { margin-top: 5px; font-size: 15px; }.pk-banner p { margin-top: 5px; color: var(--body); font-size: 12px; }.pk-banner-action { flex: 0 0 auto; color: var(--success); font-size: 13px; font-weight: 800; white-space: nowrap; }.scan-empty { padding: 20px 10px; color: var(--muted); text-align: center; font-size: 13px; line-height: 1.6; }
 
   /* Explore */
   .toolbox-page .page-header { padding-top: 6px; }
