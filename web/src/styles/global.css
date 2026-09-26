@@ -305,4 +305,6 @@ button.list-row { width: 100%; color: inherit; text-align: left; background: #ff
   .tab-link.active .tab-icon { background: transparent; }
   .tab-primary .tab-icon { width: 68px; height: 58px; margin-top: -18px; background: transparent !important; }
   .tab-primary .tab-icon img { width: 52px; height: 52px; }
+  .tab-primary .tab-icon { position: relative; top: 3px; }
+  .tab-primary > span:last-child { position: relative; top: -2px; }
 }
