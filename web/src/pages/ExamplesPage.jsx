@@ -46,7 +46,7 @@ export function ExamplesPage() {
             <span><strong>小烤肠</strong><small>肉制品</small></span>
             <span><strong>冰红茶</strong><small>饮料</small></span>
           </div>
-          <span className="example-card-action">查看 PK 结果 <OriginalIcon name="arrow-right" /></span>
+          <span className="example-card-action">开始 PK <OriginalIcon name="arrow-right" /></span>
         </Card>
       </Section>
       <Section title="更多工具">
@@ -63,11 +63,12 @@ export function ExamplesPage() {
           </Card>
         </div>
       </Section>
-      <Section>
-        <Card as="button" className="example-upload" type="button" onClick={() => navigate('/scan')}>
-          <span><strong>上传自己的配料表</strong><small>使用真实图片开始分析</small></span>
+      <Section title="分析自己的食品">
+        <button className="example-upload-action" type="button" onClick={() => navigate('/scan')}>
+          <span className="example-upload-icon"><img src="/images/action-icons/camera-action-3d.png" alt="" /></span>
+          <span><strong>拍照或上传配料表</strong><small>使用真实图片开始分析</small></span>
           <OriginalIcon name="arrow-right" />
-        </Card>
+        </button>
       </Section>
     </Page>
   )

@@ -303,12 +303,14 @@
 .example-tool-card > .iconfont:last-child { flex: 0 0 auto; color: var(--weak); font-size: 16px; }
 .example-tool-icon { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 10px; color: var(--success-dark); background: var(--success-soft); }
 .example-tool-icon .iconfont { font-size: 17px; }
-.example-upload { width: 100%; padding: 14px 16px; display: flex; align-items: center; gap: 12px; color: inherit; text-align: left; }
-.example-upload span { min-width: 0; flex: 1; }
-.example-upload strong, .example-upload small { display: block; }
-.example-upload strong { color: var(--title); font-size: 14px; }
-.example-upload small { margin-top: 4px; color: var(--body); font-size: 11px; }
-.example-upload svg { width: 19px; height: 19px; color: var(--success); }
+.example-upload-action { width: 100%; min-height: 58px; padding: 9px 12px; border: 1px dashed var(--success); border-radius: 12px; display: flex; align-items: center; gap: 10px; color: inherit; background: transparent; text-align: left; }
+.example-upload-action > span:nth-child(2) { min-width: 0; flex: 1; }
+.example-upload-action strong, .example-upload-action small { display: block; }
+.example-upload-action strong { color: var(--success-dark); font-size: 14px; }
+.example-upload-action small { margin-top: 3px; color: var(--body); font-size: 11px; }
+.example-upload-action > .iconfont:last-child { flex: 0 0 auto; color: var(--success); font-size: 18px; }
+.example-upload-icon { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border-radius: 9px; color: var(--success-dark); background: var(--success-soft); }
+.example-upload-icon img { width: 26px; height: 26px; object-fit: contain; }
 .result-ai-card, .result-avoid-card, .result-warning-card, .result-risk-card, .result-benefit-card, .result-suggestion-card { padding: 14px; }.result-ai-card { border-left: 3px solid var(--ai); }.result-ai-card h2 { color: var(--ai); }.result-ai-card h2, .result-avoid-card h2, .result-warning-card h2, .result-risk-card h2, .result-benefit-card h2, .result-suggestion-card h2 { font-size: 15px; }.result-ai-card .tag-row, .result-avoid-card .tag-row, .result-benefit-card .tag-row { margin-top: 9px; }.result-ai-card p, .result-avoid-card p, .result-warning-card p, .result-benefit-card p, .result-suggestion-card > p { margin-top: 9px; color: var(--body); font-size: 13px; line-height: 1.65; }.result-avoid-card { border-left: 3px solid var(--danger); background: var(--danger-soft); }.result-avoid-card p { color: var(--danger-dark); }.result-warning-card { border-left: 3px solid var(--warning); }.result-warning-card p + p { margin-top: 8px; }
 .ai-analysis-stack { display: grid; gap: 12px; }
 .ai-stage-card { --stage-accent: #2867c7; --stage-soft: #eef5ff; padding: 14px; border-left: 3px solid var(--stage-accent); background: linear-gradient(112deg,#fff 0%,#fff 68%,var(--stage-soft) 100%); transition: opacity .18s ease, border-color .18s ease, background-color .18s ease; }
