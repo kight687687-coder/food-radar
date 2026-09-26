@@ -46,7 +46,7 @@ export function ExamplesPage() {
             <span><strong>小烤肠</strong><small>肉制品</small></span>
             <span><strong>冰红茶</strong><small>饮料</small></span>
           </div>
-          <button className="button primary example-compare-action" type="button" onClick={startExampleComparison}>开始 PK <OriginalIcon name="arrow-right" /></button>
+          <button className="button primary example-compare-action" type="button" onClick={startExampleComparison}>开始 PK</button>
         </Card>
       </Section>
       <Section title="更多工具">

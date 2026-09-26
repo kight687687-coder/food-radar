@@ -293,8 +293,7 @@
 .example-compare-copy strong, .example-compare-copy small { display: block; }
 .example-compare-copy strong { color: var(--title); font-size: 14px; }
 .example-compare-copy small { margin-top: 3px; color: var(--success-dark); font-size: 11px; }
-.example-compare-action { min-height: 36px; margin-top: 13px; padding: 0 14px; display: inline-flex; align-items: center; gap: 5px; }
-.example-compare-action .iconfont { font-size: 14px; }
+.example-compare-action { min-height: 32px; margin: 13px auto 0; padding: 0 17px; display: flex; width: fit-content; align-items: center; font-size: 12px; }
 .example-tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .example-tool-card { min-width: 0; padding: 13px; display: flex; align-items: center; gap: 9px; color: inherit; text-align: left; }
 .example-tool-card > span:nth-child(2) { min-width: 0; flex: 1; }
@@ -430,10 +429,10 @@
 .compare-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.compare-food-slot { min-width: 0; min-height: 146px; padding: 12px; display: flex; flex-direction: column; align-items: center; color: inherit; text-align: center; }.compare-food-slot > small { align-self: flex-start; color: var(--body); font-size: 11px; font-weight: 800; }.compare-food-slot img, .compare-food-placeholder { width: 66px; height: 66px; margin-top: 9px; border-radius: 12px; object-fit: cover; }.compare-food-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--info); background: var(--module); }.compare-food-placeholder .iconfont { font-size: 22px; }.compare-food-placeholder em { color: var(--weak); font-size: 11px; font-style: normal; }.compare-food-slot > strong { max-width: 100%; margin-top: 8px; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }.compare-food-slot > b { margin-top: 4px; color: var(--success); font-size: 13px; }.compare-submit { margin-top: 12px; }
 .compare-winner-card { padding: 16px; background: linear-gradient(135deg,#fff,var(--success-soft)); }.compare-winner-card small { color: var(--success); font-size: 11px; font-weight: 900; }.compare-winner-card h2 { margin-top: 7px; font-size: 19px; }.compare-winner-card strong { display: block; margin-top: 6px; color: var(--success); font-size: 29px; }.compare-winner-card p { margin-top: 8px; color: var(--body); font-size: 13px; }
 .compare-result-card { animation: cardRise .34s ease-out both; }
-.compare-page > .section:nth-of-type(1) .compare-result-card { animation-delay: .08s; }
-.compare-page > .section:nth-of-type(2) .compare-result-card { animation-delay: .17s; }
-.compare-page > .section:nth-of-type(3) .compare-result-card { animation-delay: .26s; }
-.compare-page > .section:nth-of-type(4) .compare-result-card { animation-delay: .35s; }
+.compare-page > .section:nth-of-type(1) .compare-result-card { animation-delay: .12s; }
+.compare-page > .section:nth-of-type(2) .compare-result-card { animation-delay: .42s; }
+.compare-page > .section:nth-of-type(3) .compare-result-card { animation-delay: .72s; }
+.compare-page > .section:nth-of-type(4) .compare-result-card { animation-delay: 1.02s; }
 .compare-detail-card, .compare-risk-card, .compare-ai-card { padding: 14px; }.compare-detail-card > h2, .compare-risk-card > h2, .compare-ai-card > h2 { font-size: 15px; }.compare-native-row { padding: 12px 0; border-bottom: 1px solid #f3f4f6; }.compare-native-row:last-child { border-bottom: 0; }.compare-native-row > strong { font-size: 14px; }.compare-native-row > div { margin-top: 8px; display: flex; gap: 9px; color: var(--body); font-size: 13px; font-weight: 800; }.compare-native-row .win { color: var(--success); }.compare-native-row > small { display: block; margin-top: 5px; color: var(--weak); font-size: 11px; }.compare-risk-cols { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }.compare-risk-cols > div > strong { font-size: 13px; }.compare-risk-cols .tag-row { margin-top: 7px; }.compare-risk-card > p { margin-top: 12px; padding: 10px; border-radius: 8px; color: var(--body); background: var(--module); font-size: 12px; line-height: 1.5; }.compare-ai-card { border-left: 3px solid var(--ai); }.compare-ai-card h2 { color: var(--ai); }.compare-ai-card p { margin-top: 9px; display: flex; align-items: flex-start; gap: 8px; color: var(--body); font-size: 13px; line-height: 1.55; }.compare-ai-card p .tag { flex: 0 0 auto; }.compare-reset-link { width: 100%; padding: 17px 0; color: var(--body); background: transparent; font-size: 13px; font-weight: 700; }
 
 /* Family parity */
