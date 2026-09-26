@@ -416,6 +416,12 @@
 
 @media (max-width: 899px) {
   .profile-page { padding-bottom: 30px; }.profile-page .section { margin-top: 18px; }
+  .example-grid { grid-template-columns: 1fr; gap: 11px; }
+  .example-card { display: grid; grid-template-columns: 100px minmax(0, 1fr); grid-template-rows: auto auto; align-items: center; }
+  .example-image { width: 100px; height: 100%; min-height: 118px; grid-row: 1 / span 2; aspect-ratio: auto; object-fit: contain; background: var(--module); }
+  .example-card-copy { padding: 13px 13px 0; }
+  .example-card-copy > span { min-height: 0; }
+  .example-card-action { padding: 9px 13px 13px; }
   .wiki-page { padding-bottom: 24px; }.wiki-page .category-scroll { margin: 12px -14px 0; padding: 0 14px 2px; }.wiki-page .category-scroll button { min-height: 29px; padding: 0 12px; border: 1px solid var(--border); background: #fff; }.wiki-page .category-scroll button.active { color: #fff; background: var(--title); border-color: var(--title); }
   .result-page { padding-top: 16px; }.result-page .section { margin-top: 16px; }
   .compare-page .page-header { margin-bottom: 14px; }.compare-page .section { margin-top: 16px; }
