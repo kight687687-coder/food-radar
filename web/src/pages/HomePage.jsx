@@ -64,7 +64,7 @@ export function HomePage() {
           <span><strong>拍照识别配料表</strong><small>上传配料表，立即生成食品安全分析</small></span>
           <OriginalIcon name="arrow-right" className="home-action-arrow" />
         </button>
-        <button className="home-example-link" type="button" onClick={() => navigate('/examples')}><span aria-hidden="true">✦</span> 快速体验 <OriginalIcon name="arrow-right" /></button>
+        <button className="home-example-link" type="button" onClick={() => navigate('/examples')}><span aria-hidden="true">✦</span> 示例体验 <OriginalIcon name="arrow-right" /></button>
       </Card>
 
       <Section title="常用功能">
