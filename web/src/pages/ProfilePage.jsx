@@ -5,8 +5,9 @@ import { OriginalIcon } from '../components/OriginalIcon'
 import { Card, Page, Section } from '../components/Page'
 import { useApp } from '../context/AppContext'
 import { GENDERS, USER_TYPES } from '../data/constants'
+import { DEFAULT_AVATAR, DEFAULT_NICKNAME } from '../data/profileDefaults'
 
-const blankProfile = { nickname: '', gender: '', age: '', height: '', weight: '', userType: '普通人群', selectedAvoids: [] }
+const blankProfile = { nickname: DEFAULT_NICKNAME, gender: '', age: '', height: '', weight: '', userType: '普通人群', selectedAvoids: [], avatar: DEFAULT_AVATAR }
 
 export function ProfilePage() {
   const { profile, saveUserProfile, notify } = useApp()
@@ -25,7 +26,7 @@ export function ProfilePage() {
     notify(editing ? '健康档案已更新' : '健康档案已保存', 'success')
     navigate('/', { replace: true })
   }
-  function skip() { saveUserProfile({ userId: Date.now(), nickname: '我自己', userType: '普通人群', selectedAvoids: [] }); navigate('/', { replace: true }) }
+  function skip() { saveUserProfile({ userId: Date.now(), nickname: DEFAULT_NICKNAME, avatar: DEFAULT_AVATAR, userType: '普通人群', selectedAvoids: [] }); navigate('/', { replace: true }) }
 
   return (
     <Page title="健康档案" subtitle="填写基础信息后，识别结果会按你的身体状态、饮食目标和忌口偏好给出提醒" className="profile-page">

@@ -1,3 +1,5 @@
+import { DEFAULT_AVATAR, DEFAULT_NICKNAME, DEFAULT_RELATIONSHIP } from '../data/profileDefaults'
+
 const KEYS = {
   profile: 'userProfile',
   members: 'familyMembers',
@@ -52,24 +54,40 @@ export function setActiveMemberId(memberId) {
 }
 
 export function initializeFamily(profile = getProfile()) {
+  if (profile?.userId) {
+    const migratedProfile = {
+      ...profile,
+      nickname: profile.nickname === '我自己' ? DEFAULT_NICKNAME : (profile.nickname || DEFAULT_NICKNAME),
+      avatar: profile.avatar || DEFAULT_AVATAR,
+    }
+    if (JSON.stringify(migratedProfile) !== JSON.stringify(profile)) writeStorage(KEYS.profile, migratedProfile)
+    profile = migratedProfile
+  }
   const members = getMembers()
   if (members.length) {
+    const migrated = members.map(member => ({
+      ...member,
+      nickname: member.nickname === '我自己' ? DEFAULT_NICKNAME : (member.nickname || DEFAULT_NICKNAME),
+      relationship: member.relationship === '我自己' ? DEFAULT_RELATIONSHIP : member.relationship,
+      avatar: member.avatar || profile?.avatar || DEFAULT_AVATAR,
+    }))
+    if (JSON.stringify(migrated) !== JSON.stringify(members)) writeStorage(KEYS.members, migrated)
     if (!getActiveMemberId()) setActiveMemberId(members[0].memberId)
-    return members
+    return migrated
   }
   if (!profile?.userId) return []
   const memberId = createId('m')
   const member = {
     memberId,
-    nickname: profile.nickname || '我自己',
+    nickname: profile.nickname || DEFAULT_NICKNAME,
     gender: profile.gender || '',
     age: profile.age || '',
     height: profile.height || '',
     weight: profile.weight || '',
-    relationship: '我自己',
+    relationship: DEFAULT_RELATIONSHIP,
     userType: profile.userType || '普通人群',
     selectedAvoids: profile.selectedAvoids || [],
-    avatar: profile.avatar || '',
+    avatar: profile.avatar || DEFAULT_AVATAR,
     createTime: Date.now(),
   }
   writeStorage(KEYS.members, [member])
@@ -87,7 +105,7 @@ export function addMember(info) {
   if (members.length >= 6) return { ok: false, message: '最多添加 6 位家庭成员' }
   const member = {
     memberId: createId('m'),
-    nickname: info.nickname || '',
+    nickname: info.nickname || DEFAULT_NICKNAME,
     gender: info.gender || '',
     age: info.age || '',
     height: info.height || '',
@@ -95,7 +113,7 @@ export function addMember(info) {
     relationship: info.relationship || '',
     userType: info.userType || '普通人群',
     selectedAvoids: info.selectedAvoids || [],
-    avatar: info.avatar || '',
+    avatar: info.avatar || DEFAULT_AVATAR,
     createTime: Date.now(),
   }
   const next = [...members, member]

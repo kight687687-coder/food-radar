@@ -30,4 +30,4 @@ export const AVOID_GROUPS = [
 export const AVOID_NAMES = Object.fromEntries(AVOID_GROUPS.flatMap(group => group.items))
 export const USER_TYPES = ['普通人群', '减肥', '健身', '儿童', '老人', '孕妇', '糖尿病', '心血管']
 export const GENDERS = ['男', '女', '保密']
-export const RELATIONSHIPS = ['我自己', '伴侣', '孩子', '父母', '其他家人']
+export const RELATIONSHIPS = ['本人', '伴侣', '孩子', '父母', '其他家人']

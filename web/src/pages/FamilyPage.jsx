@@ -6,6 +6,7 @@ import { OriginalIcon } from '../components/OriginalIcon'
 import { Card, Page, Section } from '../components/Page'
 import { useApp } from '../context/AppContext'
 import { GENDERS, RELATIONSHIPS, USER_TYPES } from '../data/constants'
+import { DEFAULT_AVATAR, DEFAULT_NICKNAME, DEFAULT_RELATIONSHIP } from '../data/profileDefaults'
 import { makeAvatarDataUrl } from '../utils/image'
 
 export function FamilyPage() {
@@ -19,7 +20,7 @@ export function FamilyPage() {
   }
   return <Page title="家庭成员" subtitle="切换当前成员后，识别、历史和健康报告会按该成员展示" back className="family-page">
     <section className="family-native-summary"><span><strong>{members.length}</strong><small>已添加成员</small></span><b>最多 6 位</b></section>
-    <div className="family-list">{members.map(member => <Card className={`family-card ${member.memberId === activeMemberId ? 'active' : ''}`} key={member.memberId}><button type="button" className="family-native-select" onClick={() => { selectMember(member.memberId); notify('已切换当前成员', 'success') }}><Avatar src={member.avatar} name={member.nickname || member.relationship || '成'} /><span><span><strong>{member.nickname || member.relationship || '未命名成员'}</strong>{member.memberId === activeMemberId && <b>当前</b>}</span><small>{member.relationship || '家庭成员'} · {member.userType || '普通人群'}</small><em>{member.selectedAvoids?.length ? `已设置 ${member.selectedAvoids.length} 项忌口` : '未设置忌口'}</em></span></button><div className="family-native-actions"><button type="button" onClick={() => navigate(`/family/edit/${member.memberId}`)} aria-label="编辑"><OriginalIcon name="arrow-right" /></button>{members.length > 1 && <button type="button" onClick={() => deleteMember(member)} aria-label="移除"><OriginalIcon name="shield-warning" /></button>}</div></Card>)}</div>
+    <div className="family-list">{members.map(member => <Card className={`family-card ${member.memberId === activeMemberId ? 'active' : ''}`} key={member.memberId}><button type="button" className="family-native-select" onClick={() => { selectMember(member.memberId); notify('已切换当前成员', 'success') }}><Avatar src={member.avatar} name={member.nickname || '用'} /><span><span><strong>{member.nickname || DEFAULT_NICKNAME}</strong>{member.memberId === activeMemberId && <b>当前</b>}</span><span className="family-member-meta"><em className="tag success">{member.relationship || DEFAULT_RELATIONSHIP}</em><small>{member.userType || '普通人群'}</small></span><em>{member.selectedAvoids?.length ? `已设置 ${member.selectedAvoids.length} 项忌口` : '未设置忌口'}</em></span></button><div className="family-native-actions"><button type="button" onClick={() => navigate(`/family/edit/${member.memberId}`)} aria-label="编辑"><OriginalIcon name="arrow-right" /></button>{members.length > 1 && <button type="button" onClick={() => deleteMember(member)} aria-label="移除"><OriginalIcon name="shield-warning" /></button>}</div></Card>)}</div>
     {members.length < 6 ? <button className="family-add-card" type="button" onClick={() => navigate('/family/new')}><span><OriginalIcon name="user-group" /></span><span><strong>添加家庭成员</strong><small>为孩子、老人或控糖人群建立独立档案</small></span></button> : <p className="family-limit">成员数量已达上限</p>}
   </Page>
 }
@@ -29,7 +30,7 @@ export function FamilyEditPage({ isNew = false }) {
   const navigate = useNavigate()
   const { memberId: id } = useParams()
   const member = (!isNew && members.find(item => item.memberId === id)) || activeMember || {}
-  const [form, setForm] = useState({ nickname: member.nickname || '', gender: member.gender || '', relationship: member.relationship || '', age: member.age || '', height: member.height || '', weight: member.weight || '', userType: member.userType || '普通人群', selectedAvoids: member.selectedAvoids || [], avatar: member.avatar || '' })
+  const [form, setForm] = useState({ nickname: member.nickname || DEFAULT_NICKNAME, gender: member.gender || '', relationship: member.relationship === '我自己' ? DEFAULT_RELATIONSHIP : (member.relationship || ''), age: member.age || '', height: member.height || '', weight: member.weight || '', userType: member.userType || '普通人群', selectedAvoids: member.selectedAvoids || [], avatar: member.avatar || DEFAULT_AVATAR })
   const [avoidExpanded, setAvoidExpanded] = useState(false)
   const avatarInput = useRef(null)
   function update(field, value) { setForm(current => ({ ...current, [field]: value })) }
@@ -57,7 +58,7 @@ export function FamilyEditPage({ isNew = false }) {
     <Section title="基本信息"><Card className="native-form-card">
       <label className="native-form-row"><span>昵称</span><input value={form.nickname} onChange={event => update('nickname', event.target.value)} placeholder="输入昵称" maxLength={10} /></label>
       <label className="native-form-row"><span>性别</span><span className="native-select-wrap"><select value={form.gender} onChange={event => update('gender', event.target.value)}><option value="">请选择</option>{GENDERS.map(item => <option key={item}>{item}</option>)}</select><OriginalIcon name="arrow-right" /></span></label>
-      <label className="native-form-row"><span>关系</span><span className="native-select-wrap"><select value={form.relationship} onChange={event => update('relationship', event.target.value)}><option value="">请选择</option>{RELATIONSHIPS.map(item => <option key={item}>{item}</option>)}</select><OriginalIcon name="arrow-right" /></span></label>
+      <label className="native-form-row"><span>家庭关系</span><span className="native-select-wrap"><select value={form.relationship} onChange={event => update('relationship', event.target.value)}><option value="">请选择</option>{RELATIONSHIPS.map(item => <option key={item}>{item}</option>)}</select><OriginalIcon name="arrow-right" /></span></label>
       <div className="native-metric-row"><label><span>年龄</span><input type="number" value={form.age} onChange={event => update('age', event.target.value)} placeholder="岁" /></label><label><span>身高</span><input type="number" value={form.height} onChange={event => update('height', event.target.value)} placeholder="cm" /></label><label><span>体重</span><input type="number" value={form.weight} onChange={event => update('weight', event.target.value)} placeholder="kg" /></label></div>
     </Card></Section>
     <Section title="健康偏好"><Card className="native-form-card">

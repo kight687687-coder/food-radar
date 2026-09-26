@@ -9,8 +9,9 @@ export function AppProvider({ children }) {
   const [toast, setToast] = useState(null)
   const [dialog, setDialog] = useState(null)
 
+  const initialProfile = storage.getProfile()
+  storage.initializeFamily(initialProfile)
   const profile = storage.getProfile()
-  storage.initializeFamily(profile)
   const members = storage.getMembers()
   const activeMemberId = storage.getActiveMemberId()
   const activeMember = members.find(member => member.memberId === activeMemberId) || members[0] || null
