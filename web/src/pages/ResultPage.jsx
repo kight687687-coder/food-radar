@@ -8,6 +8,7 @@ import { EmptyState } from '../components/States'
 import { useApp } from '../context/AppContext'
 import { askNutritionist } from '../services/api'
 import { getLastResult, setComparePreset } from '../services/storage'
+import { isExampleResult } from '../data/exampleFoods'
 import { scoreMeta } from '../utils/analytics'
 import { buildAnalysisStages } from '../utils/aiAnalysisStages'
 import { buildAssistantQuestions, buildLocalAssistantAnswer, compactAssistantContext } from '../utils/resultAssistant'
@@ -74,6 +75,7 @@ export function ResultPage() {
   if (!result) return <Page title="食品分析结果" back><Card><EmptyState title="暂无分析数据" description="先上传一张清晰的配料表图片，再查看完整分析结果。" action={<button className="button primary" onClick={() => navigate('/scan')}>开始识别</button>} /></Card></Page>
 
   const score = Number(result.health_score || 0)
+  const exampleResult = isExampleResult(result)
   const meta = scoreMeta(score)
   const risks = (result.risk_additives || []).slice(0, 6).map(item => { const deduct = Number(item.deduct_score || item.deduct || 0); return { ...item, deduct, tone: deduct >= 20 ? 'danger' : deduct >= 10 ? 'warning' : 'success' } })
   if (Number(result.ingredients_count_penalty) > 0) risks.push({ name: '配料较多', risk_level: '中风险', deduct: result.ingredients_count_penalty, tone: 'warning', reason: '配料项目较多，建议优先选择配料更短的同类食品。' })
@@ -113,7 +115,7 @@ export function ResultPage() {
     <div className="result-native-top"><button type="button" onClick={() => navigate(-1)}>返回</button><h1>食品分析结果</h1></div>
     <section className={`result-score-card tone-${meta.tone}`}><small>健康评分</small><strong className={meta.className}>{score}</strong><h2>{level}</h2><p>{risks.length} 项风险 · {benefits.length} 项有益成分</p><em>参照 GB 2760 等国家食品安全标准</em></section>
 
-    {result.imageKey && <Section><Card className="result-food-strip"><StoredImage imageKey={result.imageKey} className="result-food-thumb" alt={result.food_category || '识别食品'} /><span><strong>{result.food_category || '识别食品'}</strong><small>配料表分析结果</small></span></Card></Section>}
+    {(result.imageKey || result.imageSrc) && <Section><Card className="result-food-strip"><StoredImage src={result.imageSrc} imageKey={result.imageKey} className="result-food-thumb" alt={result.food_category || '识别食品'} /><span><strong>{result.food_category || '识别食品'}</strong><small>{exampleResult ? '示例分析 · 固定结果体验' : '配料表分析结果'}</small></span>{exampleResult && <button className="result-example-back" type="button" onClick={() => navigate('/examples')}>换一款</button>}</Card></Section>}
 
     {hitAvoids.length > 0 && <Section><Card className="result-avoid-card"><h2>忌口提醒</h2><p>检测到你设置的忌口成分，建议谨慎食用或避免。</p><div className="tag-row">{hitAvoids.map(item => <span className="tag danger" key={item}>{item}</span>)}</div></Card></Section>}
     <Section title="AI 分析过程"><AiAnalysisStages stages={stages} introVisible={showAiIntro} /></Section>
