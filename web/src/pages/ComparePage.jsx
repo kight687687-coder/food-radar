@@ -53,10 +53,11 @@ export function ComparePage() {
   }
   function reset() { setFoods({ A: null, B: null }); setAdvice(''); navigate('/compare', { replace: true }) }
   const ready = comparison && foods.A?.status !== 'pending' && foods.B?.status !== 'pending'
+  const canCompare = Boolean(foods.A && foods.B && foods.A.status !== 'pending' && foods.B.status !== 'pending')
 
   return <Page title="食品对比" subtitle="选择两款食品，比较评分、风险和适用人群" back className="compare-page">
     <div className="compare-select-grid"><FoodSlot label="食品 A" food={foods.A} inputRef={inputA} disabled={isHistory || analyzing} onFile={file => selectFile('A', file)} /><FoodSlot label="食品 B" food={foods.B} inputRef={inputB} disabled={isHistory || analyzing} onFile={file => selectFile('B', file)} /></div>
-    {!ready && !isHistory && foods.A && foods.B && <button className="button primary full compare-submit" type="button" disabled={analyzing} onClick={startComparison}>开始对比</button>}
+    {!ready && !isHistory && <button className={`button full compare-submit ${canCompare ? 'primary' : 'secondary compare-submit-disabled'}`} type="button" disabled={analyzing || !canCompare} onClick={startComparison}>开始 PK</button>}
     {ready && comparison && <>
       <Section><Card className="compare-result-card compare-winner-card"><small>推荐选择</small><h2>{comparison.winnerName}</h2><strong>{Math.max(comparison.scoreA, comparison.scoreB)} 分</strong><p>综合评分更高，风险成分更少。</p></Card></Section>
       <Section><Card className="compare-result-card compare-detail-card"><h2>对比详情</h2>{comparison.rows.map(row => <div className="compare-native-row" key={row.label}><strong>{row.label}</strong><div><span className={row.aWins ? 'win' : ''}>A {row.valueA}</span><span className={row.bWins ? 'win' : ''}>B {row.valueB}</span></div><small>{row.aWins ? 'A 更优' : row.bWins ? 'B 更优' : '差异不大'}</small></div>)}</Card></Section>
