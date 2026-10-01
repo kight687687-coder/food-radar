@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:46:36",
+  "model": "deepseek-v4-flash",
+  "additive": "姜黄素",
+  "source_text": {
+    "type": "着色剂",
+    "reason": "天然色素，从姜黄提取，有抗氧化作用",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

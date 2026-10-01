@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:49:02",
+  "model": "deepseek-v4-flash",
+  "additive": "巴西棕榈蜡",
+  "source_text": {
+    "type": "被膜剂",
+    "reason": "从巴西棕榈叶提取的天然蜡，安全性高",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

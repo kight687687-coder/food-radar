@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:45:59",
+  "model": "deepseek-v4-flash",
+  "additive": "苋菜红",
+  "source_text": {
+    "type": "着色剂",
+    "reason": "人工合成色素，多国已禁用，我国限制使用范围",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": true,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

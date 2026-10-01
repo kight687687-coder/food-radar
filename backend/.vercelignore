@@ -1,13 +1,16 @@
-.env
-.env.local
-.venv/
-.pytest_cache/
-__pycache__/
-tests/
+# 部署上传排除项：
+# - data/models：TabICLv2 权重 105MB 超过 Vercel 单文件 100MB 上传上限，
+#   Vercel 上运行时由 tabicl 从 HuggingFace Hub 自动下载（见 risk_predictor），
+#   本地开发继续使用 data/models 下的本地权重（CKPT_PATH 回退逻辑）。
+# - .venv/tests/scripts/.downloads/ckpt：构建与运行均不需要
+#   （.downloads 是手动下载的旧 torch wheel；ckpt 是 data/models 权重的
+#   原始副本，均在 100MB 上传限制之上且不参与运行）。
+.venv
+tests
+scripts
+__pycache__
 *.pyc
-*.log
-deploy.sh
-food-radar.service
-init_db.py
-import_data.py
-train.py
+data/models
+.downloads
+ckpt
+.env

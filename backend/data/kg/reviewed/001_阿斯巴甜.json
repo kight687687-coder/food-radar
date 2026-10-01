@@ -1,0 +1,45 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:43:27",
+  "model": "deepseek-v4-flash",
+  "additive": "阿斯巴甜",
+  "source_text": {
+    "type": "甜味剂",
+    "reason": "人工甜味剂，含苯丙氨酸，苯丙酮尿症患者禁用；争议性长期摄入影响代谢",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:苯丙氨酸",
+      "kind": "substance",
+      "name": "苯丙氨酸"
+    },
+    {
+      "id": "subgroup:苯丙酮尿症患者",
+      "kind": "subgroup",
+      "name": "苯丙酮尿症患者"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:阿斯巴甜",
+      "target": "substance:苯丙氨酸",
+      "relation": "contains_component",
+      "evidence": "含苯丙氨酸"
+    },
+    {
+      "source": "substance:苯丙氨酸",
+      "target": "subgroup:苯丙酮尿症患者",
+      "relation": "forbidden_for",
+      "evidence": "苯丙酮尿症患者禁用",
+      "restriction_type": "forbidden"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "explicit"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

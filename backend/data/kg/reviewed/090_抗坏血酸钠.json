@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:48:38",
+  "model": "deepseek-v4-flash",
+  "additive": "抗坏血酸钠",
+  "source_text": {
+    "type": "护色剂",
+    "reason": "维生素C钠盐，安全性极高",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

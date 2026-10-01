@@ -9,3 +9,11 @@ openai>=1.30,<3.0
 joblib>=1.3,<2.0
 pandas>=2.1,<3.0
 gunicorn>=21.2,<24.0
+networkx>=3.0,<4.0
+
+# v2 风险管线（TabICLv2）——部署 Vercel Large Functions 时需要。
+# +cpu 后缀仅存在于 pytorch.org CPU 源，强制 pip 选择 CPU 版
+# （PyPI 上 Linux 默认 wheel 为 CUDA 版，体积 3-6GB 会撑爆 bundle）。
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.0+cpu
+tabicl==2.2.0

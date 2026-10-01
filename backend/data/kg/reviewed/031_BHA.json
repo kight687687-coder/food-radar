@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:45:36",
+  "model": "deepseek-v4-flash",
+  "additive": "BHA",
+  "source_text": {
+    "type": "抗氧化剂",
+    "reason": "人工合成抗氧化剂，长期大量摄入有潜在风险",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": true,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

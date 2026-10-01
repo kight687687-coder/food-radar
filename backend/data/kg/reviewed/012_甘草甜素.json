@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:44:10",
+  "model": "deepseek-v4-flash",
+  "additive": "甘草甜素",
+  "source_text": {
+    "type": "甜味剂",
+    "reason": "天然甜味剂，从甘草根提取，有特殊后味",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

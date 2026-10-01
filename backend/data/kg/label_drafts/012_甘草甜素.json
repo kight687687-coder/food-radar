@@ -1,0 +1,143 @@
+{
+  "additive": "甘草甜素",
+  "risk_level": "低",
+  "review_status": "draft",
+  "generated_at": "2026-10-01T10:14:49",
+  "labels": [
+    {
+      "group": "儿童",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "孕妇",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "老人",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "糖尿病",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "心血管",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "减肥",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "健身",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "普通人群",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    },
+    {
+      "group": "其他",
+      "initial_label": "low",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [],
+        "representative_chain": null
+      },
+      "calibrated_label": null,
+      "note": ""
+    }
+  ]
+}

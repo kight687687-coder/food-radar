@@ -1,0 +1,44 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:47:20",
+  "model": "deepseek-v4-flash",
+  "additive": "蔗糖脂肪酸酯",
+  "source_text": {
+    "type": "乳化剂",
+    "reason": "半合成乳化剂，在体内分解为蔗糖和脂肪酸，安全性高",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:蔗糖",
+      "kind": "substance",
+      "name": "蔗糖"
+    },
+    {
+      "id": "substance:脂肪酸",
+      "kind": "substance",
+      "name": "脂肪酸"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:蔗糖脂肪酸酯",
+      "target": "substance:蔗糖",
+      "relation": "metabolizes_to",
+      "evidence": "在体内分解为蔗糖和脂肪酸"
+    },
+    {
+      "source": "additive:蔗糖脂肪酸酯",
+      "target": "substance:脂肪酸",
+      "relation": "metabolizes_to",
+      "evidence": "在体内分解为蔗糖和脂肪酸"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

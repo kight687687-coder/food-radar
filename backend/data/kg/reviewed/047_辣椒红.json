@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:46:34",
+  "model": "deepseek-v4-flash",
+  "additive": "辣椒红",
+  "source_text": {
+    "type": "着色剂",
+    "reason": "天然色素，从辣椒提取，安全性高",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

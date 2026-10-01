@@ -1,0 +1,33 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:48:05",
+  "model": "deepseek-v4-flash",
+  "additive": "明矾",
+  "source_text": {
+    "type": "膨松剂",
+    "reason": "含铝膨松剂，过量摄入铝在体内蓄积，影响神经系统",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:铝元素",
+      "kind": "substance",
+      "name": "铝元素"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:明矾",
+      "target": "substance:铝元素",
+      "relation": "contains_component",
+      "evidence": "含铝膨松剂"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": true,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "explicit"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

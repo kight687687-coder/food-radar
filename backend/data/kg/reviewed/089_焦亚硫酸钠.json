@@ -1,0 +1,61 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:48:37",
+  "model": "deepseek-v4-flash",
+  "additive": "焦亚硫酸钠",
+  "source_text": {
+    "type": "漂白剂",
+    "reason": "用于干货防腐漂白，释放二氧化硫，敏感人群需注意",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:二氧化硫",
+      "kind": "substance",
+      "name": "二氧化硫"
+    },
+    {
+      "id": "substance:亚硫酸盐",
+      "kind": "substance",
+      "name": "亚硫酸盐"
+    },
+    {
+      "id": "subgroup:敏感人群",
+      "kind": "subgroup",
+      "name": "敏感人群"
+    },
+    {
+      "id": "subgroup:哮喘者",
+      "kind": "subgroup",
+      "name": "哮喘者"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:焦亚硫酸钠",
+      "target": "substance:二氧化硫",
+      "relation": "associated_with",
+      "evidence": "释放二氧化硫"
+    },
+    {
+      "source": "additive:焦亚硫酸钠",
+      "target": "subgroup:敏感人群",
+      "relation": "cautions_for",
+      "evidence": "敏感人群需注意",
+      "restriction_type": "warning"
+    },
+    {
+      "source": "substance:亚硫酸盐",
+      "target": "subgroup:哮喘者",
+      "relation": "triggers",
+      "evidence": "亚硫酸盐可能诱发哮喘和过敏反应"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

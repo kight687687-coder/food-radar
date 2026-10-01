@@ -1,0 +1,33 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:45:27",
+  "model": "deepseek-v4-flash",
+  "additive": "硝酸钠",
+  "source_text": {
+    "type": "防腐剂",
+    "reason": "肉制品护色剂，在体内可转化为亚硝酸盐",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:亚硝酸盐",
+      "kind": "substance",
+      "name": "亚硝酸盐"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:硝酸钠",
+      "target": "substance:亚硝酸盐",
+      "relation": "converts_to",
+      "evidence": "在体内可转化为亚硝酸盐"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

@@ -1,0 +1,33 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:45:03",
+  "model": "deepseek-v4-flash",
+  "additive": "脱氢乙酸钠",
+  "source_text": {
+    "type": "防腐剂",
+    "reason": "广谱防腐剂，2024年新国标在部分食品中禁用或限量",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:脱氢乙酸",
+      "kind": "substance",
+      "name": "脱氢乙酸"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:脱氢乙酸钠",
+      "target": "substance:脱氢乙酸",
+      "relation": "contains_component",
+      "evidence": "脱氢乙酸（中）：脱氢乙酸钠2024年新国标缩紧使用范围"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": true,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "explicit"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

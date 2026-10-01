@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:47:43",
+  "model": "deepseek-v4-flash",
+  "additive": "磷酸",
+  "source_text": {
+    "type": "酸度调节剂",
+    "reason": "无机酸，过量摄入影响钙磷平衡，长期影响骨骼健康",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "explicit"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

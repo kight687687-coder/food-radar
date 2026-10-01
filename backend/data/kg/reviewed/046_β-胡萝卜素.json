@@ -1,0 +1,33 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:46:19",
+  "model": "deepseek-v4-flash",
+  "additive": "β-胡萝卜素",
+  "source_text": {
+    "type": "着色剂",
+    "reason": "天然色素，维生素A前体，安全无危害",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:维生素A",
+      "kind": "substance",
+      "name": "维生素A"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:β-胡萝卜素",
+      "target": "substance:维生素A",
+      "relation": "converts_to",
+      "evidence": "维生素A前体"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

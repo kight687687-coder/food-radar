@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:49:40",
+  "model": "deepseek-v4-flash",
+  "additive": "牛磺酸",
+  "source_text": {
+    "type": "营养强化剂",
+    "reason": "条件性必需氨基酸，大量摄入可能影响儿童发育",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

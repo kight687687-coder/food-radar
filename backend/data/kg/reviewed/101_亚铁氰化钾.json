@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:49:20",
+  "model": "deepseek-v4-flash",
+  "additive": "亚铁氰化钾",
+  "source_text": {
+    "type": "抗结剂",
+    "reason": "用于食盐抗结，高温分解，限量下安全",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": true,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

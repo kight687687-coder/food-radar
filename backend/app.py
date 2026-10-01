@@ -21,8 +21,10 @@ from ai_analyze import (
 )
 from classifier import classify
 from config import ALLOWED_ORIGINS
+from explain import build_explanation, narrate_explanations
 from ocr import OCRProviderError, ProviderConfigurationError as OCRConfigurationError, ocr_image
 from persistence import load_daily, load_history, load_wiki_cache, save_scan, save_wiki_cache
+from risk_predictor import get_predictor
 from score import score_ingredients
 
 
@@ -368,6 +370,44 @@ def wiki_query():
         return jsonify({"error": "AI 百科服务尚未配置或暂时不可用"}), 503
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
+
+
+@app.post("/api/v2/risk")
+def api_v2_risk():
+    """知识图谱 v2 风险接口：法规兜底 + TabICLv2 泛化 + 拒判门控 + 表达层。
+
+    表达层只解释、不改决策（risk_level/source/confidence 逐位透传）；
+    DeepSeek 不可用时自动回退确定性模板 narrative，永不影响风险结论。
+    旧端点（/analyze 等）零改动，保持向后兼容。
+    """
+    try:
+        body = _json_body()
+        ingredients = body.get("ingredients")
+        if not isinstance(ingredients, list) or not ingredients:
+            raise ValueError("缺少 ingredients 参数（非空数组）")
+        if len(ingredients) > 80:
+            raise ValueError("ingredients 条目过多（上限 80）")
+        cleaned = [str(item).strip()[:50] for item in ingredients if str(item).strip()]
+        if not cleaned:
+            raise ValueError("ingredients 中没有有效成分名称")
+        user_type = str(body.get("user_type") or "普通人群").strip() or "普通人群"
+
+        try:
+            predictor = get_predictor()
+        except Exception:
+            # 系统边界：轻量部署环境（如 Vercel）无 torch/tabicl 推理运行时，
+            # v2 明确不可用——返回 503 而非 500，旧端点不受影响。
+            return _resp(code=503, msg="v2 风险模型在当前部署环境不可用（缺少推理运行时），请使用完整部署或本地服务")
+        predictions = predictor.predict_batch([(name, user_type) for name in cleaned])
+        explanations = narrate_explanations(
+            [build_explanation(p) for p in predictions], user_type
+        )
+        summary = {"total": len(explanations), "high": 0, "medium": 0, "low": 0, "unknown": 0}
+        for item in explanations:
+            summary[item["risk_level"]] = summary.get(item["risk_level"], 0) + 1
+        return _resp(data={"user_type": user_type, "summary": summary, "explanations": explanations})
+    except ValueError as exc:
+        return _resp(code=400, msg=str(exc))
 
 
 @app.errorhandler(RequestEntityTooLarge)

@@ -1,0 +1,175 @@
+{
+  "additive": "亚硝酸钠",
+  "risk_level": "高",
+  "review_status": "auto_calibrated",
+  "generated_at": "2026-10-01T10:14:52",
+  "labels": [
+    {
+      "group": "儿童",
+      "initial_label": "high",
+      "rules": [
+        "regulatory_forbidden"
+      ],
+      "evidence_flags": {
+        "csv_forbidden": true,
+        "graph_forbidden": false,
+        "warns_level": "高",
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "R1 证据判定=risk_only：文本无明确禁用表述（仅风险描述或中性说明）"
+    },
+    {
+      "group": "孕妇",
+      "initial_label": "high",
+      "rules": [
+        "regulatory_forbidden"
+      ],
+      "evidence_flags": {
+        "csv_forbidden": true,
+        "graph_forbidden": false,
+        "warns_level": "高",
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "R1 证据判定=risk_only：文本无明确禁用表述（仅风险描述或中性说明）"
+    },
+    {
+      "group": "老人",
+      "initial_label": "high",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": "高",
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "high",
+      "note": "",
+      "auto_note": "「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    },
+    {
+      "group": "糖尿病",
+      "initial_label": "high",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": "中",
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "high",
+      "note": "",
+      "auto_note": "「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    },
+    {
+      "group": "心血管",
+      "initial_label": "high",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": "中",
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "high",
+      "note": "",
+      "auto_note": "「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    },
+    {
+      "group": "减肥",
+      "initial_label": "high",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "high",
+      "note": "",
+      "auto_note": "「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    },
+    {
+      "group": "健身",
+      "initial_label": "high",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": "中",
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "high",
+      "note": "",
+      "auto_note": "「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    },
+    {
+      "group": "普通人群",
+      "initial_label": "high",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": "高",
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "high",
+      "note": "",
+      "auto_note": "「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    },
+    {
+      "group": "其他",
+      "initial_label": "high",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [],
+        "representative_chain": "亚硝酸钠 --禁忌于--> 婴幼儿"
+      },
+      "calibrated_label": "high",
+      "note": "",
+      "auto_note": "「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    }
+  ],
+  "calibrated_at": "2026-10-01T10:51:56"
+}

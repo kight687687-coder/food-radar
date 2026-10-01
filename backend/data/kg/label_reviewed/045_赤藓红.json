@@ -1,0 +1,182 @@
+{
+  "additive": "赤藓红",
+  "risk_level": "中",
+  "review_status": "auto_calibrated",
+  "generated_at": "2026-10-01T10:14:57",
+  "labels": [
+    {
+      "group": "儿童",
+      "initial_label": "high",
+      "rules": [
+        "regulatory_forbidden"
+      ],
+      "evidence_flags": {
+        "csv_forbidden": true,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [
+          "哮喘者",
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [
+          "婴幼儿",
+          "甲状腺功能异常者",
+          "胎儿"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "R1 证据判定=caution：文本为限制/限量/慎用/注意表述，非明确禁用"
+    },
+    {
+      "group": "孕妇",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「甲状腺功能异常者」为专属亚人群风险（专属疾病人群，不映射九大人群），不作为该人群升格依据"
+    },
+    {
+      "group": "老人",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「甲状腺功能异常者」为专属亚人群风险（专属疾病人群，不映射九大人群），不作为该人群升格依据"
+    },
+    {
+      "group": "糖尿病",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「甲状腺功能异常者」为专属亚人群风险（专属疾病人群，不映射九大人群），不作为该人群升格依据"
+    },
+    {
+      "group": "心血管",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「甲状腺功能异常者」为专属亚人群风险（专属疾病人群，不映射九大人群），不作为该人群升格依据"
+    },
+    {
+      "group": "减肥",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「甲状腺功能异常者」为专属亚人群风险（专属疾病人群，不映射九大人群），不作为该人群升格依据"
+    },
+    {
+      "group": "健身",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「甲状腺功能异常者」为专属亚人群风险（专属疾病人群，不映射九大人群），不作为该人群升格依据"
+    },
+    {
+      "group": "普通人群",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [],
+        "subgroup_caution_chain": [
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「甲状腺功能异常者」为专属亚人群风险（专属疾病人群，不映射九大人群），不作为该人群升格依据"
+    },
+    {
+      "group": "其他",
+      "initial_label": "medium",
+      "rules": [],
+      "evidence_flags": {
+        "csv_forbidden": false,
+        "graph_forbidden": false,
+        "warns_level": null,
+        "subgroup_forbidden_chain": [
+          "哮喘者",
+          "婴幼儿"
+        ],
+        "subgroup_caution_chain": [
+          "婴幼儿",
+          "甲状腺功能异常者"
+        ],
+        "representative_chain": "赤藓红 --含成分--> 碘 --需注意--> 甲状腺功能异常者"
+      },
+      "calibrated_label": "medium",
+      "note": "",
+      "auto_note": "「哮喘者」为专属亚人群风险（专属敏感人群，不映射九大人群），不作为该人群升格依据；「婴幼儿」禁忌链映射人群为「儿童」，不覆盖该人群，不作为升格依据"
+    }
+  ],
+  "calibrated_at": "2026-10-01T10:51:56"
+}

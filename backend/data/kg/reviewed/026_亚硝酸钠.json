@@ -1,0 +1,45 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:45:23",
+  "model": "deepseek-v4-flash",
+  "additive": "亚硝酸钠",
+  "source_text": {
+    "type": "防腐剂",
+    "reason": "肉制品护色防腐剂，过量摄入有致癌风险（亚硝胺）",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:亚硝胺",
+      "kind": "substance",
+      "name": "亚硝胺"
+    },
+    {
+      "id": "subgroup:婴幼儿",
+      "kind": "subgroup",
+      "name": "婴幼儿"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:亚硝酸钠",
+      "target": "substance:亚硝胺",
+      "relation": "converts_to",
+      "evidence": "特定条件下形成亚硝胺（致癌物）"
+    },
+    {
+      "source": "additive:亚硝酸钠",
+      "target": "subgroup:婴幼儿",
+      "relation": "forbidden_for",
+      "evidence": "婴幼儿禁用",
+      "restriction_type": "forbidden"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": true,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "explicit"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

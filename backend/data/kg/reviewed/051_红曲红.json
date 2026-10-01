@@ -1,0 +1,38 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:46:43",
+  "model": "deepseek-v4-flash",
+  "additive": "红曲红",
+  "source_text": {
+    "type": "着色剂",
+    "reason": "天然色素，由红曲霉发酵产生，安全性高",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:红曲红",
+      "kind": "substance",
+      "name": "红曲红"
+    },
+    {
+      "id": "substance:色素",
+      "kind": "substance",
+      "name": "色素"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:红曲红",
+      "target": "substance:色素",
+      "relation": "contains_component",
+      "evidence": "天然色素，由红曲霉发酵产生"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

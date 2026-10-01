@@ -1,0 +1,15 @@
+# uv 依赖解析配置（Vercel Python 构建用 uv lock）：
+# Vercel builder 会在相邻生成的 pyproject.toml 里写 [tool.uv].index（从
+# requirements.txt 的 --extra-index-url 转换），但 uv.toml 优先级更高会把
+# 其覆盖——因此必须在这里完整声明两个 index。
+#   index-strategy=unsafe-best-match：跨 index 取最优版本，
+#   requests 等常规包取 PyPI；torch==2.14.0+cpu 仅存在于 pytorch.org CPU 源。
+# 两个 index 均为可信官方源，无 dependency confusion 风险。
+index-strategy = "unsafe-best-match"
+
+[[index]]
+url = "https://pypi.org/simple"
+default = true
+
+[[index]]
+url = "https://download.pytorch.org/whl/cpu"

@@ -1,0 +1,46 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:43:50",
+  "model": "deepseek-v4-flash",
+  "additive": "糖精钠",
+  "source_text": {
+    "type": "甜味剂",
+    "reason": "人工甜味剂，历史上争议较大，婴儿食品禁用",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "subgroup:婴幼儿",
+      "kind": "subgroup",
+      "name": "婴幼儿"
+    },
+    {
+      "id": "subgroup:胎儿",
+      "kind": "subgroup",
+      "name": "胎儿"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:糖精钠",
+      "target": "subgroup:婴幼儿",
+      "relation": "forbidden_for",
+      "evidence": "婴儿食品禁用",
+      "restriction_type": "forbidden"
+    },
+    {
+      "source": "additive:糖精钠",
+      "target": "subgroup:胎儿",
+      "relation": "cautions_for",
+      "evidence": "对胎儿安全性不明确",
+      "restriction_type": "attention"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": true,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

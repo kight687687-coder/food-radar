@@ -1,0 +1,44 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:48:10",
+  "model": "deepseek-v4-flash",
+  "additive": "亚硫酸钠",
+  "source_text": {
+    "type": "漂白剂",
+    "reason": "用于蔬果漂白防腐，可能诱发哮喘，部分人群中敏感",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:亚硫酸盐",
+      "kind": "substance",
+      "name": "亚硫酸盐"
+    },
+    {
+      "id": "subgroup:哮喘者",
+      "kind": "subgroup",
+      "name": "哮喘者"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:亚硫酸钠",
+      "target": "substance:亚硫酸盐",
+      "relation": "contains_component",
+      "evidence": "亚硫酸盐可能诱发哮喘和过敏反应"
+    },
+    {
+      "source": "substance:亚硫酸盐",
+      "target": "subgroup:哮喘者",
+      "relation": "triggers",
+      "evidence": "可能诱发哮喘"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "suggestive"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

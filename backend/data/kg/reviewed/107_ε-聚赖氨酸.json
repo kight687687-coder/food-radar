@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:49:30",
+  "model": "deepseek-v4-flash",
+  "additive": "ε-聚赖氨酸",
+  "source_text": {
+    "type": "防腐剂",
+    "reason": "天然生物防腐剂，由链霉菌发酵产生，广谱抗菌",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

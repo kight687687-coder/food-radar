@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:47:58",
+  "model": "deepseek-v4-flash",
+  "additive": "琥珀酸二钠",
+  "source_text": {
+    "type": "增味剂",
+    "reason": "天然增味剂，存在于贝类中，具海味鲜味",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:44:17",
+  "model": "deepseek-v4-flash",
+  "additive": "纽甜",
+  "source_text": {
+    "type": "甜味剂",
+    "reason": "人工甜味剂，甜度极高（为蔗糖7000-13000倍），用量极少",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

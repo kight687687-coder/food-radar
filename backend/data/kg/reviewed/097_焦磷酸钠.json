@@ -1,0 +1,33 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:49:00",
+  "model": "deepseek-v4-flash",
+  "additive": "焦磷酸钠",
+  "source_text": {
+    "type": "水分保持剂",
+    "reason": "磷酸盐类，过量影响钙磷平衡",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:磷酸盐",
+      "kind": "substance",
+      "name": "磷酸盐"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:焦磷酸钠",
+      "target": "substance:磷酸盐",
+      "relation": "contains_component",
+      "evidence": "磷酸盐类，过量影响钙磷平衡"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "explicit"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

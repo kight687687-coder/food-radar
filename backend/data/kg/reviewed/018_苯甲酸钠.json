@@ -1,0 +1,45 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:44:59",
+  "model": "deepseek-v4-flash",
+  "additive": "苯甲酸钠",
+  "source_text": {
+    "type": "防腐剂",
+    "reason": "人工防腐剂，大量摄入影响儿童发育及肝脏功能",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [
+    {
+      "id": "substance:苯甲酸",
+      "kind": "substance",
+      "name": "苯甲酸"
+    },
+    {
+      "id": "subgroup:婴幼儿",
+      "kind": "subgroup",
+      "name": "婴幼儿"
+    }
+  ],
+  "edges": [
+    {
+      "source": "additive:苯甲酸钠",
+      "target": "substance:苯甲酸",
+      "relation": "contains_component",
+      "evidence": "苯甲酸（高）"
+    },
+    {
+      "source": "substance:苯甲酸",
+      "target": "subgroup:婴幼儿",
+      "relation": "cautions_for",
+      "evidence": "3岁以下婴幼儿应严格避免",
+      "restriction_type": "warning"
+    }
+  ],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": true,
+    "risk_statement_exists": true,
+    "evidence_strength": "explicit"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

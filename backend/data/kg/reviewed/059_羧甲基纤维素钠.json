@@ -1,0 +1,20 @@
+{
+  "review_status": "reviewed",
+  "generated_at": "2026-10-01T09:46:58",
+  "model": "deepseek-v4-flash",
+  "additive": "羧甲基纤维素钠",
+  "source_text": {
+    "type": "增稠剂",
+    "reason": "半合成纤维素衍生物，不被人体吸收，安全性高",
+    "standard": "GB2760-2024"
+  },
+  "nodes": [],
+  "edges": [],
+  "evidence_features": {
+    "regulatory_restriction": false,
+    "special_population_related": false,
+    "risk_statement_exists": false,
+    "evidence_strength": "none"
+  },
+  "reviewed_at": "2026-10-01T10:02:37"
+}

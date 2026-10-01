@@ -22,3 +22,12 @@ web/dist/
 
 # Local visual QA artifacts
 .tmp-mobile-qa/
+
+# Local v2 model weights & caches（超过 100MB，不入库；Vercel 上由 HF Hub 下载）
+backend/.downloads/
+backend/ckpt/
+backend/data/models/*.ckpt
+backend/data/models/tabicl/
+
+# Local test artifacts
+tmp/
